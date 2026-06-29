@@ -1,0 +1,249 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - UtilityPaymentJournal</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    @* <link rel="stylesheet" href="~/lib/datatables/css/dataTables.bootstrap5.min.css" /> *@
+    <link rel="stylesheet" href="~/lib/dt/css/dataTables.bootstrap5.min.css" />
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/UtilityPaymentJournal.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+
+    <header class="notebook-header mb-4">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light p-0">
+            <div class="container-fluid notebook-nav">
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between w-100">
+
+                    <!-- Левая часть: Закладки ежедневника -->
+                    <ul class="navbar-nav notebook-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="Residence" asp-action="GetView">
+                                <i class="bi bi-house-door tab-icon"></i><!-- Иконка дома -->
+                                <span class="tab-text">Жилые объекты</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="UtilityProvider" asp-action="GetView">
+                                <i class="bi bi-briefcase tab-icon"></i><!-- Иконка портфеля -->
+                                <span class="tab-text">Поставщики услуг</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="WaterReadings" asp-action="GetView">
+                                <i class="bi bi-droplet tab-icon"></i><!-- Иконка капля -->
+                                <span class="tab-text">Счетчики воды</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="ElectricityReadings" asp-action="GetView">
+                                <i class="bi bi-lightning-charge tab-icon"></i><!-- Иконка молния -->
+                                <span class="tab-text">Счетчики электроэнергии</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="ComplaintBoard" asp-action="GetView">
+                                <i class="bi bi-kanban tab-icon"></i><!-- Иконка жалобная книга -->
+                                <span class="tab-text">Доска жалоб</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                <i class="bi bi-shield-lock tab-icon"></i><!-- Иконка замка -->
+                                <span class="tab-text">Privacy</span>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Правая часть: Имя + Иконка выхода -->
+                    <ul class="navbar-nav d-flex flex-row align-items-center ms-auto notebook-user-zone">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <i class="bi bi-person-circle notebook-user-icon me-2"></i>
+                                <span class="nav-link notebook-user-name p-0">
+                                    @{
+                                        var firstName = User.FindFirst("FirstName")?.Value;
+                                        var lastName = User.FindFirst("LastName")?.Value;
+
+                                        // Соединяем имя и фамилию через пробел, игнорируя null и пустые строки
+                                        var fullName = string.Join(" ", new[] { firstName, lastName }.Where(s => !string.IsNullOrEmpty(s)));
+
+                                        var displayName = !string.IsNullOrEmpty(fullName) ? fullName : firstName;
+                                    }
+                                    @displayName
+@*                                  @User.FindFirst("FirstName")?.Value @User.FindFirst("LastName")?.Value *@
+                                </span>
+                            </li>
+                            <li class="nav-item d-flex align-items-center">
+                                <span class="notebook-user-divider me-3"></span>
+                                <form class="form-inline d-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" id="logoutButton" class="btn btn-link p-0 border-0 align-middle">
+                                        <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    @* <header class="notebook-header mb-4">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light p-0">
+            <div class="container-fluid notebook-nav">
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between w-100">
+
+                    <!-- Левая часть: Закладки ежедневника -->
+                    <ul class="navbar-nav notebook-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="Residence" asp-action="GetView">Жилые объекты</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+
+                    <!-- Правая часть: Имя + Иконка выхода -->
+                    <ul class="navbar-nav d-flex flex-row align-items-center ms-auto notebook-user-zone">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <i class="bi bi-person-circle notebook-user-icon me-2"></i>
+                                <span class="nav-link notebook-user-name p-0">
+                                    @User.FindFirst("FullName")?.Value
+                                </span>
+                            </li>
+                            <li class="nav-item d-flex align-items-center">
+                                <!-- Убрали текстовый символ '|', оставив чистый класс -->
+                                <span class="notebook-user-divider me-3"></span>
+                                <form class="form-inline d-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" id="logoutButton" class="btn btn-link p-0 border-0 align-middle">
+                                        <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+
+                </div>
+            </div>
+        </nav>
+    </header> *@
+
+    @* <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Residence" asp-action="GetView">Жилые объекты</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                    </ul>
+
+                    <!-- ОБНОВЛЕННЫЙ БЛОК: ИМЯ + ИКОНКА ВЫХОДА -->
+                    <ul class="navbar-nav d-flex flex-row align-items-center ms-auto">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <!-- Элегантная иконка пользователя рядом с именем -->
+                                <i class="bi bi-person-circle text-secondary me-2" style="font-size: 1.2rem;"></i>
+                                <span class="nav-link text-dark fw-medium p-0">
+                                    @User.FindFirst("FullName")?.Value
+                                </span>
+                            </li>
+
+                            <li class="nav-item d-flex align-items-center">
+                                <!-- Вертикальный разделитель -->
+                                <span class="text-muted opacity-25 me-3">|</span>
+
+                                <form class="form-inline d-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                    <!-- Кнопка-иконка с плавным изменением цвета при наведении -->
+                                    <button type="submit" id="logoutButton" class="btn btn-link text-secondary p-0 link-danger d-flex align-items-center" title="Выйти">
+                                        <i class="bi bi-box-arrow-right" style="font-size: 1.35rem;"></i>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
+                    <!-- /ОБНОВЛЕННЫЙ БЛОК -->
+                </div>
+            </div>
+        </nav>
+    </header> *@
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="notebook-style-footer mt-auto py-4">
+        <partial name="_Footer" />
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* <script src="~/lib/datatables/jquery.dataTables.min.js"></script>
+    <script src="~/lib/datatables/dataTables.bootstrap5.min.js"></script> *@
+
+    <script src="~/lib/dt/js/dataTables.min.js"></script>
+    <script src="~/lib/dt/js/dataTables.bootstrap5.min.js"> </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const currentUrl = window.location.pathname;
+            const navLinks = document.querySelectorAll("header .navbar-nav .nav-link");
+
+            navLinks.forEach(link => {
+                // Если href ссылки совпадает с текущим путем
+                if (link.getAttribute("href") === currentUrl) {
+                    link.classList.add("active"); // Добавляем класс активности Bootstrap
+                    link.classList.add("fw-bold"); // Дополнительно выделяем жирным
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.getElementById('logoutButton').addEventListener('click', function () {
+            // Получаем URL действия, если скрипт в .cshtml файле
+            const logoutUrl = '@Url.Action("Logout", "Account")';
+
+            // Получаем Anti-Forgery токен (обязательно для POST в ASP.NET Core)
+            //const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch(logoutUrl, {
+                method: 'POST',
+                headers: {
+                    // Обязательно указываем, что ожидаем JSON в ответ
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                    //'Content-Type': 'application/json',
+                    // 'RequestVerificationToken': token // Отправляем токен в заголовке
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Перенаправление на страницу, указанную в контроллере
+                    window.location.href = data.redirectUrl;
+                }
+            })
+            .catch(error => console.error('Ошибка:', error));
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

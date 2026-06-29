@@ -1,0 +1,15 @@
+﻿@* @{
+    Layout = "_LoginLayout";
+} *@
+
+
+@{
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        Layout = "_Layout";
+    }
+    else
+    {
+        Layout = "_LoginLayout";
+    }
+}

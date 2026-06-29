@@ -1,0 +1,65 @@
+﻿@* <div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <!-- modal-sm делает окно аккуратным и маленьким -->
+        <div class="modal-content border-warning">
+            <!-- Оранжевая рамка для привлечения внимания -->
+            <div class="modal-header bg-warning text-dark py-2">
+                <h5 class="modal-title fs-6" id="alertModalLabel">Внимание</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body text-center py-3" id="alertModalMessage">
+                <!-- Текст ошибки будет подставляться динамически через JavaScript -->
+            </div>
+            <div class="modal-footer py-1 justify-content-center">
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Понятно</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+        // Функция для быстрого показа предупреждения
+        function showAlert(message) {
+            $('#alertModalMessage').text(message);
+            const alertModal = new bootstrap.Modal(document.getElementById('alertModal'));
+            alertModal.show();
+        }
+</script> *@
+
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content notebook-alert-content-white">
+
+            <!-- Полностью белая шапка -->
+            <div class="modal-header notebook-alert-header-white py-3 px-3 border-0">
+                <div class="d-flex align-items-center">
+                    <!-- Спокойная иконка без кричащих цветов -->
+                    <i class="bi bi-info-circle-fill notebook-alert-icon-gray me-2"></i>
+                    <h5 class="modal-title fs-6 fw-bold text-dark" id="alertModalLabel">Внимание</h5>
+                </div>
+                <button type="button" class="btn-close notebook-alert-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+
+            <!-- Чистый белый фон и крупный читаемый текст ошибки -->
+            <div class="modal-body text-center py-2 px-3 notebook-alert-body-large" id="alertModalMessage">
+                <!-- Текст ошибки будет подставляться динамически через JavaScript -->
+            </div>
+
+            <!-- Минималистичный футер без лишних линий -->
+            <div class="modal-footer py-3 justify-content-center border-0">
+                <button type="button" class="btn notebook-alert-btn-soft" data-bs-dismiss="modal">Понятно</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функция для быстрого показа предупреждения
+    function showAlert(message) {
+        $('#alertModalMessage').text(message);
+        const alertModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('alertModal'));
+        alertModal.show();
+    }
+</script>
+

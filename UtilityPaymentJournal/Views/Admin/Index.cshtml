@@ -1,0 +1,81 @@
+﻿@using UtilityPaymentJournal.Models.ViewModels
+@model CreateUserViewModel
+@{
+    ViewData["Title"] = "Account";
+}
+
+<div>
+    <form id="creationForm" class="p-4 border rounded shadow-sm bg-white" style="max-width: 400px; margin: auto;">
+        <h3 class="text-center mb-4">Вход</h3>
+
+        <!-- Блок для отображения ошибок, возвращенных через AJAX -->
+        <div id="validationSummary" class="text-danger mb-3"></div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="UserName" class="form-control" id="username" placeholder="Логин" />
+            <label asp-for="UserName"></label>
+            <span asp-validation-for="UserName" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="FirstName" class="form-control" id="fullname" placeholder="Имя" />
+            <label asp-for="FirstName"></label>
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="LastName" class="form-control" id="fullname" placeholder="Фамилия" />
+            <label asp-for="LastName"></label>
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Password" class="form-control" id="password" placeholder="Пароль" />
+            <label asp-for="Password"></label>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="w-100 btn btn-primary">Войти</button>
+    </form>
+
+    <script>
+            document.getElementById('creationForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = this;
+            const formData = new FormData(form);
+            const summary = document.getElementById('validationSummary');
+            summary.innerHTML = '';
+
+            // // Достаем токен безопасности из формы
+            // const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/Admin/CreateUserWithRole', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    // Обязательно указываем, что ожидаем JSON в ответ
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка сервера');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    summary.textContent = data.message || "Ошибка авторизации.";
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                summary.textContent = "Произошла ошибка при обработке запроса.";
+            });
+        });
+    </script>
+</div>

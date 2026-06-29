@@ -1,0 +1,228 @@
+﻿@{
+    ViewData["Title"] = "Поставщики услуг";
+}
+
+<div class="container mt-5 mb-5">
+    <!-- Добавлен mb-5 -->
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Форма ввода и кнопка добавления -->
+            <div class="mb-4">
+                <div class="input-group notebook-style-group">
+                    <input type="text" id="utilityInput" class="form-control notebook-style-input" placeholder="Введите наименование поставщика услуг..." maxlength="100">
+                    <button class="btn notebook-style-btn" id="btnAdd">Добавить</button>
+                </div>
+                <div id="validationError" class="text-danger small mt-2 fw-medium" style="display: none;"></div>
+            </div>
+
+            <!-- Контейнер для списка -->
+            <ul class="list-group notebook-style-list" id="utilityList">
+                <!-- Элементы загружаются асинхронно через jQuery AJAX -->
+            </ul>
+
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<partial name="_ConfirmModal" />
+
+<!-- Модальное окно для предупреждений и ошибок валидации -->
+<partial name="_AlertModal" />
+
+@section Scripts {
+    <script>
+        const apiUrl = '/UtilityProvider';
+
+        $(document).ready(function () {
+            loadUtilities();
+
+            // 1. ПОЛУЧЕНИЕ И ОТРИСОВКА СПИСКА
+            function loadUtilities() {
+                $.ajax({
+                    url: `${apiUrl}/GetAll`,
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        $('#utilityList').empty();
+
+                        if (data.length === 0) {
+                            // Спокойная матовая заглушка для пустого списка
+                            $('#utilityList').append('<li class="list-group-item text-center py-4 notebook-style-empty-item">Список поставщиков услуг пуст</li>');
+                            return;
+                        }
+
+                        data.forEach(utility => {
+                            // Интеграция кастомных стилей блокнота с сохранением JS-классов управления
+                            $('#utilityList').append(`
+                                <li class="list-group-item notebook-style-item" data-id="${utility.id}">
+
+                                    <!-- Режим просмотра -->
+                                    <div class="view-mode w-100 d-flex justify-content-between align-items-center">
+                                        <span class="notebook-item-text text-break me-3 clickable-address" title="Нажмите для редактирования">${utility.name}</span>
+                                        <div class="flex-shrink-0 d-flex gap-2">
+                                            <button class="btn notebook-btn-action-edit btn-edit-trigger">
+                                                <i class="bi bi-pencil-square me-1"></i> Редактировать
+                                            </button>
+                                            <button class="btn notebook-btn-action-delete btn-delete">
+                                                <i class="bi bi-trash3 me-1"></i> Удалить
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Режим редактирования -->
+                                    <div class="edit-mode w-100 d-flex justify-content-between align-items-center" style="display: none !important;">
+                                        <div class="w-100 me-3">
+                                            <input type="text" class="form-control notebook-style-edit-input edit-input" value="${utility.name}" maxlength="100">
+                                            <div class="text-danger small edit-error mt-2 fw-medium" style="display: none;"></div>
+                                        </div>
+                                        <div class="flex-shrink-0 d-flex gap-2">
+                                            <button class="btn notebook-btn-action-save btn-save">
+                                                <i class="bi bi-check-lg me-1"></i> Сохранить
+                                            </button>
+                                            <button class="btn notebook-btn-action-cancel btn-cancel">Отмена</button>
+                                        </div>
+                                    </div>
+
+                                </li>
+                            `);
+                        });
+                    },
+                    error: function () {
+                        showAlert('Не удалось загрузить список поставщиков услуг.');
+                    }
+                });
+            }
+
+            // 2. ДОБАВЛЕНИЕ ЭЛЕМЕНТА
+            $('#btnAdd').click(function () {
+                const utilityText = $('#utilityInput').val().trim();
+
+                if (!utilityText) {
+                    showAlert('Поле не может быть пустым!');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('Name', utilityText);
+
+                $.ajax({
+                    url: `${apiUrl}/Create`,
+                    method: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                        $('#utilityInput').val('');
+                        loadUtilities();
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 400 && xhr.responseText) {
+                            showAlert(xhr.responseText);
+                        } else {
+                            showAlert('Ошибка при сохранении изменений.');
+                        }
+                    }
+                });
+            });
+
+            // 3. ВКЛЮЧЕНИЕ РЕЖИМА РЕДАКТИРОВАНИЯ
+            $('#utilityList').on('click', '.clickable-address, .btn-edit-trigger', function () {
+                const li = $(this).closest('li');
+                li.find('.view-mode').attr('style', 'display: none !important;');
+                li.find('.edit-mode').attr('style', 'display: flex !important;');
+                li.find('.edit-input').focus().select();
+            });
+
+            // 4. ОТМЕНА РЕДАКТИРОВАНИЯ
+            $('#utilityList').on('click', '.btn-cancel', function () {
+                const li = $(this).closest('li');
+                const originalText = li.find('.notebook-item-text').text(); // Исправлен класс для получения текста
+
+                li.find('.edit-input').val(originalText);
+                li.find('.edit-error').hide().text('');
+
+                li.find('.edit-mode').attr('style', 'display: none !important;');
+                li.find('.view-mode').attr('style', 'display: flex !important;');
+            });
+
+            // 5. СОХРАНЕНИЕ ИЗМЕНЕНИЙ
+            $('#utilityList').on('click', '.btn-save', function () {
+                const li = $(this).closest('li');
+                const id = li.data('id');
+                const newUtility = li.find('.edit-input').val().trim();
+                const errorBlock = li.find('.edit-error');
+
+                errorBlock.hide().text('');
+
+                if (!newUtility) {
+                    showAlert('Наименование поставщика услуг не может быть пустым');
+                    return;
+                }
+
+                const formData = new FormData();
+                formData.append('Id', id);
+                formData.append('Name', newUtility);
+
+                $.ajax({
+                    url: `${apiUrl}/Edit/${id}`,
+                    method: 'PUT',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (updatedUtility) {
+                        li.find('.notebook-item-text').text(updatedUtility.name); // Исправлен класс для обновления текста
+
+                        li.find('.edit-mode').attr('style', 'display: none !important;');
+                        li.find('.view-mode').attr('style', 'display: flex !important;');
+                    },
+                    error: function (xhr) {
+                        if (xhr.status === 400 && xhr.responseText) {
+                            showAlert(xhr.responseText);
+                        } else {
+                            showAlert('Ошибка при сохранении изменений.');
+                        }
+                    }
+                });
+            });
+
+            // 6. УДАЛЕНИЕ (Через универсальное окно)
+            let listItemToDelete = null;
+
+            $('#utilityList').on('click', '.btn-delete', function () {
+                listItemToDelete = $(this).closest('li');
+                const id = listItemToDelete.data('id');
+                const utilityName = listItemToDelete.find('.notebook-item-text').text();
+
+                // Передаем настройки и логику AJAX прямо внутрь функции
+                showConfirm({
+                        title: 'Удаление объекта',
+                        message: 'Вы действительно хотите удалить поставщика услуг:',
+                        targetText: utilityName,
+                        btnText: 'Удалить',
+                        btnClass: 'notebook-delete-btn-confirm', // Включит коралловую границу
+                        iconClass: 'bi-trash3-fill notebook-confirm-icon'
+                }, function () {
+                    // Этот код выполнится ТОЛЬКО если пользователь нажмет кнопку "Удалить" в окне
+                    $.ajax({
+                        url: `${apiUrl}/Delete/${id}`,
+                        method: 'DELETE',
+                        success: function () {
+                            listItemToDelete.fadeOut(250, function () {
+                                $(this).remove();
+                                if ($('#utilityList li').length === 0) {
+                                    loadUtilities();
+                                }
+                            });
+                        },
+                        error: function () {
+                            showAlert('Ошибка при удалении объекта.');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+}
+

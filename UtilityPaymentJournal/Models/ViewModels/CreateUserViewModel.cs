@@ -1,0 +1,23 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace UtilityPaymentJournal.Models.ViewModels
+{
+    public class CreateUserViewModel
+    {
+        [Required(ErrorMessage = "Введите логин")]
+        [Display(Name = "Логин")]
+        public string UserName { get; set; } // Вместо Email
+
+        [Required(ErrorMessage = "Введите имя пользователя")]
+        [Display(Name = "имя")]
+        public string FirstName { get; set; }
+        [Required(ErrorMessage = "Введите фамилию пользователя")]
+        [Display(Name = "фамилия")]
+        public string LastName { get; set; }
+
+        [Required(ErrorMessage = "Введите пароль")]
+        [Display(Name = "Пароль")]
+        [DataType(DataType.Password)]
+        public string Password { get; set; }
+    }
+}
