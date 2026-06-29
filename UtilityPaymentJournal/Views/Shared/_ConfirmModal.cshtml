@@ -1,0 +1,25 @@
+﻿<div class="modal fade" id="universalConfirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm-custom">
+        <div class="modal-content notebook-confirm-box">
+
+            <!-- Шапка окна: иконка и текст выровнены строго на одном уровне слева -->
+            <div class="modal-header notebook-confirm-header py-3 px-4 d-flex align-items-center justify-content-start border-0">
+                <i class="bi bi-question-circle-fill notebook-confirm-icon me-2" id="confirmModalIcon"></i>
+                <h5 class="modal-title fw-bold m-0" id="confirmModalLabel">Подтверждение действия</h5>
+            </div>
+
+            <!-- Тело окна: текст вопроса и плашка центрированы для сохранения баланса страницы -->
+            <div class="modal-body py-4 px-4 text-center">
+                <span id="confirmModalMessage" class="notebook-confirm-message d-block mb-3">Вы действительно хотите выполнить это действие?</span>
+                <div id="confirmModalTarget" class="notebook-confirm-target mx-auto fw-semibold" style="display: none;"></div>
+            </div>
+
+            <!-- Подвал окна: сетка флексов гарантирует кнопкам ОДИНАКОВУЮ длину -->
+            <div class="modal-footer py-3 px-4 d-flex justify-content-center border-0 gap-3">
+                <button type="button" class="btn notebook-confirm-btn-cancel notebook-equal-btn" data-bs-dismiss="modal" id="btnConfirmCancel">Отмена</button>
+                <button type="button" class="btn notebook-confirm-btn-action notebook-equal-btn" id="btnConfirmAction">Подтвердить</button>
+            </div>
+
+        </div>
+    </div>
+</div>

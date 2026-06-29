@@ -1,0 +1,1416 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+/*body {
+  margin-bottom: 60px;
+}*/
+
+/* Базовый чистый белый фон страницы с крупным и понятным шрифтом */
+body {
+    background-color: #ffffff !important;
+    color: #3d4650 !important; /* Чуть темнее и четче для легкого чтения */
+    /* Современный шрифт без засечек вместо сложного ретро-курсива */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 1.1rem; /* Увеличенный базовый размер */
+    line-height: 1.6;
+}
+
+
+a.navbar-brand {
+    white-space: normal;
+    text-align: center;
+    word-break: break-all;
+}
+
+a {
+    color: #0077cc;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.border-top {
+    border-top: 1px solid #e5e5e5;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.box-shadow {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
+}
+
+button.accept-policy {
+    font-size: 1rem;
+    line-height: inherit;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
+}
+
+/*#region СТИЛИЗАЦИЯ ФУТЕРА */
+
+.notebook-style-footer {
+    background-color: #ffffff; /* Чистый белый фон, как у body */
+    /* Мягкая горизонтальная линия сверху, отделяющая контент */
+    border-top: 1px solid #e1e9f0 !important;
+    margin-top: 50px; /* Гарантированный минимальный отступ от списка */
+}
+
+/* Крупный, блеклый и читаемый текст в футере */
+.notebook-footer-text {
+    color: #7f93a6 !important; /* Спокойный серо-голубой тон */
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+}
+
+/*#endregion*/
+
+/*#region ХЕДЕР КАК КОРЕШОК ЕЖЕДНЕВНИКА */
+
+.notebook-header {
+    background-color: #ecf1f6; /* Мягкий пастельно-голубой */
+    padding-top: 16px;
+    position: relative;
+    border-bottom: 2px solid #cbd6e2 !important; /* Линия стала чуть четче */
+}
+
+.notebook-nav {
+    align-items: flex-end;
+}
+
+.notebook-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: -2px; /* Идеальное перекрытие 2px рамки */
+    z-index: 1;
+    padding: 0;
+    list-style: none;
+}
+
+/* Базовая вкладка (в обычном состоянии узкая, под размер иконки) */
+.notebook-tab {
+    background-color: #e1e9f0 !important;
+    color: #556373 !important;
+    border: 2px solid #cbd6e2 !important;
+    border-bottom: none !important;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 10px 18px !important; /* Сбалансированные отступы для круглой/квадратной вкладки */
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.3px;
+    /* Флекс для выравнивания иконки и текста в одну линию */
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    /* Анимация для изменения фонов и внутренних отступов при раскрытии */
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, padding 0.2s ease-in-out;
+}
+
+/* Стили самой иконки внутри вкладки */
+.notebook-tab .tab-icon {
+    font-size: 1.2rem;
+    display: inline-block;
+    flex-shrink: 0; /* Иконка никогда не сжимается */
+}
+
+/* Контейнер текста (по умолчанию скрыт и сжат в 0) */
+.notebook-tab .tab-text {
+    max-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    display: inline-block;
+    overflow: hidden;
+    /* Плавное появление ширины, прозрачности и отступа текста */
+    transition: max-width 0.25s ease-in-out, opacity 0.2s ease-in-out, margin 0.25s ease-in-out;
+}
+
+/* ЭФФЕКТ НАВЕДЕНИЯ: Раскрытие вкладки */
+.notebook-tab:hover {
+    background-color: #d4e0eb !important;
+    color: #2c353f !important;
+    padding-left: 22px !important; /* Увеличиваем боковые отступы, когда виден текст */
+    padding-right: 22px !important;
+}
+
+/* При наведении делаем текст видимым и раздвигаем max-width */
+.notebook-tab:hover .tab-text {
+    max-width: 300px; /* Запас ширины, чтобы текст поместился в одну строку */
+    opacity: 1;
+    visibility: visible;
+    margin-left: 10px; /* Появляется красивый отступ между иконкой и текстом */
+}
+
+/* Активная вкладка (всегда раскрыта по умолчанию, чтобы пользователь видел где он) */
+.notebook-tab.active {
+    background-color: #f7fafc !important;
+    border-color: #cbd6e2 !important;
+    border-bottom: 2px solid #f7fafc !important;
+    color: #2c353f !important;
+    padding-top: 14px !important;
+    padding-left: 22px !important;
+    padding-right: 22px !important;
+}
+
+/* У активной вкладки текст открыт сразу без наведения */
+.notebook-tab.active .tab-text {
+    max-width: 300px;
+    opacity: 1;
+    visibility: visible;
+    margin-left: 10px;
+}
+
+/* Зона пользователя в хедере */
+.notebook-user-zone {
+    padding-bottom: 10px;
+    font-size: 1.05rem;
+    list-style: none;
+    padding-left: 0;
+}
+
+.notebook-user-icon {
+    color: #7f93a6;
+    font-size: 1.3rem;
+}
+
+.notebook-user-name {
+    color: #556373 !important;
+    font-weight: 600;
+}
+
+/* Современный вертикальный разделитель между пользователем и кнопкой выхода */
+.notebook-user-divider {
+    display: inline-block;
+    width: 2px;
+    height: 22px;
+    background-color: #a2b4c7;
+    align-self: center;
+    opacity: 0.8;
+}
+
+#logoutButton {
+    color: #7f93a6;
+    background: none;
+    border: none;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+#logoutButton i {
+    font-size: 1.3rem;
+}
+
+#logoutButton:hover {
+    color: #c47878 !important;
+    transform: scale(1.1);
+}
+
+/*#endregion*/
+
+/*#region ЦЕНТРАЛЬНЫЙ БЛОК БЛОКНОТА (ПРИВЕТСТВЕННАЯ СТРАНИЦА) */
+
+/* Внешний каркас */
+.desk-notebook-container {
+    background-color: #ecf1f6;
+    padding: 16px 12px 12px 12px;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(149, 165, 182, 0.15);
+}
+
+/* Кольца переплета блокнота (пропорционально увеличены) */
+.notebook-rings-top {
+    position: absolute;
+    top: -10px;
+    left: 10%;
+    right: 10%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.notebook-ring {
+    width: 14px;
+    height: 28px;
+    background: linear-gradient(135deg, #e1e9f0 0%, #c4d0dc 100%);
+    border-radius: 7px;
+    box-shadow: 1px 2px 4px rgba(120, 135, 150, 0.2);
+}
+
+/* Измененный внутренний чистый лист блокнота */
+.notebook-sketch-page {
+    background-color: #f7fafc !important; /* Цвет совпадает с активной вкладкой */
+    border-radius: 4px;
+    padding: 60px 45px; /* Больше пространства внутри */
+    position: relative;
+    border: 2px solid #cbd6e2;
+}
+
+/* Декоративный круглый штамп с иконкой */
+.notebook-badge-wrapper {
+    display: inline-block;
+    padding: 4px;
+    border: 2px solid #e1e9f0;
+    border-radius: 50%;
+}
+
+.notebook-badge-icon {
+    width: 68px;
+    height: 68px;
+    background-color: #ecf1f6;
+    border-radius: 50%;
+    color: #556373;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease-in-out;
+}
+
+.desk-notebook-container:hover .notebook-badge-icon {
+    background-color: #e1e9f0;
+    color: #2c353f;
+    transform: scale(1.05);
+}
+
+/* Крупный и четкий заголовок приветствия */
+.notebook-title {
+    font-family: inherit;
+    color: #2c353f;
+    font-weight: 700;
+    font-size: 2.25rem; /* Значительно крупнее */
+    letter-spacing: -0.5px;
+}
+
+/* Разделительная черта */
+.notebook-subtitle-line {
+    width: 60px;
+    height: 2px;
+    background-color: #cbd6e2;
+}
+
+/* Высокочитаемый основной текст */
+.notebook-text {
+    font-family: inherit;
+    font-style: normal; /* Убран наклонный курсив, который утомлял глаза */
+    color: #4a5560;
+    max-width: 480px; /* Немного расширен блок текста */
+    font-size: 1.15rem; /* Крупный размер */
+    line-height: 1.6; /* Комфортное расстояние между строками */
+    font-weight: 400;
+}
+
+/*#endregion*/
+
+/*#region СТИЛИЗАЦИЯ ОКНА СПИСКА ЖИЛЫХ ОБЪЕКТОВ */
+
+/* Крупный и четкий заголовок */
+.notebook-style-title {
+    color: #2c353f;
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: -0.5px;
+}
+
+/* Рамка вокруг поля ввода и кнопки */
+.notebook-style-group {
+    border: 2px solid #cbd6e2;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #ffffff;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Плавная пастельная подсветка при клике на поле ввода */
+.notebook-style-group:focus-within {
+    border-color: #95a5b5;
+    box-shadow: 0 0 0 4px rgba(149, 165, 182, 0.15);
+}
+
+/* Само поле ввода (крупный текст, без внутренних рамок Bootstrap) */
+.notebook-style-input {
+    border: none !important;
+    background-color: transparent !important;
+    padding: 12px 18px !important;
+    font-size: 1.15rem !important;
+    color: #3d4650 !important;
+    box-shadow: none !important;
+}
+
+.notebook-style-input::placeholder {
+    color: #909da9;
+}
+
+/* Кнопка "Добавить" в тон неактивных вкладок навигации */
+.notebook-style-btn {
+    background-color: #e1e9f0 !important;
+    color: #3d4650 !important;
+    border: none !important;
+    border-left: 2px solid #cbd6e2 !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    padding: 12px 24px !important;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+}
+
+.notebook-style-btn:hover {
+    background-color: #d4e0eb !important;
+    color: #2c353f !important;
+}
+
+.notebook-style-btn:active {
+    background-color: #cbd6e2 !important;
+}
+
+/* Стиль контейнера списка (аккуратные серо-голубые границы) */
+.notebook-style-list {
+    border: 2px solid #cbd6e2;
+    border-radius: 8px !important;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(149, 165, 182, 0.05) !important;
+}
+
+/* Класс для строк списка, которые приходят из AJAX */
+.notebook-style-item {
+    background-color: #ffffff !important;
+    border: none !important;
+    border-bottom: 1px solid #ecf1f6 !important;
+    color: #3d4650 !important;
+    padding: 14px 20px !important;
+    font-size: 1.15rem !important;
+    font-weight: 500;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.notebook-style-item:last-child {
+    border-bottom: none !important;
+}
+
+/* Мягкое выделение строки при наведении мыши */
+.notebook-style-item:hover {
+    background-color: #f7fafc !important;
+    color: #2c353f !important;
+}
+
+/* --- ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ СТРОК СПИСКА ЖИЛЫЕ ОБЪЕКТЫ --- */
+
+/* Стилизация строки для пустого списка */
+.notebook-style-empty-item {
+    background-color: #ffffff !important;
+    border: none !important;
+    color: #909da9 !important;
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+/* Поле ввода прямо внутри строки при редактировании */
+.notebook-style-edit-input {
+    border: 2px solid #cbd6e2 !important;
+    border-radius: 6px !important;
+    padding: 8px 14px !important;
+    font-size: 1.1rem !important;
+    color: #3d4650 !important;
+    background-color: #f7fafc !important; /* Легкая серо-голубая подложка для инпута */
+    box-shadow: none !important;
+    transition: border-color 0.15s ease-in-out, background-color 0.15s ease-in-out !important;
+}
+
+.notebook-style-edit-input:focus {
+    border-color: #95a5b5 !important;
+    background-color: #ffffff !important;
+}
+
+/* Кнопка "Сохранить" (нежный пастельно-зеленый оттенок вместо кричащего зеленого) */
+.notebook-btn-action-save {
+    background-color: #edf7ed !important;
+    color: #4e7a4e !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+.notebook-btn-action-save:hover {
+    background-color: #dbf0db !important;
+    color: #355935 !important;
+}
+
+/* Кнопка "Отмена" (нейтральный светлый тон) */
+.notebook-btn-action-cancel {
+    background-color: #f0f3f6 !important;
+    color: #657585 !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+.notebook-btn-action-cancel:hover {
+    background-color: #e1e9f0 !important;
+    color: #3d4650 !important;
+}
+
+/*#endregion*/
+
+/*#region СТИЛИЗАЦИЯ ОКНА ПРЕДУПРЕЖДЕНИЯ */
+
+/* Белый чистый корпус окна с очень мягкой серой границей */
+.notebook-alert-content-white {
+    background-color: #ffffff !important;
+    border: 1px solid #cbd6e2 !important;
+    border-radius: 12px !important; /* Чуть более округлые углы для мягкости */
+    box-shadow: 0 10px 30px rgba(149, 165, 182, 0.12) !important;
+}
+
+/* Белая прозрачная шапка без границ */
+.notebook-alert-header-white {
+    background-color: #ffffff !important;
+}
+
+/* Мягкая серо-стальная иконка информации */
+.notebook-alert-icon-gray {
+    color: #7f93a6;
+    font-size: 1.2rem;
+}
+
+/* Крупный, контрастный, но комфортный для глаз текст сообщения */
+.notebook-alert-body-large {
+    color: #3d4650 !important;
+    font-size: 1.15rem !important;
+    font-weight: 500;
+    line-height: 1.6;
+}
+
+/* Кнопка "Понятно" в максимально блеклом серо-голубом исполнении */
+.notebook-alert-btn-soft {
+    background-color: #f0f3f6 !important;
+    color: #4a5560 !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 8px 28px !important;
+    border-radius: 8px !important;
+    transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out !important;
+}
+
+.notebook-alert-btn-soft:hover {
+    background-color: #e1e9f0 !important;
+    color: #2c353f !important;
+}
+
+.notebook-alert-btn-soft:active {
+    background-color: #cbd6e2 !important;
+}
+
+/*#endregion*/
+
+/*#region СТИЛИЗАЦИЯ СТРУКТУРИРОВАННОГО ОКНА ПОДТВЕРЖДЕНИЯ */
+
+/* Кастомная оптимальная ширина окна */
+.modal-dialog-centered.modal-sm-custom {
+    max-width: 440px;
+}
+
+/* Корпус окна с мягкой рамкой */
+.notebook-confirm-box {
+    background-color: #ffffff !important;
+    border: 2px solid #cbd6e2 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 12px 35px rgba(149, 165, 182, 0.15) !important;
+    overflow: hidden;
+}
+
+/* Линия под Хедером */
+.notebook-confirm-header {
+    background-color: #f8fafc !important;
+    border-bottom: 1px solid #dbe3ec !important; /* Горизонтальная полоса-разделитель */
+    width: 100%;
+}
+
+/* Иконка в заголовке на одном уровне с текстом */
+.notebook-confirm-icon {
+    color: #7f93a6;
+    font-size: 1.3rem; /* Слегка уменьшен размер для идеального выравнивания с текстом */
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Заголовок */
+.notebook-confirm-box .modal-title {
+    color: #2c353f !important;
+    font-size: 1.15rem;
+    letter-spacing: -0.2px;
+}
+
+/* Текст главного вопроса */
+.notebook-confirm-message {
+    color: #4a5560 !important;
+    font-size: 1.1rem !important;
+    line-height: 1.5;
+}
+
+/* Выделенный целевой текст */
+.notebook-confirm-target {
+    background-color: #f1f5f9;
+    color: #1e252b;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    border: 1px dashed #cbd6e2;
+    word-break: break-word;
+    max-width: 100%;
+    display: inline-block;
+}
+
+/* Линия над кнопками подвала */
+.notebook-confirm-box .modal-body {
+    border-bottom: 1px solid #dbe3ec !important; /* Горизонтальная полоса-разделитель */
+}
+
+/* --- КНОПКИ ОДИНАКОВОЙ ДЛИНЫ --- */
+.notebook-equal-btn {
+    flex-grow: 1;
+    flex-shrink: 0;
+    flex-basis: 0; /* Гарантирует абсолютно одинаковую пропорцию распределения пространства */
+    min-width: 130px; /* Минимальная комфортная длина для любого языка текста */
+    text-align: center;
+}
+
+/* Кнопка "Отмена" с четкой рамкой */
+.notebook-confirm-btn-cancel {
+    background-color: #ffffff !important;
+    color: #556373 !important;
+    border: 2px solid #cbd6e2 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 8px 20px !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+.notebook-confirm-btn-cancel:hover {
+    background-color: #f4f7f9 !important;
+    border-color: #b0c2d4 !important;
+    color: #2c353f !important;
+}
+
+/* Базовая кнопка подтверждения */
+.notebook-confirm-btn-action {
+    background-color: #f4f7f9 !important;
+    color: #38434f !important;
+    border: 2px solid #cbd6e2 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 8px 20px !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+.notebook-confirm-btn-action:hover {
+    background-color: #e1e9f0 !important;
+    border-color: #95a5b5 !important;
+}
+
+/* Специфический коралловый стиль для кнопки удаления */
+.notebook-confirm-btn-danger-style {
+    background-color: #fdf2f2 !important;
+    color: #b05c5c !important;
+    border: 2px solid #f5d6d6 !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    padding: 8px 20px !important;
+    border-radius: 8px !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+.notebook-confirm-btn-danger-style:hover {
+    background-color: #fbe3e3 !important;
+    border-color: #e8b6b6 !important;
+    color: #964343 !important;
+}
+
+/*#endregion*/
+
+/*#region СТИЛИ ПЕРЕКЛЮЧАТЕЛЯ ХОЛОДНОЙ И ГОРЯЧЕЙ ВОДЫ */
+
+/* Контейнер для трех кнопок с фиксированной общей шириной */
+.triple-water-switch {
+    display: inline-flex;
+    width: 320px; /* Одинаковая общая длина переключателя */
+    background-color: #f1f3f5; /* Цвет подложки неактивных элементов */
+    border-radius: 6px;
+    padding: 2px;
+    border: 1px solid #dee2e6;
+    overflow: hidden;
+    user-select: none;
+}
+
+    /* Скрываем дефолтные радио-кружочки */
+    .triple-water-switch input[type="radio"] {
+        display: none;
+    }
+
+    /* Стили для текстовых плашек с одинаковой длиной */
+    .triple-water-switch label {
+        flex: 1; /* Делит переключатель на 3 абсолютно равные части */
+        padding: 5px 0;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #6c757d;
+        cursor: pointer;
+        border-radius: 4px;
+        margin-bottom: 0;
+        transition: all 0.2s ease-in-out;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    /* Эффект при наведении на доступные кнопки */
+    .triple-water-switch input[type="radio"]:not([disabled]) + label:hover {
+        background-color: #e9ecef;
+        color: #495057;
+    }
+
+    /* ХОЛОДНАЯ: Приглушенный, глубокий джинсово-синий (Текст белый) */
+    .triple-water-switch input[type="radio"]:checked + label.lbl-cold {
+        background-color: #4682b4; /* Steel Blue (Стальной синий) */
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(70, 130, 180, 0.2);
+    }
+
+    /* ГОРЯЧАЯ: Сдержанный, благородный терракотово-красный (Текст белый) */
+    .triple-water-switch input[type="radio"]:checked + label.lbl-hot {
+        background-color: #cd5c5c; /* Indian Red (Спокойный кирпично-красный) */
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(205, 92, 92, 0.2);
+    }
+
+    /* ВОДООТВЕДЕНИЕ: Мягкий, матовый орехово-коричневый (Текст белый) */
+    .triple-water-switch input[type="radio"]:checked + label.lbl-drain {
+        background-color: #a0785a; /* Chamoisee (Мягкий древесно-ореховый) */
+        color: #ffffff !important;
+        box-shadow: 0 2px 4px rgba(160, 120, 90, 0.2);
+    }
+
+    /* Сохраняем читаемость и контраст, если элемент заблокирован (disabled) */
+    .triple-water-switch input[type="radio"]:disabled + label {
+        cursor: default;
+        opacity: 0.5; /* Неактивные варианты плавно тускнеют */
+    }
+
+    .triple-water-switch input[type="radio"]:disabled:checked + label {
+        opacity: 1; /* Выбранный вариант остается на 100% видимым */
+    }
+
+
+/* Контейнер переключателя в виде плоской аккуратной кнопки */
+/*.water-toggle-container {
+    display: inline-flex;
+    align-items: center;*/ /* Центрируем содержимое по вертикали внутри флекса */
+    /*justify-content: center;*/ /* Центрируем содержимое по горизонтали */
+    /*position: relative;
+    width: 125px;*/ /* Ширина плашки под размер текста */
+    /*height: 36px;*/ /* Высота гармонирует с выпадающими списками */
+    /*border-radius: 8px;*/ /* Радиус скругления совпадает со стандартными полями ввода */
+    /*cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease-in-out;
+    overflow: hidden;
+    border: 1px solid transparent;
+    vertical-align: middle;*/ /* Выравнивание самого блока по вертикали в ячейке */
+/*}*/
+
+/* Скрытый чекбокс */
+/*.water-type-switch {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}*/
+
+/* Текст строго по центру */
+/*.water-toggle-text {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;*/ /* Центрируем текст по вертикали */
+    /*justify-content: center;*/ /* Центрируем текст по горизонтали */
+    /*font-size: 1.1rem !important;*/ /* Точный размер шрифта, как у всей строки таблицы */
+    /*font-weight: 500 !important;*/ /* Обычная приятная плотность текста (Medium) */
+    /*font-family: inherit;
+    text-transform: none !important;*/ /* Отменяем капслок для единообразия */
+    /*z-index: 1;
+    pointer-events: none;*/ /* Клик проходит сквозь текст на лейбл */
+    /*transition: color 0.2s ease-in-out;
+}*/
+
+/* --- ЦВЕТОВЫЕ ТЕМЫ ПЕРЕКЛЮЧАТЕЛЯ --- */
+
+/* Холодная вода (Синяя плоская кнопка) */
+/*.water-style-cold {
+    background-color: #e0f2fe !important;*/ /* Нежно-синий фон */
+    /*border-color: #bae6fd !important;
+}
+
+    .water-style-cold .water-toggle-text {
+        color: #0369a1 !important;*/ /* Глубокий синий текст */
+        /*padding: 0 !important;*/ /* Текст строго по центру */
+    /*}*/
+
+/* Горячая вода (Красная плоская кнопка) */
+/*.water-style-hot {
+    background-color: #fee2e2 !important;*/ /* Нежно-красный фон */
+    /*border-color: #fecaca !important;
+}
+
+    .water-style-hot .water-toggle-text {
+        color: #b91c1c !important;*/ /* Глубокий красный текст */
+        /*padding: 0 !important;*/ /* Текст строго по центру */
+    /*}*/
+
+/* Состояние заблокировано (Режим просмотра) */
+/*input:disabled + .water-toggle-container {
+    cursor: not-allowed;
+    opacity: 0.8;
+}*/
+
+/*#endregion*/
+
+/*#region СТИЛИ ЗАПОЛНЕНИЯ ДАТ */
+
+/* Сбрасываем оформление полей дат в режиме просмотра */
+.notebook-table input[type="date"] {
+    background-color: transparent !important;
+    border: 1px solid transparent !important;
+    color: #1e293b !important;
+    padding: 4px 0 !important;
+    cursor: default;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+    /* Стили полей дат в режиме редактирования (когда disabled снят) */
+    .notebook-table input[type="date"]:not(:disabled) {
+        background-color: #f8fafc !important;
+        border: 1px solid #3b82f6 !important;
+        border-radius: 4px;
+        padding: 4px 8px !important;
+        cursor: pointer;
+    }
+
+    /* Убираем иконку календаря в режиме просмотра для чистоты интерфейса (опционально) */
+    .notebook-table input[type="date"]:disabled::-webkit-calendar-picker-indicator {
+        display: none;
+    }
+
+/*#endregion*/
+
+/*#region ПОЛЕ ВВОДА ПОКАЗАНИЙ СЧЕТЧИКА */
+
+.content-editable-box {
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 80px;
+    display: inline-block;
+    font-size: inherit; /* Поле ввода наследует крупный шрифт 1.1rem */
+    /* КОРРЕКЦИЯ: Принудительно убираем жирность, делая шрифт стандартным */
+    font-weight: 400 !important;
+    transition: all 0.2s ease;
+}
+
+/* Стили поля при включении режима редактирования */
+.content-editable-box[contenteditable="true"] {
+    background-color: #f8fafc;
+    border: 1px solid #3b82f6;
+    outline: none;
+    /* Гарантируем обычную толщину букв и при редактировании */
+    font-weight: 400 !important;
+}
+
+.content-editable-box[contenteditable="true"]:focus {
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+/*#endregion*/
+
+/*#region   СТИЛИ ВЫПАДАЮЩЕГО СПИСКА */
+
+/* Убираем стрелочки и сбрасываем оформление для всех селектов в таблице */
+.notebook-table select.form-select {
+    appearance: none !important;
+    -webkit-appearance: none !important; /* Для Safari и Chrome */
+    -moz-appearance: none !important; /* Для Firefox */
+    background-image: none !important; /* Полностью удаляем стрелочку Bootstrap */
+    padding-right: 8px !important; /* Возвращаем аккуратный правый отступ */
+    background-color: transparent;
+    border: 1px solid transparent; /* Скрываем границы в режиме просмотра */
+    color: inherit;
+    font-size: 1.1rem; /* Крупный и четкий шрифт всей таблицы */
+    font-family: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    cursor: default;
+}
+
+    /* Стили для всех селектов, когда они заблокированы (Режим просмотра) */
+    .notebook-table select.form-select:disabled {
+        opacity: 1 !important; /* Отменяем дефолтное размытие Bootstrap */
+        color: #1e293b !important; /* Глубокий графитовый цвет текста */
+        background-color: transparent !important;
+    }
+
+    /* Стили для всех селектов в режиме редактирования (когда disabled снят) */
+    .notebook-table select.form-select:not(:disabled) {
+        background-color: #f8fafc !important; /* Пастельный фон, как у инлайн-полей */
+        border: 1px solid #3b82f6 !important; /* Фирменная синяя граница */
+        border-radius: 4px;
+        padding: 4px 8px !important; /* Внутренние отступы для удобного клика */
+        cursor: pointer;
+    }
+
+        /* Состояние фокуса активного селекта */
+        .notebook-table select.form-select:not(:disabled):focus {
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important; /* Мягкое синее свечение */
+            outline: none;
+        }
+
+/*#endregion*/
+
+/*#region СТИЛИ ТАБЛИЦ */
+
+/* Контейнер таблицы с мягкой тенью */
+.notebook-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    border: 1px solid #eef2f5;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important; /* УБРАЛИ СКРОЛЛ ОТСЮДА, КАРТОЧКА НЕ ДВИГАЕТСЯ */
+    position: relative;
+}
+
+/* Принудительный контроль ширины таблицы и отключение авто-растяжения */
+.notebook-table {
+    width: 100% !important;
+    margin: 0 !important;
+    /* КЛЮЧЕВОЙ МОМЕНТ: Запрещает браузеру расширять ячейки из-за внутренних инпутов.
+       Ширина теперь строго фиксируется на основе пикселей, заданных в <th> */
+    table-layout: fixed;
+    /* ДОБАВЛЕНО: Задаем минимальную ширину таблицы, при которой колонкам будет свободно.
+       Если экран монитора или окно браузера станет меньше 1300px, колонки НЕ начнут 
+       наползать друг на друга, а активируется горизонтальный скролл внутри рамки. */
+    min-width: 1300px !important;
+}
+
+    /* Ограничиваем все элементы управления внутри ячеек, чтобы они не раздвигали таблицу */
+    .notebook-table select.form-select,
+    .notebook-table input[type="date"],
+    .notebook-table .content-editable-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Строки в виде элементов списка */
+    .notebook-table tbody tr {
+        border-bottom: 1px solid #f1f5f9 !important;
+        transition: background-color 0.2s ease;
+    }
+
+    /* КОРРЕКЦИЯ ШРИФТА ТАБЛИЦЫ: наследуем размер 1.1rem из body и делаем текст четким */
+    .notebook-table th,
+    .notebook-table td {
+        font-size: 1.1rem !important; /* Принудительно выставляем крупный размер как у body */
+        font-family: inherit; /* Наследуем качественный шрифт без засечек */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        vertical-align: middle !important; /* Центрируем контент ячеек по vertical */
+        /* КОРРЕКЦИЯ: Прячем текст, если он вдруг превысит размеры фиксированной ячейки */
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Заголовки таблицы делаем чуть плотнее для хорошей читаемости */
+    .notebook-table th {
+        font-weight: 600;
+        color: #1e293b; /* Темный slate цвет */
+    }
+
+/* Управление переключением кнопок через вспомогательный класс .row-edit-mode */
+.btn-save-inline,
+.btn-cancel-inline,
+.row-edit-mode .btn-edit-inline,
+.row-edit-mode .btn-delete-inline {
+    display: none !important;
+}
+
+.row-edit-mode .btn-save-inline,
+.row-edit-mode .btn-cancel-inline {
+    display: inline-block !important;
+}
+
+/* Возвращаем видимость и правильное отображение кнопок действий */
+.notebook-table td.text-center,
+.notebook-table td:first-child,
+.notebook-table th.text-center {
+    overflow: visible !important; /* Отменяем скрытие кнопок */
+    /* ИСПРАВЛЕНО: Запрещаем кнопкам переноситься на новую строку (делаем "Редактировать" и "Удалить" 
+       строго в один ряд). Наползания не будет, так как min-width таблицы защищает колонку */
+    white-space: nowrap !important;
+}
+
+/* Убедимся, что контейнеры кнопок центрируют содержимое и не сжимают его */
+.notebook-table .view-mode,
+.notebook-table .edit-mode {
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    width: auto !important; /* Убираем 100%, чтобы элементы не раздувались */
+}
+
+
+
+
+/*#region СТИЛИ СКРОЛЛА */
+
+/* 1. Красивый скроллбар для нового контейнера DataTables 2.0 */
+.notebook-container .dt-scroll-body::-webkit-scrollbar {
+    height: 8px !important; /* Тонкий скролл */
+    width: 8px !important;
+}
+
+/* Дорожка скролла */
+.notebook-container .dt-scroll-body::-webkit-scrollbar-track {
+    background: #f8f9fa !important; /* Светлый фон */
+    border-radius: 10px !important;
+}
+
+/* Ползунок */
+.notebook-container .dt-scroll-body::-webkit-scrollbar-thumb {
+    background: #ced4da !important; /* Серый цвет Bootstrap */
+    border-radius: 10px !important;
+    border: 2px solid #f8f9fa !important; /* Эффект отступа */
+}
+
+    /* Наведение на ползунок */
+    .notebook-container .dt-scroll-body::-webkit-scrollbar-thumb:hover {
+        background: #adb5bd !important;
+    }
+
+/* Поддержка Firefox */
+.notebook-container .dt-scroll-body {
+    scrollbar-width: thin !important;
+    scrollbar-color: #ced4da #f8f9fa !important;
+}
+
+/* ========================================== */
+/* 2. УДАЛЕНИЕ ЧЕРНОЙ ПОЛОСЫ (ДЛЯ DATATABLES 2.0) */
+/* ========================================== */
+
+/* Убираем темный фон и тени у самого контейнера скролла */
+.notebook-container .dt-scroll-body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Убираем возможную рамку у родительского блока скролла */
+.notebook-container .dt-scroll {
+    border-bottom: none !important;
+}
+
+/* Убираем рамку снизу у шапки таблицы нового плагина */
+.notebook-container .dt-scroll-head {
+    border-bottom: none !important;
+    background: #ffffff !important;
+}
+
+    .notebook-container .dt-scroll-head table {
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
+    }
+
+/* Задаем аккуратную легкую границу Bootstrap для самой таблицы */
+.notebook-container table.dataTable {
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+/*#endregion*/
+
+/*#region Стили кнопки добавления новой записи */
+
+/* 1. Контейнер кнопки в футере (Ячейка TD) */
+.add-row-row td {
+    border: none !important;
+    position: sticky !important;
+    left: 0 !important;
+    z-index: 10 !important;
+    background-color: #ffffff !important; /* Четкий белый фон, чтобы данные таблицы не просвечивали при горизонтальном скролле */
+}
+
+/* 2. Базовое состояние кнопки */
+.btn-notebook-add {
+    background-color: transparent !important;
+    color: #334155; /* ТЕМНЫЙ ГРАФИТ */
+    border: none !important; /* Кнопка строго без рамок */
+    border-radius: 8px;
+    cursor: pointer;
+    /* Размеры и позиционирование */
+    font-size: 1.1rem;
+    font-weight: 600;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    padding: 6px 16px 6px 8px !important; /* Компактные отступы */
+    width: auto !important;
+    /* Сглаживание и четкость текста */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
+    letter-spacing: 0.01em;
+    /* Плавная анимация */
+    transition: color 0.15s ease-in-out, opacity 0.15s ease-in-out, transform 0.10s ease-in-out;
+}
+
+    /* 3. Базовое состояние иконки */
+    .btn-notebook-add .add-icon {
+        color: #334155;
+        font-size: 1.15rem;
+        display: inline-flex;
+        align-items: center;
+        -webkit-font-smoothing: antialiased !important;
+        -webkit-text-stroke: 0.5px #334155; /* Микро-толщина для четкости значка */
+        transition: color 0.15s ease-in-out, -webkit-text-stroke 0.15s ease-in-out;
+    }
+
+    /* 4. Эффект наведения (Hover) */
+    .btn-notebook-add:hover {
+        background-color: transparent !important;
+        color: #1d4ed8; /* Насыщенный синий */
+        border: none !important; /* Гарантируем отсутствие рамок */
+    }
+
+        .btn-notebook-add:hover .add-icon {
+            color: #1d4ed8;
+            -webkit-text-stroke: 0.5px #1d4ed8; /* Синий контур иконки */
+        }
+
+    /* 5. Эффект нажатия (Active) */
+    .btn-notebook-add:active {
+        opacity: 0.8;
+        transform: scale(0.98); /* Легкое уменьшение при клике */
+    }
+
+/*#endregion*/
+
+/*#endregion*/
+
+
+/*#region СТИЛИЗАЦИЯ ИНТЕРАКТИВНОЙ ДОСКИ ЖАЛОБ (BALANCED CLEAN UI) */
+
+/* --- ОБЩИЙ ФОН И ИНТЕРЬЕР --- */
+
+/* Строгий белый чистый фон для всей страницы доски */
+.kanban-board-bg {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+    background: #ffffff !important;
+    padding: 30px !important;
+}
+
+/* Крупный заголовок доски */
+.notebook-kanban-title {
+    color: #1e2530;
+    font-weight: 700;
+    font-size: 2.25rem;
+    letter-spacing: -0.5px;
+}
+
+/* Главная кнопка "Добавить жалобу" */
+.notebook-kanban-add-btn {
+    background: #ffffff !important;
+    color: #4f5d73 !important;
+    border: 1px solid rgba(203, 214, 226, 0.8) !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    padding: 12px 24px !important;
+    box-shadow: 0 4px 12px rgba(149, 165, 182, 0.08) !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+    .notebook-kanban-add-btn:hover {
+        background: #4f5d73 !important;
+        color: #ffffff !important;
+        border-color: #4f5d73 !important;
+        box-shadow: 0 4px 12px rgba(79, 93, 115, 0.2) !important;
+    }
+
+
+/* --- КОЛОНКИ: ЦВЕТНАЯ ШАПКА, БЕЛОЕ ТЕЛО, ГРАНИЦЫ В ЦВЕТ ШАПКИ --- */
+
+/* Контейнер колонки: границы выкрашены в цвет шапки (#f4f6f8) */
+.notebook-column-card {
+    border: 2px solid #f4f6f8 !important; /* Границы цвета шапки */
+    border-radius: 16px !important;
+    background: #ffffff !important; /* Внутренний фон колонки теперь белый */
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(160, 174, 192, 0.03) !important;
+}
+
+/* Шапка колонки (Стильный пастельный серо-голубой цвет) */
+.notebook-column-header {
+    background: #f4f6f8 !important; /* Цвет шапки колонок сохранен */
+    border-bottom: 2px solid #f4f6f8 !important;
+    padding: 18px 24px !important;
+}
+
+    .notebook-column-header h5 {
+        color: #334155 !important;
+        font-weight: 700 !important;
+        font-size: 1.15rem;
+        letter-spacing: -0.3px;
+    }
+
+/* Круглые бейджи счетчиков */
+.notebook-column-badge {
+    font-weight: 700 !important;
+    font-size: 0.85rem !important;
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    background-color: #ffffff !important;
+    color: #475569 !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* Основное тело колонок — белое за счет .notebook-column-card */
+.notebook-column-body {
+    background: #ffffff !important; /* Тело колонок стало белым */
+    padding: 20px 16px !important;
+}
+
+
+/* --- КАРТОЧКА ЖАЛОБЫ (ПЕРВОНАЧАЛЬНЫЙ СЕРО-ГОЛУБОЙ ЦВЕТ) --- */
+
+.notebook-complaint-card {
+    background-color: #f7fafc !important; /* Вернули первоначальный серо-голубой цвет карточек */
+    border: 1px solid rgba(226, 232, 240, 0.9) !important;
+    border-radius: 14px !important;
+    padding: 20px !important;
+    box-shadow: 0 2px 6px rgba(160, 174, 192, 0.02) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: grab;
+}
+
+    /* Эффект при наведении мыши (карточка слегка белеет и приподнимается) */
+    .notebook-complaint-card:hover {
+        border-color: rgba(67, 97, 238, 0.3) !important;
+        box-shadow: 0 8px 16px rgba(160, 174, 192, 0.08) !important;
+        background-color: #ffffff !important; /* Мягкое побеление при наведении */
+        transform: translateY(-2px);
+    }
+
+    .notebook-complaint-card:active {
+        cursor: grabbing;
+    }
+
+/* Заголовок внутри карточки */
+.notebook-card-title {
+    color: #1e2530 !important;
+    font-weight: 600 !important;
+    font-size: 1.1rem !important;
+    line-height: 1.4;
+    /* НАСТРОЙКИ ДЛЯ ПЕРЕНОСА СТРОК */
+    white-space: normal !important; /* Разрешаем перенос текста на новые строки */
+    word-break: break-word !important; /* Безопасно переносим слишком длинные слова */
+    overflow: visible !important; /* Делаем текст полностью видимым */
+}
+
+/* Текст описания внутри карточки */
+.notebook-card-text {
+    color: #475569 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+    font-weight: 400;
+}
+
+/* Кнопки действий (карандаш и корзина) */
+.notebook-card-action-btn {
+    color: #94a3b8 !important;
+    font-size: 1.1rem !important;
+    padding: 6px !important;
+    border-radius: 8px;
+    transition: all 0.15s ease !important;
+}
+
+    .notebook-card-action-btn:hover {
+        background-color: #e2e8f0;
+    }
+
+    .notebook-card-action-btn.btn-edit:hover {
+        color: #4361ee !important;
+    }
+
+    .notebook-card-action-btn.btn-delete:hover {
+        color: #e63946 !important;
+    }
+
+
+/* --- ИКОНКИ УСЛУГ (ЧИСТЫЕ, БЕЗ ОБРАМЛЕНИЯ) --- */
+
+.notebook-complaint-card .js-card-icon {
+    font-size: 1.3rem !important;
+    padding: 0 !important;
+    background-color: transparent !important; /* Без прямоугольного фона */
+    border-radius: 0 !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Чистый цвет для капли воды (Водоснабжение) */
+.notebook-complaint-card .bi-droplet-fill,
+.notebook-complaint-card .text-primary {
+    color: #0284c7 !important;
+}
+
+/* Чистый цвет для молнии (Электроэнергия) */
+.notebook-complaint-card .bi-lightning-charge-fill,
+.notebook-complaint-card .text-warning {
+    color: #f59e0b !important;
+}
+
+
+/* --- ЗОНА ФУТЕРА (УВЕЛИЧЕННАЯ ДАТА) --- */
+
+/* Тонкие прозрачные разделители зон внутри карточки */
+.notebook-complaint-card hr {
+    border-top: 1px solid #e2e8f0 !important;
+    margin: 14px 0 !important;
+    opacity: 1 !important;
+}
+
+/* Дата крупная и контрастная */
+.card-footer-date {
+    font-weight: 500;
+    color: #64748b !important;
+    font-size: 0.9rem !important;
+}
+
+    .card-footer-date i {
+        font-size: 0.95rem;
+        vertical-align: middle;
+    }
+
+
+/* --- МОДАЛЬНЫЕ ОКНА --- */
+
+.notebook-modal-content {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 20px !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05) !important;
+    background: #ffffff !important;
+}
+
+.notebook-modal-header {
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding: 20px 24px !important;
+}
+
+    .notebook-modal-header .modal-title {
+        font-weight: 700 !important;
+        font-size: 1.35rem;
+        color: #1e2530;
+    }
+
+.notebook-form-input {
+    border: 1px solid #cbd6e2 !important;
+    border-radius: 10px !important;
+    padding: 12px 16px !important;
+    font-size: 0.95rem !important;
+    background-color: #f8fafc !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+    .notebook-form-input:focus {
+        border-color: #4361ee !important;
+        background-color: #ffffff !important;
+        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1) !important;
+    }
+
+/* Кнопка "Сохранить/Создать" (Нежный пастельно-зеленый оттенок вместо синего) */
+.notebook-btn-save {
+    background-color: #edf7ed !important;
+    color: #4e7a4e !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 8px 18px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    box-shadow: none !important; /* Убрали синюю тень */
+    transition: all 0.15s ease-in-out !important;
+}
+
+    .notebook-btn-save:hover {
+        background-color: #dbf0db !important;
+        color: #355935 !important;
+    }
+
+/* Кнопка "Отмена" (Нейтральный приятный светлый тон) */
+.notebook-btn-cancel {
+    background-color: #f0f3f6 !important;
+    color: #657585 !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    padding: 8px 18px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    transition: all 0.15s ease-in-out !important;
+}
+
+    .notebook-btn-cancel:hover {
+        background-color: #e1e9f0 !important;
+        color: #3d4650 !important;
+    }
+
+/*#endregion*/

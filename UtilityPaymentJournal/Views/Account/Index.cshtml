@@ -1,0 +1,77 @@
+﻿@using UtilityPaymentJournal.Models.ViewModels
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Account";
+}
+
+
+<div>
+    <div class="d-flex align-items-center justify-content-center min-vh-50 py-5">
+        <form id="loginForm" class="w-100 p-4 p-sm-5 border-0 rounded-4 shadow bg-white" style="max-width: 420px;">
+            <!-- Заголовок с мягким цветом и уменьшенным весом -->
+            <h2 class="text-center fw-semibold text-secondary mb-4">Вход в систему</h2>
+
+            <!-- Поле ввода Логина -->
+            <div class="form-floating mb-3">
+                <input asp-for="UserName" class="form-control rounded-3 border-light-subtle shadow-sm" id="username" placeholder="Логин" />
+                <label asp-for="UserName" class="text-muted"></label>
+                <span asp-validation-for="UserName" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <!-- Поле ввода Пароля -->
+            <div class="form-floating mb-4">
+                <input asp-for="Password" type="password" class="form-control rounded-3 border-light-subtle shadow-sm" id="password" placeholder="Пароль" />
+                <label asp-for="Password" class="text-muted"></label>
+                <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+            </div>
+
+            <!-- Кнопка с эффектом глубины и плавным переходом -->
+            <button type="submit" class="w-100 btn btn-primary btn-lg py-2 fs-6 fw-medium shadow-sm rounded-3">
+                Войти
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для предупреждений и ошибок валидации -->
+<partial name="_AlertModal" />
+
+<script>
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const form = this;
+        const formData = new FormData(form);
+
+        // // Достаем токен безопасности из формы
+        // const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        fetch('/Account/Login', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                // Обязательно указываем, что ожидаем JSON в ответ
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Ошибка сервера');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirectUrl;
+            } else {
+                showAlert(data.message || 'Ошибка авторизации.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            showAlert('Произошла ошибка при обработке запроса.');
+        });
+    });
+</script>
+

@@ -1,0 +1,73 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-7">
+
+            <!-- Внешний каркас блокнота (имитация кожаной/картонной подложки) -->
+            <div class="desk-notebook-container position-relative">
+
+                <!-- Металлические кольца переплета сверху страницы -->
+                <div class="notebook-rings-top d-flex justify-content-around">
+                    <div class="notebook-ring"></div>
+                    <div class="notebook-ring"></div>
+                    <div class="notebook-ring"></div>
+                    <div class="notebook-ring"></div>
+                    <div class="notebook-ring"></div>
+                </div>
+
+                <!-- Раскрытый чистый лист плотной бумаги -->
+                <div class="notebook-sketch-page text-center">
+
+                    <!-- Известный нам винтажный ярлык-штамп -->
+                    <div class="notebook-badge-wrapper mb-4">
+                        <div class="notebook-badge-icon">
+                            <i class="bi-journal-bookmark-fill"></i>
+                        </div>
+                    </div>
+
+                    @{
+                        var firstName = User.FindFirst("FirstName")?.Value?.Trim();
+                        // Если имя есть — пишем с маленькой буквы, если нет — с большой
+                        var welcomeText = !string.IsNullOrEmpty(firstName) ? "добро пожаловать!" : "Добро пожаловать!";
+                    }
+
+                    <!-- Заголовок -->
+                    <h1 class="notebook-title mb-2">
+                        @if (!string.IsNullOrEmpty(firstName))
+                        {
+                            <span>@firstName, </span>
+                        }
+                        @welcomeText
+                    </h1>
+                    <div class="notebook-subtitle-line mx-auto mb-4"></div>
+
+                    <!-- Текст-заметка в блокноте -->
+                    <p class="notebook-text mx-auto">
+                        Ваш персональный цифровой журнал для коммунальных услуг готов к работе. Начните прямо сейчас.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@* <div class="container text-center my-5 position-relative">
+
+    <!-- Теплое винтажное пятно (эффект старой бумаги/сепии) -->
+    <div class="position-absolute top-50 start-50 translate-middle bg-warning opacity-5 rounded-circle" style="width: 320px; height: 320px; filter: blur(90px); z-index: 0;"></div>
+
+    <div class="position-relative" style="z-index: 1;">
+        <!-- Иконка в цвете старых чернил с эффектом легкого наклона -->
+        <div class="mb-4">
+            <i class="bi-journal-bookmark-fill d-inline-block notebook-main-icon" style="font-size: 8rem; color: #8c7b6e; cursor: pointer;"></i>
+        </div>
+
+        <!-- Текст старого печатного станка -->
+        <h1 class="display-4 fw-bold mb-3" style="color: #4a3f35 !important; font-family: 'Georgia', serif;">Добро пожаловать.</h1>
+        <p class="fs-5 mx-auto" style="max-width: 500px; color: #706255 !important; font-family: 'Georgia', serif; font-style: italic;">Ваш персональный цифровой журнал для коммунальных услуг готов к работе. Начните прямо сейчас.</p>
+    </div>
+</div> *@
