@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace UtilityPaymentJournal.Filters
 {
+    /// <summary>
+    /// Фильтр не нужен, поскольку используется встроенный ApiController для api-контроллеров
+    /// </summary>
     public class ValidateModelAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)
