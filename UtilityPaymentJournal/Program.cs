@@ -36,12 +36,13 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = supportedCultures;
 });
 
-// Add services to the container.
-builder.Services.AddControllersWithViews(options =>
-{
-    // Фильтр работает для всех контроллеров приложения
-    options.Filters.Add<ValidateModelAttribute>();
-});
+builder.Services.AddControllersWithViews();
+//Add services to the container.
+//builder.Services.AddControllersWithViews(options =>
+//{
+//    // Фильтр работает для всех контроллеров приложения
+//    options.Filters.Add<ValidateModelAttribute>();
+//});
 
 builder.Services.AddScoped<IResidenceService, ResidenceService>();
 builder.Services.AddScoped<IUtilityProviderService, UtilityProviderService>();
@@ -134,35 +135,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Index}/{id?}");
-
-
-//добавление данных в БД =======================================================
-//var adminRole = new Role()
-//                {
-//                    Name = "Admin",
-//                    NormalizedName = "ADMIN"
-//                };
-//var userRole = new Role()
-//{
-//    Name = "User",
-//    NormalizedName = "USER"
-//};
-
-//var users = new List<User>
-//{
-//    new User() { UserName = "LKisatova", Password="12345", FullName="Лариса Кисатова", Role=userRole},
-//    new User() { UserName = "MKisatov", Password="55555", FullName="Марат Кисатов", Role=adminRole},
-//};
-
-//var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-//optionsBuilder.UseNpgsql(connectionString);
-//using (var context = new ApplicationDbContext(optionsBuilder.Options))
-//{
-//    // Добавление данных
-//    context.Users.AddRange(users);
-//    context.SaveChanges();
-//}
-// ==============================================================================
 
 
 // Автоматическое применение миграций при старте контейнера

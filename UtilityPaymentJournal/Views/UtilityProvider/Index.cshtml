@@ -33,7 +33,7 @@
 
 @section Scripts {
     <script>
-        const apiUrl = '/UtilityProvider';
+        const apiUrl = '/api/utility-providers';
 
         $(document).ready(function () {
             loadUtilities();
@@ -41,7 +41,7 @@
             // 1. ПОЛУЧЕНИЕ И ОТРИСОВКА СПИСКА
             function loadUtilities() {
                 $.ajax({
-                    url: `${apiUrl}/GetAll`,
+                    url: apiUrl,
                     method: 'GET',
                     dataType: 'json',
                     success: function (data) {
@@ -104,25 +104,35 @@
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('Name', utilityText);
+                const requestData = {
+                    name: utilityText
+                };
 
                 $.ajax({
-                    url: `${apiUrl}/Create`,
+                    url: apiUrl,
                     method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
                     success: function () {
                         $('#utilityInput').val('');
                         loadUtilities();
                     },
                     error: function (xhr) {
-                        if (xhr.status === 400 && xhr.responseText) {
-                            showAlert(xhr.responseText);
-                        } else {
-                            showAlert('Ошибка при сохранении изменений.');
+                            if (xhr.status === 400 && xhr.responseJSON) {
+                            // Безопасно достаем текст первой попавшейся ошибки из JSON-объекта
+                            const errors = xhr.responseJSON.errors;
+                            if (errors) {
+                                // Берем массив ошибок для первого поля и достаем первую строку
+                                const firstField = Object.keys(errors)[0];
+                                const firstError = errors[firstField][0];
+
+                                showAlert(firstError); // Показываем чистый текст: "Поле обязательно для заполнения"
+                                return;
+                            }
                         }
+
+                        // Если это не 400 ошибка валидации, а падение сервера (500)
+                        showAlert('Ошибка при сохранении изменений.');
                     }
                 });
             });
@@ -161,16 +171,15 @@
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('Id', id);
-                formData.append('Name', newUtility);
+                const requestData = {
+                    name: newUtility
+                };
 
                 $.ajax({
-                    url: `${apiUrl}/Edit/${id}`,
+                    url: `${apiUrl}/${id}`,
                     method: 'PUT',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
                     success: function (updatedUtility) {
                         li.find('.notebook-item-text').text(updatedUtility.name); // Исправлен класс для обновления текста
 
@@ -178,11 +187,20 @@
                         li.find('.view-mode').attr('style', 'display: flex !important;');
                     },
                     error: function (xhr) {
-                        if (xhr.status === 400 && xhr.responseText) {
-                            showAlert(xhr.responseText);
-                        } else {
-                            showAlert('Ошибка при сохранении изменений.');
+                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+                            if (errors) {
+                                // Берем самое первое поле с ошибкой и его первую текстовую строку
+                                const firstField = Object.keys(errors)[0];
+                                const firstError = errors[firstField][0];
+
+                                showAlert(firstError);
+                                return;
+                            }
                         }
+
+                        // Если это не ошибка валидации, а любой другой сбой (например, 500)
+                        showAlert('Ошибка при сохранении изменений.');
                     }
                 });
             });
@@ -206,7 +224,7 @@
                 }, function () {
                     // Этот код выполнится ТОЛЬКО если пользователь нажмет кнопку "Удалить" в окне
                     $.ajax({
-                        url: `${apiUrl}/Delete/${id}`,
+                        url: `${apiUrl}/${id}`,
                         method: 'DELETE',
                         success: function () {
                             listItemToDelete.fadeOut(250, function () {
@@ -217,6 +235,19 @@
                             });
                         },
                         error: function () {
+                            if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                const errors = xhr.responseJSON.errors;
+                                if (errors) {
+                                    // Достаем первое поле и первую ошибку этого поля
+                                    const firstField = Object.keys(errors)[0];
+                                    const firstError = errors[firstField][0];
+
+                                    showAlert(firstError);
+                                    return;
+                                }
+                            }
+
+                            // Дефолтное сообщение для удаления
                             showAlert('Ошибка при удалении объекта.');
                         }
                     });
