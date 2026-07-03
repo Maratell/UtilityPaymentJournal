@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Threading;
 using UtilityPaymentJournal.DTO.Residences;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Residences;
@@ -55,9 +56,12 @@ namespace UtilityPaymentJournal.Services
             return result.Select(r => _residenceMapper.ToDto(r));
         }
 
-        private async Task<Residence> FindByIdOrThrowAsync(long id)
+        private async Task<Residence> FindByIdOrThrowAsync(long id, CancellationToken cancellationToken = default)
         {
-            Residence? residence = await _context.Residences.FirstOrDefaultAsync(r => r.Id == id);
+            // Использование FindAsync вместо FirstOrDefaultAsync — это стандарт для поиска по Primary Key.
+            // Оно сначала ищет объект в кэше контекста EF Core, не нагружая лишний раз базу данных PostgreSQL.
+            Residence? residence = await _context.Residences.FindAsync(new object[] { id }, cancellationToken);
+
             if (residence == null)
             {
                 throw new KeyNotFoundException($"Жилой объект с ID {id} не найден.");

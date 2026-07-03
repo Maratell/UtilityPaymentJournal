@@ -9,7 +9,7 @@ using UtilityProviderPaymentJournal.Interface.Mapping;
 
 namespace UtilityPaymentJournal.Controllers
 {
-    [Route("utility-provider")]
+    [Route("utility-providers")]
     public class UtilityProviderController : Controller
     {
         [HttpGet]

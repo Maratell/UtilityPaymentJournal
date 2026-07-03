@@ -35,7 +35,7 @@
 
 @section Scripts {
     <script>
-        const apiUrl = '/Residence';
+        const apiUrl = '/api/residences';
 
         $(document).ready(function () {
             loadResidences();
@@ -43,7 +43,7 @@
             // 1. ПОЛУЧЕНИЕ И ОТРИСОВКА СПИСКА
             function loadResidences() {
                 $.ajax({
-                    url: `${apiUrl}/GetAll`,
+                    url: apiUrl,
                     method: 'GET',
                     dataType: 'json',
                     success: function (data) {
@@ -106,25 +106,42 @@
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('Address', addressText);
+                const requestData = {
+                    address: addressText
+                };
 
                 $.ajax({
-                    url: `${apiUrl}/Create`,
+                    url: apiUrl,
                     method: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
                     success: function () {
                         $('#addressInput').val('');
                         loadResidences();
                     },
                     error: function (xhr) {
-                        if (xhr.status === 400 && xhr.responseText) {
-                            showAlert(xhr.responseText);
-                        } else {
-                            showAlert('Ошибка при сохранении изменений.');
+                        // 1. Обработка кастомных ошибок (объект detail)
+                        // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            showAlert(xhr.responseJSON.detail);
+                            return;
                         }
+
+                        // 2. Обработка ошибок валидации (объект errors)
+                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            // Безопасно достаем текст первой попавшейся ошибки из JSON-объекта
+                            const errors = xhr.responseJSON.errors;
+
+                            // Берем массив ошибок для первого поля и достаем первую строку
+                            const firstField = Object.keys(errors)[0];
+                            const firstError = errors[firstField][0];
+
+                            showAlert(firstError); // Показываем чистый текст: "Поле обязательно для заполнения"
+                            return;
+                        }
+
+                        // 3. Дефолтное сообщение при добавлении элемента
+                        showAlert('Ошибка при добавлении элемента.');
                     }
                 });
             });
@@ -163,67 +180,103 @@
                     return;
                 }
 
-                const formData = new FormData();
-                formData.append('Id', id);
-                formData.append('Address', newAddress);
+                const requestData = {
+                    address: newAddress
+                };
 
                 $.ajax({
-                    url: `${apiUrl}/Edit/${id}`,
+                    url: `${apiUrl}/${id}`,
                     method: 'PUT',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
                     success: function (updatedResidence) {
-                        li.find('.notebook-item-text').text(updatedResidence.address); // Исправлен класс для обновления текста
+                        li.find('.notebook-item-text').text(updatedResidence.address); 
 
                         li.find('.edit-mode').attr('style', 'display: none !important;');
                         li.find('.view-mode').attr('style', 'display: flex !important;');
                     },
                     error: function (xhr) {
-                        if (xhr.status === 400 && xhr.responseText) {
-                            showAlert(xhr.responseText);
-                        } else {
-                            showAlert('Ошибка при сохранении изменений.');
+
+                        // 1. Обработка кастомных ошибок (объект detail)
+                        // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            showAlert(xhr.responseJSON.detail);
+                            return;
                         }
+
+                        // 2. Обработка ошибок валидации (объект errors)
+                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+
+                            // Берем самое первое поле с ошибкой и его первую текстовую строку
+                            const firstField = Object.keys(errors)[0];
+                            const firstError = errors[firstField][0];
+
+                            showAlert(firstError);
+                            return;
+                        }
+
+                        // 3. Дефолтное сообщение для удаления
+                        showAlert('Ошибка при сохранении изменений.');
                     }
                 });
             });
 
-                    // 6. УДАЛЕНИЕ (Через универсальное окно)
-        let listItemToDelete = null;
+            // 6. УДАЛЕНИЕ
+            let listItemToDelete = null;
 
-        $('#residenceList').on('click', '.btn-delete', function () {
-            listItemToDelete = $(this).closest('li');
-            const id = listItemToDelete.data('id');
-            const address = listItemToDelete.find('.notebook-item-text').text();
+            $('#residenceList').on('click', '.btn-delete', function () {
+                listItemToDelete = $(this).closest('li');
+                const id = listItemToDelete.data('id');
+                const address = listItemToDelete.find('.notebook-item-text').text();
 
-            // Передаем настройки и логику AJAX прямо внутрь функции
-            showConfirm({
-                    title: 'Удаление объекта',
-                    message: 'Вы действительно хотите удалить жилой объект по адресу:',
-                    targetText: address,
-                    btnText: 'Удалить',
-                    btnClass: 'notebook-delete-btn-confirm', // Включит коралловую границу
-                    iconClass: 'bi-trash3-fill notebook-confirm-icon'
-            }, function () {
-                // Этот код выполнится ТОЛЬКО если пользователь нажмет кнопку "Удалить" в окне
-                $.ajax({
-                    url: `${apiUrl}/Delete/${id}`,
-                    method: 'DELETE',
-                    success: function () {
-                        listItemToDelete.fadeOut(250, function () {
-                            $(this).remove();
-                            if ($('#residenceList li').length === 0) {
-                                loadResidences();
+                // Передаем настройки и логику AJAX прямо внутрь функции
+                showConfirm({
+                        title: 'Удаление объекта',
+                        message: 'Вы действительно хотите удалить жилой объект по адресу:',
+                        targetText: address,
+                        btnText: 'Удалить',
+                        btnClass: 'notebook-delete-btn-confirm', // Включит коралловую границу
+                        iconClass: 'bi-trash3-fill notebook-confirm-icon'
+                }, function () {
+                    // Этот код выполнится ТОЛЬКО если пользователь нажмет кнопку "Удалить" в окне
+                    $.ajax({
+                        url: `${apiUrl}/${id}`,
+                        method: 'DELETE',
+                        success: function () {
+                            listItemToDelete.fadeOut(250, function () {
+                                $(this).remove();
+                                if ($('#residenceList li').length === 0) {
+                                    loadResidences();
+                                }
+                            });
+                        },
+                        error: function (xhr) {
+                            // 1. Обработка кастомных ошибок (объект detail)
+                            // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
+                            if (xhr.responseJSON && xhr.responseJSON.detail) {
+                                showAlert(xhr.responseJSON.detail);
+                                return;
                             }
-                        });
-                    },
-                    error: function () {
-                        showAlert('Ошибка при удалении объекта.');
-                    }
+
+                            // 2. Обработка ошибок валидации (объект errors)
+                            if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                const errors = xhr.responseJSON.errors;
+                              
+                                // Достаем первое поле и первую ошибку этого поля
+                                const firstField = Object.keys(errors)[0];
+                                const firstError = errors[firstField][0];
+
+                                showAlert(firstError);
+                                return;
+                            }
+
+                            // 3. Дефолтное сообщение для удаления
+                            showAlert('Ошибка при удалении объекта.');
+                        }
+                    });
                 });
             });
-        });
         });
     </script>
 }

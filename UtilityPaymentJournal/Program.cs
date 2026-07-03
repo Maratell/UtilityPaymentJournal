@@ -5,6 +5,7 @@ using System.Globalization;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Filters;
+using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Mapping;
@@ -35,6 +36,16 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
 });
+
+
+// регистрация глобальной обработки ошибок
+builder.Services.AddProblemDetails();
+
+// Порядок регистрации критически важен! Общий обработчик ВСЕГДА идет самым последним.
+builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
+builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // <-- Добавили
+// -------------------------------------------------
 
 builder.Services.AddControllersWithViews();
 //Add services to the container.
@@ -117,10 +128,15 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
+// Активирует централизованную обработку ошибок. Все исключения из контроллеров и сервисов 
+// будут поочередно проходить через кастомные обработчики (NotFound, Database, Global), 
+// возвращая клиенту стандартизированный ответ ProblemDetails вместо аварийного падения.
+app.UseExceptionHandler();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    //app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
