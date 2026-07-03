@@ -118,20 +118,27 @@
                         loadUtilities();
                     },
                     error: function (xhr) {
-                            if (xhr.status === 400 && xhr.responseJSON) {
-                            // Безопасно достаем текст первой попавшейся ошибки из JSON-объекта
-                            const errors = xhr.responseJSON.errors;
-                            if (errors) {
-                                // Берем массив ошибок для первого поля и достаем первую строку
-                                const firstField = Object.keys(errors)[0];
-                                const firstError = errors[firstField][0];
-
-                                showAlert(firstError); // Показываем чистый текст: "Поле обязательно для заполнения"
-                                return;
-                            }
+                        // 1. Обработка кастомных ошибок (объект detail)
+                        // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            showAlert(xhr.responseJSON.detail);
+                            return;
                         }
 
-                        // Если это не 400 ошибка валидации, а падение сервера (500)
+                        // 2. Обработка ошибок валидации (объект errors)
+                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            // Достаем текст первой попавшейся ошибки из JSON-объекта
+                            const errors = xhr.responseJSON.errors;
+
+                            // Берем массив ошибок для первого поля и достаем первую строку
+                            const firstField = Object.keys(errors)[0];
+                            const firstError = errors[firstField][0];
+
+                            showAlert(firstError); // Показываем чистый текст: "Поле обязательно для заполнения"
+                            return;
+                        }
+
+                        // 3. Дефолтное сообщение при сохранении элемента
                         showAlert('Ошибка при сохранении изменений.');
                     }
                 });
@@ -187,19 +194,26 @@
                         li.find('.view-mode').attr('style', 'display: flex !important;');
                     },
                     error: function (xhr) {
-                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
-                            const errors = xhr.responseJSON.errors;
-                            if (errors) {
-                                // Берем самое первое поле с ошибкой и его первую текстовую строку
-                                const firstField = Object.keys(errors)[0];
-                                const firstError = errors[firstField][0];
-
-                                showAlert(firstError);
-                                return;
-                            }
+                        // 1. Обработка кастомных ошибок (объект detail)
+                        // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
+                        if (xhr.responseJSON && xhr.responseJSON.detail) {
+                            showAlert(xhr.responseJSON.detail);
+                            return;
                         }
 
-                        // Если это не ошибка валидации, а любой другой сбой (например, 500)
+                        // 2. Обработка ошибок валидации (объект errors)
+                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                            const errors = xhr.responseJSON.errors;
+
+                            // Берем самое первое поле с ошибкой и его первую текстовую строку
+                            const firstField = Object.keys(errors)[0];
+                            const firstError = errors[firstField][0];
+
+                            showAlert(firstError);
+                            return;
+                        }
+
+                        // 3. Дефолтное сообщение при сохранении
                         showAlert('Ошибка при сохранении изменений.');
                     }
                 });
@@ -234,20 +248,27 @@
                                 }
                             });
                         },
-                        error: function () {
-                            if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
-                                const errors = xhr.responseJSON.errors;
-                                if (errors) {
-                                    // Достаем первое поле и первую ошибку этого поля
-                                    const firstField = Object.keys(errors)[0];
-                                    const firstError = errors[firstField][0];
-
-                                    showAlert(firstError);
-                                    return;
-                                }
+                        error: function (xhr) {
+                            // 1. Обработка кастомных ошибок (объект detail)
+                            // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
+                            if (xhr.responseJSON && xhr.responseJSON.detail) {
+                                showAlert(xhr.responseJSON.detail);
+                                return;
                             }
 
-                            // Дефолтное сообщение для удаления
+                            // 2. Обработка ошибок валидации (объект errors)
+                            if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
+                                const errors = xhr.responseJSON.errors;
+                  
+                                // Достаем первое поле и первую ошибку этого поля
+                                const firstField = Object.keys(errors)[0];
+                                const firstError = errors[firstField][0];
+
+                                showAlert(firstError);
+                                return;
+                            }
+
+                            // 3. Дефолтное сообщение для удаления
                             showAlert('Ошибка при удалении объекта.');
                         }
                     });
