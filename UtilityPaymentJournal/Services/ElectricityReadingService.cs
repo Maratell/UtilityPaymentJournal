@@ -9,8 +9,8 @@ namespace UtilityPaymentJournal.Services
 {
     public class ElectricityReadingService : IElectricityReadingService
     {
-        private ApplicationDbContext _context;
-        private IElectricityReadingMapper _electricityReadingMapper;
+        private readonly ApplicationDbContext _context;
+        private readonly IElectricityReadingMapper _electricityReadingMapper;
 
         public ElectricityReadingService(
             ApplicationDbContext context,
@@ -20,87 +20,82 @@ namespace UtilityPaymentJournal.Services
             _electricityReadingMapper = electricityReadingMapper;
         }
 
-        public async Task<ElectricityReadingDTO> CreateAsync(CreateElectricityReadingDTO createElectricityReadingDto)
+        public async Task<ElectricityReadingDTO> CreateAsync(CreateElectricityReadingDTO dto, CancellationToken cancellationToken = default)
         {
-            ElectricityReading electricityReading = _electricityReadingMapper.ToEntity(createElectricityReadingDto);
+            ElectricityReading entity = _electricityReadingMapper.ToEntity(dto);
 
-            await _context.ElectricityReadings.AddAsync(electricityReading);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-            }
+            // используем синхронный Add, так как операция происходит в памяти
+            _context.ElectricityReadings.Add(entity);
+            await _context.SaveChangesAsync(cancellationToken);
 
-            ElectricityReading? savedElectricityReading = await GetElectricityReadingWithDetailsAsync(electricityReading.Id);
-            if (savedElectricityReading == null)
-            {
-                throw new KeyNotFoundException("Запись не найдена");
-            }
+            // Пытаемся подтянуть полные детали из бд
+            ElectricityReading? savedEntity = await FindEntityAsync(entity.Id, includeDetails: true, cancellationToken);
 
-            return _electricityReadingMapper.ToDto(savedElectricityReading);
+            // Если бд вернула объект с деталями — маппим его. 
+            // Если произошел сбой и вернулся null — маппим исходный entity из памяти.
+            return _electricityReadingMapper.ToDto(savedEntity ?? entity);
         }
 
-        public async Task DeleteAsync(long id)
+        public async Task<ElectricityReadingDTO?> EditAsync(long id, EditElectricityReadingDTO dto, CancellationToken cancellationToken = default)
         {
-            ElectricityReading electricityReading = await FindByIdOrThrowAsync(id);
+            // загружаем entity с деталями, чтобы вернуть клиенту полный обновленный DTO
+            ElectricityReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
+            if (entity == null)
+                return null;
 
-            _context.ElectricityReadings.Remove(electricityReading);
-            await _context.SaveChangesAsync();
+            _electricityReadingMapper.UpdateEntity(dto, entity);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return _electricityReadingMapper.ToDto(entity);
         }
 
-        public async Task<ElectricityReadingDTO> EditAsync(long id, EditElectricityReadingDTO editElectricityReadingDto)
+        public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
         {
-            ElectricityReading electricityReading = await FindByIdOrThrowAsync(id);
+            // EF Core сразу генерирует SQL-запрос: DELETE FROM ElectricityReadings WHERE Id = @id
+            // Метод возвращает количество удаленных строк (0 или 1)
+            int deletedRowsCount = await _context.ElectricityReadings
+                .Where(w => w.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
 
-            _electricityReadingMapper.UpdateEntity(editElectricityReadingDto, electricityReading);
-            await _context.SaveChangesAsync();
-
-            ElectricityReading? editedElectricityReading = await GetElectricityReadingWithDetailsAsync(electricityReading.Id);
-            return _electricityReadingMapper.ToDto(electricityReading);
+            // Если удалена 1 строка — возвращаем true, если 0 (id не найден) — возвращаем false
+            return deletedRowsCount > 0;
         }
 
-        public async Task<IEnumerable<ElectricityReadingDTO>> GetAllAsync()
-        {
-            IEnumerable<ElectricityReading> electricityReadings = await GetElectricityReadingsWithDetailsAsync();
-
-            return electricityReadings.Select(w => _electricityReadingMapper.ToDto(w));
-        }
-
-        private async Task<IEnumerable<ElectricityReading>> GetElectricityReadingsWithDetailsAsync()
+        public async Task<IReadOnlyCollection<ElectricityReadingDTO>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             // Извлекаем данные из БД с жадной загрузкой (Eager Loading) связанных объектов
-            return await _context.ElectricityReadings
+            List<ElectricityReading> entities = await _context.ElectricityReadings
                 .Include(w => w.Residence)
                 .Include(w => w.UtilityProvider)
-                .ToListAsync();
+                .AsNoTracking()
+                .AsSplitQuery()
+                .ToListAsync(cancellationToken);
+
+            return entities
+                .Select(w => _electricityReadingMapper.ToDto(w))
+                .ToList();
         }
 
-        private async Task<ElectricityReading?> GetElectricityReadingWithDetailsAsync(long id)
+        public async Task<ElectricityReadingDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            ElectricityReading? entity = await _context.ElectricityReadings
-                .Include(w => w.Residence)
-                .Include(w => w.UtilityProvider)
-                .FirstOrDefaultAsync(w => w.Id == id);
+            // загружаем entity со всеми деталями для передачи клиенту в UI
+            ElectricityReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
 
-            if (entity == null)
-            {
-                throw new KeyNotFoundException($"Показание счетчика воды с ID {id} не найдено.");
-            }
-
-            return entity;
+            return entity is null ? null : _electricityReadingMapper.ToDto(entity);
         }
 
-        private async Task<ElectricityReading> FindByIdOrThrowAsync(long id)
+        private async Task<ElectricityReading?> FindEntityAsync(long id, bool includeDetails, CancellationToken cancellationToken)
         {
-            ElectricityReading? electricityReading = await _context.ElectricityReadings.FirstOrDefaultAsync(r => r.Id == id);
-            if (electricityReading == null)
+            IQueryable<ElectricityReading> query = _context.ElectricityReadings;
+
+            if (includeDetails)
             {
-                throw new KeyNotFoundException($"Показание счетчика воды с ID {id} не найдено.");
+                query = query
+                    .Include(w => w.Residence)
+                    .Include(w => w.UtilityProvider);
             }
 
-            return electricityReading;
+            return await query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
     }
 }
