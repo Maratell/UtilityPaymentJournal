@@ -10,7 +10,7 @@ using UtilityProviderPaymentJournal.Interface.Mapping;
 namespace UtilityPaymentJournal.Controllers
 {
     [Route("utility-providers")]
-    public class UtilityProviderController : Controller
+    public class UtilityProvidersController : Controller
     {
         [HttpGet]
         public IActionResult Index()

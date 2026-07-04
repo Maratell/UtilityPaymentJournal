@@ -8,12 +8,12 @@ namespace UtilityPaymentJournal.Controllers.Api
 {
     [ApiController]
     [Route("api/utility-providers")]
-    public class UtilityProviderApiController : ControllerBase
+    public class UtilityProvidersApiController : ControllerBase
     {
         private readonly IUtilityProviderService _utilityProviderService;
         private readonly IUtilityProviderMapper _utilityProviderMapper;
 
-        public UtilityProviderApiController(
+        public UtilityProvidersApiController(
             IUtilityProviderService utilityProviderService,
             IUtilityProviderMapper utilityProviderMapper)
         {
@@ -26,7 +26,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         {
             IEnumerable<UtilityProviderDTO> result = await _utilityProviderService.GetAllAsync();
 
-            IEnumerable<UtilityProviderViewModel> viewModels = result.Select(r => _utilityProviderMapper.ToViewModel(r));
+            List<UtilityProviderViewModel> viewModels = result
+                .Select(r => _utilityProviderMapper.ToViewModel(r))
+                .ToList();
 
             return Ok(viewModels);
         }

@@ -8,12 +8,12 @@ namespace UtilityPaymentJournal.Controllers.Api
 {
     [ApiController]
     [Route("api/residences")]
-    public class ResidenceApiController : ControllerBase
+    public class ResidencesApiController : ControllerBase
     {
         private readonly IResidenceService _residenceService;
         private readonly IResidenceMapper _residenceMapper;
 
-        public ResidenceApiController(
+        public ResidencesApiController(
             IResidenceService residenceService,
             IResidenceMapper residenceMapper)
         {
@@ -26,7 +26,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         {
             IEnumerable<ResidenceDTO> result = await _residenceService.GetAllAsync();
 
-            IEnumerable<ResidenceViewModel> viewModels = result.Select(r => _residenceMapper.ToViewModel(r));
+            List<ResidenceViewModel> viewModels = result
+                .Select(r => _residenceMapper.ToViewModel(r))
+                .ToList();
 
             return Ok(viewModels);
         }

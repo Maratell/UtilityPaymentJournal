@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.DTO.Utilities;
 using UtilityPaymentJournal.DTO.WaterReadings;
 using UtilityPaymentJournal.EF.Context;
-using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
 using WaterReadingPaymentJournal.Interface.Mapping;
 using WaterReadingPaymentJournal.Interface.Service;
@@ -11,8 +9,8 @@ namespace WaterReadingPaymentJournal.Services
 {
     public class WaterReadingService : IWaterReadingService
     {
-        private ApplicationDbContext _context;
-        private IWaterReadingMapper _waterReadingMapper;
+        private readonly ApplicationDbContext _context;
+        private readonly IWaterReadingMapper _waterReadingMapper;
 
         public WaterReadingService(
             ApplicationDbContext context,
@@ -22,81 +20,82 @@ namespace WaterReadingPaymentJournal.Services
             _waterReadingMapper = waterReadingMapper;
         }
 
-        public async Task<WaterReadingDTO> CreateAsync(CreateWaterReadingDTO createWaterReadingDto)
+        public async Task<WaterReadingDTO> CreateAsync(CreateWaterReadingDTO dto, CancellationToken cancellationToken = default)
         {
-            WaterReading waterReading = _waterReadingMapper.ToEntity(createWaterReadingDto);
+            WaterReading entity = _waterReadingMapper.ToEntity(dto);
 
-            await _context.WaterReadings.AddAsync(waterReading);
-            await _context.SaveChangesAsync();
+            // используем синхронный Add, так как операция происходит в памяти
+            _context.WaterReadings.Add(entity);
+            await _context.SaveChangesAsync(cancellationToken);
 
-            WaterReading? savedWaterReading = await GetWaterReadingWithDetailsAsync(waterReading.Id);
-            if (savedWaterReading == null)
-            {
-                throw new KeyNotFoundException("Запись не найдена");
-            }
+            // Пытаемся подтянуть полные детали из бд
+            WaterReading? savedEntity = await FindEntityAsync(entity.Id, includeDetails: true, cancellationToken);
 
-            return _waterReadingMapper.ToDto(savedWaterReading);
+            // Если бд вернула объект с деталями — маппим его. 
+            // Если произошел сбой и вернулся null — маппим исходный entity из памяти.
+            return _waterReadingMapper.ToDto(savedEntity ?? entity);
         }
 
-        public async Task DeleteAsync(long id)
+        public async Task<WaterReadingDTO?> EditAsync(long id, EditWaterReadingDTO dto, CancellationToken cancellationToken = default)
         {
-            WaterReading waterReading = await FindByIdOrThrowAsync(id);
+            // загружаем entity с деталями, чтобы вернуть клиенту полный обновленный DTO
+            WaterReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
+            if (entity == null)
+                return null;
 
-            _context.WaterReadings.Remove(waterReading);
-            await _context.SaveChangesAsync();
+            _waterReadingMapper.UpdateEntity(dto, entity);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return _waterReadingMapper.ToDto(entity);
         }
 
-        public async Task<WaterReadingDTO> EditAsync(long id, EditWaterReadingDTO editWaterReadingDto)
+        public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
         {
-            WaterReading waterReading = await FindByIdOrThrowAsync(id);
+            // EF Core сразу генерирует SQL-запрос: DELETE FROM WaterReadings WHERE Id = @id
+            // Метод возвращает количество удаленных строк (0 или 1)
+            int deletedRowsCount = await _context.WaterReadings
+                .Where(w => w.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
 
-            _waterReadingMapper.UpdateEntity(editWaterReadingDto, waterReading);
-            await _context.SaveChangesAsync();
-
-            WaterReading? editedWaterReading = await GetWaterReadingWithDetailsAsync(waterReading.Id);
-            return _waterReadingMapper.ToDto(waterReading);
+            // Если удалена 1 строка — возвращаем true, если 0 (id не найден) — возвращаем false
+            return deletedRowsCount > 0;
         }
 
-        public async Task<IEnumerable<WaterReadingDTO>> GetAllAsync()
-        {
-            IEnumerable<WaterReading> waterReadings = await GetWaterReadingsWithDetailsAsync();
-
-            return waterReadings.Select(w => _waterReadingMapper.ToDto(w));
-        }
-
-        private async Task<IEnumerable<WaterReading>> GetWaterReadingsWithDetailsAsync()
+        public async Task<IReadOnlyCollection<WaterReadingDTO>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             // Извлекаем данные из БД с жадной загрузкой (Eager Loading) связанных объектов
-            return await _context.WaterReadings
+            List<WaterReading> entities =  await _context.WaterReadings
                 .Include(w => w.Residence)
                 .Include(w => w.UtilityProvider)
-                .ToListAsync();
+                .AsNoTracking()
+                .AsSplitQuery()
+                .ToListAsync(cancellationToken);
+
+            return entities
+                .Select(w => _waterReadingMapper.ToDto(w))
+                .ToList();
         }
 
-        private async Task<WaterReading?> GetWaterReadingWithDetailsAsync(long id)
+        public async Task<WaterReadingDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            WaterReading? entity = await _context.WaterReadings
-                .Include(w => w.Residence)
-                .Include(w => w.UtilityProvider)
-                .FirstOrDefaultAsync(w => w.Id == id);
+            // загружаем entity со всеми деталями для передачи клиенту в UI
+            WaterReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
 
-            if (entity == null)
-            {
-                throw new KeyNotFoundException($"Показание счетчика воды с ID {id} не найдено.");
-            }
-
-            return entity;
+            return entity is null ? null : _waterReadingMapper.ToDto(entity);
         }
 
-        private async Task<WaterReading> FindByIdOrThrowAsync(long id)
+        private async Task<WaterReading?> FindEntityAsync(long id, bool includeDetails, CancellationToken cancellationToken)
         {
-            WaterReading? waterReading = await _context.WaterReadings.FirstOrDefaultAsync(r => r.Id == id);
-            if (waterReading == null)
+            IQueryable<WaterReading> query = _context.WaterReadings;
+
+            if (includeDetails)
             {
-                throw new KeyNotFoundException($"Показание счетчика воды с ID {id} не найдено.");
+                query = query
+                    .Include(w => w.Residence)
+                    .Include(w => w.UtilityProvider);
             }
 
-            return waterReading;
+            return await query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
     }
 }
