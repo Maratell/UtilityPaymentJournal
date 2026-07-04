@@ -9,12 +9,12 @@
             <div class="notebook-container">
                 <!-- Конфигурация путей к контроллерам в атрибутах таблицы -->
                 <table id="readingsTable"
-                       data-ajax-url="@Url.Action("GetAll", "ElectricityReadings")"
-                       data-create-url="@Url.Action("Create", "ElectricityReadings")"
-                       data-edit-url="@Url.Action("Edit", "ElectricityReadings")"
-                       data-delete-url="@Url.Action("Delete", "ElectricityReadings")"
-                       data-residences-url="@Url.Action("GetAll", "Residence")"
-                       data-utilities-url="@Url.Action("GetAll", "UtilityProvider")"
+                       data-ajax-url="/api/electricity-readings"
+                       data-create-url="/api/electricity-readings"
+                       data-edit-url="/api/electricity-readings/"
+                       data-delete-url="/api/electricity-readings/"
+                       data-residences-url="/api/residences"
+                       data-utilities-url="/api/utility-providers"
                        class="table table-hover notebook-table mb-0"
                        style="width:100%">
                     <thead class="table-light">
@@ -540,28 +540,36 @@
                     // Этот код выполнится ТОЛЬКО если пользователь нажмет кнопку "Удалить" в окне
                     var deleteUrl = $('#readingsTable').data('delete-url');
 
+                    // Извлекаем ID из данных строки (с проверкой регистра на всякий случай)
+                    var currentId = rowData.id !== undefined ? rowData.id : (rowData.Id !== undefined ? rowData.Id : 0);
+
+                    // Формируем правильный URL, прибавляя ID к базовому пути
+                    var targetDeleteUrl = deleteUrl + currentId; // Получится: /api/water-readings/id
+
                     // Визуально скрываем строку на время запроса
                     $row.css('opacity', '0.5');
 
                     $.ajax({
-                        url: deleteUrl,
+                        url: targetDeleteUrl,
                         type: "DELETE",
                         data: { id: rowData.id },
-                        success: function (res) {
-                            if (res.success) {
-                                // Перезагружаем данные с сервера БЕЗ жесткого сброса пагинации на предыдущую страницу
-                                table.ajax.reload(function() {
-                                    // После успешного обновления данных отправляем юзера в самый конец таблицы
-                                    redrawAfterChange(table);
-                                }, true);
-                            } else {
-                                $row.css('opacity', '1');
-                                alert(res.message || "Ошибка удаления.");
-                            }
+                        success: function () {
+                            // Перезагружаем данные с сервера БЕЗ жесткого сброса пагинации на предыдущую страницу
+                            table.ajax.reload(function() {
+                                // После успешного обновления данных отправляем юзера в самый конец таблицы
+                                redrawAfterChange(table);
+                            }, true);
                         },
-                        error: function() {
+                        error: function(xhr) {
                             $row.css('opacity', '1');
-                            alert("Критическая ошибка сервера при удалении.");
+
+                            // Пытаемся распарсить ошибку бэкенда
+                            if (tryShowServerError(xhr)) {
+                                return;
+                            }
+
+                            // 3. Дефолтное сообщение для удаления
+                            showAlert('Ошибка при удалении объекта.');
                         }
                     });
                 });
@@ -653,9 +661,18 @@
                 };
 
                 // Проверяем URL для создания или редактирования записи
-                var targetUrl = (currentId === 0)
-                    ? $('#readingsTable').data('create-url')
-                    : $('#readingsTable').data('edit-url');
+                var targetUrl;
+                var httpMethod;
+
+                if (currentId === 0) {
+                    // Создание новой записи
+                    targetUrl = $('#readingsTable').data('create-url'); // Получим: /api/water-readings
+                    httpMethod = "POST";                                // Метод для создания
+                } else {
+                    // Редактирование существующей записи
+                    targetUrl = $('#readingsTable').data('edit-url') + currentId; // Приклеиваем id в конец пути /api/water-readings
+                    httpMethod = "PUT";                                            // Метод для обновления
+                }
 
                 // Блокируем строку на время AJAX-запроса через наш глобальный триггер
                 $row.trigger('editModeChanged', [false]).css('opacity', '0.5');
@@ -665,34 +682,37 @@
 
                 $.ajax({
                     url: targetUrl,
-                    type: "POST",
-                    data: sendData,
+                    type: httpMethod,
+                    contentType: "application/json", // говорим серверу, что шлем JSON
+                    data: JSON.stringify(sendData),
                     success: function (response) {
-                        if (response.success) {
-                            // 1. Передаем обновленный объект от сервера напрямую в DataTables
-                            table.row($row).data(response.data).draw(false);
 
-                            // ИСПРАВЛЕНО: Так как данные перерисовались, находим строку в DOM заново
-                            var $updatedRow = $(table.row($row).node());
+                        // 1. Передаем обновленный объект от сервера напрямую в DataTables
+                        table.row($row).data(response).draw(false);
 
-                            $updatedRow.css('opacity', '1');
+                        // ИСПРАВЛЕНО: Так как данные перерисовались, находим строку в DOM заново
+                        var $updatedRow = $(table.row($row).node());
 
-                            // 2. Возвращаем интерфейс строки в режим просмотра через классы Bootstrap
-                            $updatedRow.find('.edit-mode').removeClass('d-flex').addClass('d-none');
-                            $updatedRow.find('.view-mode').removeClass('d-none').addClass('d-flex');
+                        $updatedRow.css('opacity', '1');
 
-                            // 3. Сбрасываем управляющие классы редактирования
-                            $updatedRow.removeClass('row-edit-mode row-new-item');
-                        } else {
-                            $row.trigger('editModeChanged', [true]).css('opacity', '1');
-                            //$row.find('button, select, input, .content-editable-box').prop('disabled', false).css('opacity', '1');
-                            showAlert(response.message || "Ошибка чтения данных.");
-                        }
+                        // 2. Возвращаем интерфейс строки в режим просмотра через классы Bootstrap
+                        $updatedRow.find('.edit-mode').removeClass('d-flex').addClass('d-none');
+                        $updatedRow.find('.view-mode').removeClass('d-none').addClass('d-flex');
+
+                        // 3. Сбрасываем управляющие классы редактирования
+                        $updatedRow.removeClass('row-edit-mode row-new-item');
+
                     },
-                    error: function () {
+                    error: function (xhr) {
                         $row.trigger('editModeChanged', [true]).css('opacity', '1');
-                        //$row.find('button, select, input, .content-editable-box').prop('disabled', false).css('opacity', '1');
-                        showAlert("Критическая ошибка сервера при сохранении.");
+
+                        // Пытаемся распарсить ошибку бэкенда
+                        if (tryShowServerError(xhr)) {
+                            return;
+                        }
+
+                        // Дефолтное сообщение при сохранении
+                        showAlert('Ошибка при сохранении изменений.');
                     }
                 });
             });
