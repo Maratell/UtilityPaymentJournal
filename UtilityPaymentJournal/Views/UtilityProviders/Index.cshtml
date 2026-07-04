@@ -118,27 +118,13 @@
                         loadUtilities();
                     },
                     error: function (xhr) {
-                        // 1. Обработка кастомных ошибок (объект detail)
-                        // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
-                        if (xhr.responseJSON && xhr.responseJSON.detail) {
-                            showAlert(xhr.responseJSON.detail);
+
+                        // Пытаемся распарсить ошибку бэкенда
+                        if (tryShowServerError(xhr)) {
                             return;
                         }
 
-                        // 2. Обработка ошибок валидации (объект errors)
-                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
-                            // Достаем текст первой попавшейся ошибки из JSON-объекта
-                            const errors = xhr.responseJSON.errors;
-
-                            // Берем массив ошибок для первого поля и достаем первую строку
-                            const firstField = Object.keys(errors)[0];
-                            const firstError = errors[firstField][0];
-
-                            showAlert(firstError); // Показываем чистый текст: "Поле обязательно для заполнения"
-                            return;
-                        }
-
-                        // 3. Дефолтное сообщение при сохранении элемента
+                        // Дефолтное сообщение при сохранении элемента
                         showAlert('Ошибка при сохранении изменений.');
                     }
                 });
@@ -194,26 +180,12 @@
                         li.find('.view-mode').attr('style', 'display: flex !important;');
                     },
                     error: function (xhr) {
-                        // 1. Обработка кастомных ошибок (объект detail)
-                        // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
-                        if (xhr.responseJSON && xhr.responseJSON.detail) {
-                            showAlert(xhr.responseJSON.detail);
+                        // Пытаемся распарсить ошибку бэкенда
+                        if (tryShowServerError(xhr)) {
                             return;
                         }
 
-                        // 2. Обработка ошибок валидации (объект errors)
-                        if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
-                            const errors = xhr.responseJSON.errors;
-
-                            // Берем самое первое поле с ошибкой и его первую текстовую строку
-                            const firstField = Object.keys(errors)[0];
-                            const firstError = errors[firstField][0];
-
-                            showAlert(firstError);
-                            return;
-                        }
-
-                        // 3. Дефолтное сообщение при сохранении
+                        // Дефолтное сообщение при сохранении
                         showAlert('Ошибка при сохранении изменений.');
                     }
                 });
@@ -249,26 +221,12 @@
                             });
                         },
                         error: function (xhr) {
-                            // 1. Обработка кастомных ошибок (объект detail)
-                            // Если сервер вернул стандартизированный ProblemDetails, то текст ошибки лежит в .detail
-                            if (xhr.responseJSON && xhr.responseJSON.detail) {
-                                showAlert(xhr.responseJSON.detail);
+                            // Пытаемся распарсить ошибку бэкенда
+                            if (tryShowServerError(xhr)) {
                                 return;
                             }
 
-                            // 2. Обработка ошибок валидации (объект errors)
-                            if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.errors) {
-                                const errors = xhr.responseJSON.errors;
-                  
-                                // Достаем первое поле и первую ошибку этого поля
-                                const firstField = Object.keys(errors)[0];
-                                const firstError = errors[firstField][0];
-
-                                showAlert(firstError);
-                                return;
-                            }
-
-                            // 3. Дефолтное сообщение для удаления
+                            // Дефолтное сообщение для удаления
                             showAlert('Ошибка при удалении объекта.');
                         }
                     });

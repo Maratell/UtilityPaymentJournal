@@ -8,7 +8,7 @@ using UtilityPaymentJournal.Models.Residences;
 namespace UtilityPaymentJournal.Controllers.Mvc
 {
     [Route("residences")]
-    public class ResidenceController : Controller
+    public class ResidencesController : Controller
     {
         [HttpGet]
         public IActionResult Index()

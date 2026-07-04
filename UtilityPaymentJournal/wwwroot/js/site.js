@@ -65,3 +65,59 @@ function showConfirm(options, onConfirm) {
 
     modalInstance.show();
 }
+
+/**
+ * Функция для быстрого показа предупреждения через Bootstrap Modal
+ * @param {string} message - Текст ошибки или предупреждения
+ */
+function showAlert(message) {
+    var $modalEl = $('#alertModal');
+
+    // Проверка безопасности: если модалки нет в DOM, выводим обычный alert
+    if ($modalEl.length === 0) {
+        alert(message);
+        return;
+    }
+
+    $('#alertModalMessage').text(message);
+
+    // Находим или создаем инстанс модального окна Bootstrap
+    const alertModal = bootstrap.Modal.getOrCreateInstance($modalEl[0]);
+    alertModal.show();
+}
+
+/**
+ * Пытается извлечь и показать ошибку из ответа сервера (ProblemDetails или Validation Errors).
+ * @param {Object} xhr - Объект XHR от jQuery $.ajax
+ * @returns {boolean} - true, если ошибка была распознана и выведена; false, если структура неизвестна
+ */
+function tryShowServerError(xhr) {
+    if (!xhr || !xhr.responseJSON) {
+        return false;
+    }
+
+    // 1. Обработка кастомных ошибок (объект detail)
+    if (xhr.responseJSON.detail) {
+        showAlert(xhr.responseJSON.detail);
+        return true;
+    }
+
+    // 2. Обработка ошибок валидации (объект errors)
+    if (xhr.status === 400 && xhr.responseJSON.errors) {
+        const errors = xhr.responseJSON.errors;
+        const keys = Object.keys(errors);
+
+        if (keys.length > 0) {
+            const firstField = keys[0];
+            // Проверяем, массив это или одиночная строка
+            const firstError = Array.isArray(errors[firstField]) ? errors[firstField][0] : errors[firstField];
+
+            if (firstError) {
+                showAlert(firstError);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}

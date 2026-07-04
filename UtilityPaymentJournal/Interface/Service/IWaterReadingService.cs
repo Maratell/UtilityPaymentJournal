@@ -4,9 +4,10 @@ namespace WaterReadingPaymentJournal.Interface.Service
 {
     public interface IWaterReadingService
     {
-        public Task<WaterReadingDTO> CreateAsync(CreateWaterReadingDTO createWaterReadingDto);
-        public Task DeleteAsync(long id);
-        public Task<WaterReadingDTO> EditAsync(long id, EditWaterReadingDTO editWaterReadingDto);
-        public Task<IEnumerable<WaterReadingDTO>> GetAllAsync();
+        Task<WaterReadingDTO> CreateAsync(CreateWaterReadingDTO dto, CancellationToken cancellationToken = default);
+        Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
+        Task<WaterReadingDTO?> EditAsync(long id, EditWaterReadingDTO dto, CancellationToken cancellationToken = default);
+        Task<IReadOnlyCollection<WaterReadingDTO>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<WaterReadingDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
     }
 }
