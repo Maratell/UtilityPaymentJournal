@@ -20,9 +20,9 @@ namespace UtilityPaymentJournal.Services
             _residenceMapper = residenceMapper;
         }
 
-        public async Task<ResidenceDTO> CreateAsync(CreateResidenceDTO dto, CancellationToken cancellationToken = default)
+        public async Task<ResidenceDTO> CreateAsync(CreateResidenceDTO createDto, CancellationToken cancellationToken = default)
         {
-            Residence entity = _residenceMapper.ToEntity(dto);
+            Residence entity = _residenceMapper.ToEntity(createDto);
 
             // используем синхронный Add, так как операция происходит в памяти
             _context.Residences.Add(entity);
@@ -31,13 +31,13 @@ namespace UtilityPaymentJournal.Services
             return _residenceMapper.ToDto(entity);
         }
 
-        public async Task<ResidenceDTO?> EditAsync(long id, EditResidenceDTO dto, CancellationToken cancellationToken = default)
+        public async Task<ResidenceDTO?> EditAsync(long id, EditResidenceDTO editDto, CancellationToken cancellationToken = default)
         {
             Residence? entity = await FindEntityAsync(id, cancellationToken);
             if (entity == null)
                 return null;
 
-            _residenceMapper.UpdateEntity(dto, entity);
+            _residenceMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
             return _residenceMapper.ToDto(entity);

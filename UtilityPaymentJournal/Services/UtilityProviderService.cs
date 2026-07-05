@@ -20,9 +20,9 @@ namespace UtilityPaymentJournal.Services
             _utilityProviderMapper = utilityProviderMapper;
         }
 
-        public async Task<UtilityProviderDTO> CreateAsync(CreateUtilityProviderDTO dto, CancellationToken cancellationToken = default)
+        public async Task<UtilityProviderDTO> CreateAsync(CreateUtilityProviderDTO createDto, CancellationToken cancellationToken = default)
         {
-            UtilityProvider entity = _utilityProviderMapper.ToEntity(dto);
+            UtilityProvider entity = _utilityProviderMapper.ToEntity(createDto);
 
             // используем синхронный Add, так как операция происходит в памяти
             _context.UtilityProviders.Add(entity);
@@ -31,13 +31,13 @@ namespace UtilityPaymentJournal.Services
             return _utilityProviderMapper.ToDto(entity);
         }
 
-        public async Task<UtilityProviderDTO?> EditAsync(long id, EditUtilityProviderDTO dto, CancellationToken cancellationToken = default)
+        public async Task<UtilityProviderDTO?> EditAsync(long id, EditUtilityProviderDTO editDto, CancellationToken cancellationToken = default)
         {
             UtilityProvider? entity = await FindEntityAsync(id, cancellationToken);
             if (entity == null)
                 return null;
 
-            _utilityProviderMapper.UpdateEntity(dto, entity);
+            _utilityProviderMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
             return _utilityProviderMapper.ToDto(entity);

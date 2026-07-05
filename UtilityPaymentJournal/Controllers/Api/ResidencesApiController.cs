@@ -35,7 +35,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<ResidenceViewModel>> GetById(long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<ResidenceViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             ResidenceDTO? dto = await _residenceService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
@@ -60,7 +60,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<ResidenceViewModel>> Edit(long id, [FromBody] EditResidenceViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<ResidenceViewModel>> Edit([FromRoute] long id, [FromBody] EditResidenceViewModel editViewModel, CancellationToken cancellationToken)
         {
             EditResidenceDTO editDto = _residenceMapper.ToDto(editViewModel);
 
@@ -75,7 +75,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
             bool isDeleted = await _residenceService.DeleteAsync(id, cancellationToken);
             if (!isDeleted)

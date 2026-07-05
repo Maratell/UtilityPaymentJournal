@@ -34,7 +34,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<WaterReadingViewModel>> GetById(long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<WaterReadingViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             WaterReadingDTO? dto = await _waterReadingService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
@@ -60,7 +60,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<WaterReadingViewModel>> Edit(long id, [FromBody] EditWaterReadingViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<WaterReadingViewModel>> Edit([FromRoute] long id, [FromBody] EditWaterReadingViewModel editViewModel, CancellationToken cancellationToken)
         {
             EditWaterReadingDTO editDto = _waterReadingMapper.ToDto(editViewModel);
 
@@ -75,7 +75,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
             bool isDeleted = await _waterReadingService.DeleteAsync(id, cancellationToken);
             if (!isDeleted)

@@ -20,9 +20,9 @@ namespace WaterReadingPaymentJournal.Services
             _waterReadingMapper = waterReadingMapper;
         }
 
-        public async Task<WaterReadingDTO> CreateAsync(CreateWaterReadingDTO dto, CancellationToken cancellationToken = default)
+        public async Task<WaterReadingDTO> CreateAsync(CreateWaterReadingDTO createDto, CancellationToken cancellationToken = default)
         {
-            WaterReading entity = _waterReadingMapper.ToEntity(dto);
+            WaterReading entity = _waterReadingMapper.ToEntity(createDto);
 
             // используем синхронный Add, так как операция происходит в памяти
             _context.WaterReadings.Add(entity);
@@ -36,14 +36,14 @@ namespace WaterReadingPaymentJournal.Services
             return _waterReadingMapper.ToDto(savedEntity ?? entity);
         }
 
-        public async Task<WaterReadingDTO?> EditAsync(long id, EditWaterReadingDTO dto, CancellationToken cancellationToken = default)
+        public async Task<WaterReadingDTO?> EditAsync(long id, EditWaterReadingDTO editDto, CancellationToken cancellationToken = default)
         {
             // загружаем entity с деталями, чтобы вернуть клиенту полный обновленный DTO
             WaterReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
             if (entity == null)
                 return null;
 
-            _waterReadingMapper.UpdateEntity(dto, entity);
+            _waterReadingMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
             return _waterReadingMapper.ToDto(entity);
