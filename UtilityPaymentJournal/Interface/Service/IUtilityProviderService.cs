@@ -1,13 +1,13 @@
-﻿using UtilityPaymentJournal.DTO.Utilities;
-using UtilityPaymentJournal.DTO.UtilityProviders;
+﻿using UtilityPaymentJournal.DTO.UtilityProviders;
 
 namespace UtilityPaymentJournal.Interface.Service
 {
     public interface IUtilityProviderService
     {
-        public Task<UtilityProviderDTO> CreateAsync(CreateUtilityProviderDTO createUtilityProviderDto);
-        public Task DeleteAsync(long id);
-        public Task<UtilityProviderDTO> EditAsync(long id, EditUtilityProviderDTO editUtilityProviderDto);
-        public Task<IEnumerable<UtilityProviderDTO>> GetAllAsync();
+        Task<UtilityProviderDTO> CreateAsync(CreateUtilityProviderDTO dto, CancellationToken cancellationToken = default);
+        Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
+        Task<UtilityProviderDTO?> EditAsync(long id, EditUtilityProviderDTO dto, CancellationToken cancellationToken = default);
+        Task<IReadOnlyCollection<UtilityProviderDTO>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<UtilityProviderDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
     }
 }

@@ -1,12 +1,14 @@
 ﻿using UtilityPaymentJournal.DTO.Residences;
+using UtilityPaymentJournal.DTO.UtilityProviders;
 
 namespace UtilityPaymentJournal.Interface.Service
 {
     public interface IResidenceService
     {
-        public Task<ResidenceDTO> CreateAsync(CreateResidenceDTO createResidenceDto);
-        public Task DeleteAsync(long id);
-        public Task<ResidenceDTO> EditAsync(long id, EditResidenceDTO editResidenceDto);
-        public Task<IEnumerable<ResidenceDTO>> GetAllAsync();
+        Task<ResidenceDTO> CreateAsync(CreateResidenceDTO dto, CancellationToken cancellationToken = default);
+        Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
+        Task<ResidenceDTO?> EditAsync(long id, EditResidenceDTO dto, CancellationToken cancellationToken = default);
+        Task<IReadOnlyCollection<ResidenceDTO>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<ResidenceDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
     }
 }

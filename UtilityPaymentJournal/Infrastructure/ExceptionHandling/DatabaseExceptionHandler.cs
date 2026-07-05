@@ -29,14 +29,25 @@ namespace UtilityPaymentJournal.Infrastructure.ExceptionHandling
             Exception exception,
             CancellationToken cancellationToken)
         {
-            // Современный паттерн-матчинг: проверяем всю цепочку исключений в одну строчку
-            if (exception is DbUpdateException { InnerException: PostgresException postgresException }
-                && postgresException.SqlState == PostgresErrorCodes.ForeignKeyViolation)
+            // Ищем PostgresException на любом уровне вложенности
+            var currentEx = exception;
+            PostgresException? postgresException = null;
+
+            while (currentEx != null)
+            {
+                if (currentEx is PostgresException pgEx)
+                {
+                    postgresException = pgEx;
+                    break;
+                }
+                currentEx = currentEx.InnerException;
+            }
+
+            // Если нашли и это нарушение внешнего ключа
+            if (postgresException != null && postgresException.SqlState == PostgresErrorCodes.ForeignKeyViolation)
             {
                 httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
 
-                // Используем стандартный TryWriteAsync, который сам сформирует JSON
-                // и автоматически добавит важный для отладки "traceId"
                 return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
                 {
                     HttpContext = httpContext,
@@ -52,5 +63,65 @@ namespace UtilityPaymentJournal.Infrastructure.ExceptionHandling
 
             return false;
         }
+
+        //public async ValueTask<bool> TryHandleAsync(
+        //    HttpContext httpContext,
+        //    Exception exception,
+        //    CancellationToken cancellationToken)
+        //{
+        //    // Распаковываем исключение: ищем PostgresException на самом верхнем уровне 
+        //    // или внутри InnerException (это сработает и для ExecuteDeleteAsync, и для SaveChangesAsync)
+        //    if (exception is PostgresException postgresException ||
+        //       (exception.InnerException is PostgresException innerPgException && (postgresException = innerPgException) != null))
+        //    {
+        //        if (postgresException.SqlState == PostgresErrorCodes.ForeignKeyViolation)
+        //        {
+        //            httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+
+        //            return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        //            {
+        //                HttpContext = httpContext,
+        //                Exception = exception,
+        //                ProblemDetails = new ProblemDetails
+        //                {
+        //                    Status = StatusCodes.Status409Conflict,
+        //                    Title = "Удаление невозможно",
+        //                    Detail = "Этот объект связан с другими данными в системе. Сначала удалите связанные элементы."
+        //                }
+        //            });
+        //        }
+        //    }
+
+        //    return false;
+        //}
+
+        //public async ValueTask<bool> TryHandleAsync(
+        //    HttpContext httpContext,
+        //    Exception exception,
+        //    CancellationToken cancellationToken)
+        //{
+        //    // Современный паттерн-матчинг: проверяем всю цепочку исключений в одну строчку
+        //    if (exception is DbUpdateException { InnerException: PostgresException postgresException }
+        //        && postgresException.SqlState == PostgresErrorCodes.ForeignKeyViolation)
+        //    {
+        //        httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
+
+        //        // Используем стандартный TryWriteAsync, который сам сформирует JSON
+        //        // и автоматически добавит важный для отладки "traceId"
+        //        return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+        //        {
+        //            HttpContext = httpContext,
+        //            Exception = exception,
+        //            ProblemDetails = new ProblemDetails
+        //            {
+        //                Status = StatusCodes.Status409Conflict,
+        //                Title = "Удаление невозможно",
+        //                Detail = "Этот объект связан с другими данными в системе. Сначала удалите связанные элементы."
+        //            }
+        //        });
+        //    }
+
+        //    return false;
+        //}
     }
 }

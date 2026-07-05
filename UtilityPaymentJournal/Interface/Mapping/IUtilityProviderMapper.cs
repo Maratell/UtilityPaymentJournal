@@ -6,14 +6,16 @@ namespace UtilityProviderPaymentJournal.Interface.Mapping
 {
     public interface IUtilityProviderMapper
     {
-        CreateUtilityProviderDTO ToDto(CreateUtilityProviderViewModel createUtilityProviderViewModel);
+        CreateUtilityProviderDTO ToDto(CreateUtilityProviderViewModel createViewModel);
 
-        UtilityProviderDTO ToDto(UtilityProvider utility);
+        UtilityProviderDTO ToDto(UtilityProvider entity);
 
-        EditUtilityProviderDTO ToDto(EditUtilityProviderViewModel editUtilityProviderViewModel);
+        EditUtilityProviderDTO ToDto(EditUtilityProviderViewModel editViewModel);
 
-        UtilityProvider ToEntity(CreateUtilityProviderDTO createUtilityProviderDto);
+        UtilityProvider ToEntity(CreateUtilityProviderDTO dto);
 
-        UtilityProviderViewModel ToViewModel(UtilityProviderDTO utilityDto);
+        UtilityProviderViewModel ToViewModel(UtilityProviderDTO dto);
+
+        void UpdateEntity(EditUtilityProviderDTO dto, UtilityProvider entity);
     }
 }
