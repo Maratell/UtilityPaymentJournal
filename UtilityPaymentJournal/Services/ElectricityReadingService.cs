@@ -20,9 +20,9 @@ namespace UtilityPaymentJournal.Services
             _electricityReadingMapper = electricityReadingMapper;
         }
 
-        public async Task<ElectricityReadingDTO> CreateAsync(CreateElectricityReadingDTO dto, CancellationToken cancellationToken = default)
+        public async Task<ElectricityReadingDTO> CreateAsync(CreateElectricityReadingDTO createDto, CancellationToken cancellationToken = default)
         {
-            ElectricityReading entity = _electricityReadingMapper.ToEntity(dto);
+            ElectricityReading entity = _electricityReadingMapper.ToEntity(createDto);
 
             // используем синхронный Add, так как операция происходит в памяти
             _context.ElectricityReadings.Add(entity);
@@ -36,14 +36,14 @@ namespace UtilityPaymentJournal.Services
             return _electricityReadingMapper.ToDto(savedEntity ?? entity);
         }
 
-        public async Task<ElectricityReadingDTO?> EditAsync(long id, EditElectricityReadingDTO dto, CancellationToken cancellationToken = default)
+        public async Task<ElectricityReadingDTO?> EditAsync(long id, EditElectricityReadingDTO editDto, CancellationToken cancellationToken = default)
         {
             // загружаем entity с деталями, чтобы вернуть клиенту полный обновленный DTO
             ElectricityReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
             if (entity == null)
                 return null;
 
-            _electricityReadingMapper.UpdateEntity(dto, entity);
+            _electricityReadingMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
             return _electricityReadingMapper.ToDto(entity);

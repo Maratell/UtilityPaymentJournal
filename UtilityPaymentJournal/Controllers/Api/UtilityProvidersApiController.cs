@@ -34,7 +34,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<UtilityProviderViewModel>> GetById(long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<UtilityProviderViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             UtilityProviderDTO? dto = await _utilityProviderService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
@@ -59,7 +59,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<UtilityProviderViewModel>> Edit(long id, [FromBody] EditUtilityProviderViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<UtilityProviderViewModel>> Edit([FromRoute] long id, [FromBody] EditUtilityProviderViewModel editViewModel, CancellationToken cancellationToken)
         {
             EditUtilityProviderDTO editDto = _utilityProviderMapper.ToDto(editViewModel);
 
@@ -74,7 +74,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
             bool isDeleted = await _utilityProviderService.DeleteAsync(id, cancellationToken);
             if (!isDeleted)

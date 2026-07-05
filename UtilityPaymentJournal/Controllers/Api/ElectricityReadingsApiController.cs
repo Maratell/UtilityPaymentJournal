@@ -34,7 +34,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<ElectricityReadingViewModel>> GetById(long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<ElectricityReadingViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             ElectricityReadingDTO? dto = await _electricityReadingService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
@@ -59,7 +59,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<ElectricityReadingViewModel>> Edit(long id, [FromBody] EditElectricityReadingViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<ElectricityReadingViewModel>> Edit([FromRoute] long id, [FromBody] EditElectricityReadingViewModel editViewModel, CancellationToken cancellationToken)
         {
             EditElectricityReadingDTO editDto = _electricityReadingMapper.ToDto(editViewModel);
 
@@ -74,7 +74,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
             bool isDeleted = await _electricityReadingService.DeleteAsync(id, cancellationToken);
             if (!isDeleted)

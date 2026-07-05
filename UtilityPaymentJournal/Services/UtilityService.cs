@@ -5,6 +5,7 @@ using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 
+
 namespace UtilityPaymentJournal.Services
 {
     public class UtilityService : IUtilityService
@@ -14,57 +15,70 @@ namespace UtilityPaymentJournal.Services
 
         public UtilityService(
             ApplicationDbContext context,
-            IUtilityMapper uilityMapper)
+            IUtilityMapper utilityMapper)
         {
             _context = context;
-            _utilityMapper = uilityMapper;
+            _utilityMapper = utilityMapper;
         }
 
-        public async Task<UtilityDTO> CreateAsync(CreateUtilityDTO uilityDto)
+        public async Task<UtilityDTO> CreateAsync(CreateUtilityDTO createDto, CancellationToken cancellationToken = default)
         {
-            Utility entity = _utilityMapper.ToEntity(uilityDto);
+            Utility entity = _utilityMapper.ToEntity(createDto);
 
-            await _context.Utilities.AddAsync(entity);
-            await _context.SaveChangesAsync();
+            // используем синхронный Add, так как операция происходит в памяти
+            _context.Utilities.Add(entity);
+            await _context.SaveChangesAsync(cancellationToken);
 
             return _utilityMapper.ToDto(entity);
         }
 
-        public async Task DeleteAsync(long id)
+        public async Task<UtilityDTO?> EditAsync(long id, EditUtilityDTO editDto, CancellationToken cancellationToken = default)
         {
-            Utility entity = await FindByIdOrThrowAsync(id);
-
-            _context.Utilities.Remove(entity);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<UtilityDTO> EditAsync(long id, EditUtilityDTO editUtilityDto)
-        {
-            Utility entity = await FindByIdOrThrowAsync(id);
-
-            entity.Name = editUtilityDto.Name;
-            entity.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            return _utilityMapper.ToDto(entity);
-        }
-
-        public async Task<IEnumerable<UtilityDTO>> GetAllAsync()
-        {
-            List<Utility> result = await _context.Utilities.ToListAsync();
-
-            return result.Select(r => _utilityMapper.ToDto(r));
-        }
-
-        private async Task<Utility> FindByIdOrThrowAsync(long id)
-        {
-            Utility? entity = await _context.Utilities.FirstOrDefaultAsync(r => r.Id == id);
+            Utility? entity = await FindEntityAsync(id, cancellationToken);
             if (entity == null)
-            {
-                throw new KeyNotFoundException($"Услуга с ID {id} не найден.");
-            }
+                return null;
 
-            return entity;
+            _utilityMapper.UpdateEntity(editDto, entity);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return _utilityMapper.ToDto(entity);
+        }
+
+        public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // EF Core сразу генерирует SQL-запрос: DELETE FROM Utilities WHERE Id = @id
+            // Метод возвращает количество удаленных строк (0 или 1)
+            int deletedRowsCount = await _context.Utilities
+                .Where(w => w.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
+
+            // Если удалена 1 строка — возвращаем true, если 0 (id не найден) — возвращаем false
+            return deletedRowsCount > 0;
+        }
+
+        public async Task<IReadOnlyCollection<UtilityDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
+            List<Utility> entities = await _context.Utilities
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            return entities
+                .Select(e => _utilityMapper.ToDto(e))
+                .ToList();
+        }
+
+        public async Task<UtilityDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        {
+            // загружаем entity со всеми деталями для передачи клиенту в UI
+            Utility? entity = await FindEntityAsync(id, cancellationToken);
+
+            return entity is null ? null : _utilityMapper.ToDto(entity);
+        }
+
+        private async Task<Utility?> FindEntityAsync(long id, CancellationToken cancellationToken)
+        {
+            return await _context.Utilities
+                .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
     }
 }
