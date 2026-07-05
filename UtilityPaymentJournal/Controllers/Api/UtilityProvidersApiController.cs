@@ -22,45 +22,65 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UtilityProviderViewModel>>> GetAll()
+        public async Task<ActionResult<IReadOnlyCollection<UtilityProviderViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<UtilityProviderDTO> result = await _utilityProviderService.GetAllAsync();
+            IEnumerable<UtilityProviderDTO> dtos = await _utilityProviderService.GetAllAsync(cancellationToken);
 
-            List<UtilityProviderViewModel> viewModels = result
-                .Select(r => _utilityProviderMapper.ToViewModel(r))
+            List<UtilityProviderViewModel> viewModels = dtos
+                .Select(dto => _utilityProviderMapper.ToViewModel(dto))
                 .ToList();
 
             return Ok(viewModels);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<UtilityProviderViewModel>> Create([FromBody] CreateUtilityProviderViewModel createUtilityProviderViewModel)
+        [HttpGet("{id:long}")]
+        public async Task<ActionResult<UtilityProviderViewModel>> GetById(long id, CancellationToken cancellationToken)
         {
-            CreateUtilityProviderDTO dto = _utilityProviderMapper.ToDto(createUtilityProviderViewModel);
+            UtilityProviderDTO? dto = await _utilityProviderService.GetByIdAsync(id, cancellationToken);
+            if (dto is null)
+            {
+                return NotFound($"Поставщик услуг с ID {id} не найден.");
+            }
 
-            UtilityProviderDTO result = await _utilityProviderService.CreateAsync(dto);
+            UtilityProviderViewModel viewModel = _utilityProviderMapper.ToViewModel(dto);
+            return Ok(viewModel);
+        }
 
-            UtilityProviderViewModel createdViewModel = _utilityProviderMapper.ToViewModel(result);
+        [HttpPost]
+        public async Task<ActionResult<UtilityProviderViewModel>> Create([FromBody] CreateUtilityProviderViewModel createViewModel, CancellationToken cancellationToken)
+        {
+            CreateUtilityProviderDTO createDto = _utilityProviderMapper.ToDto(createViewModel);
 
-            return CreatedAtAction(nameof(GetAll), createdViewModel);
+            UtilityProviderDTO createdDto = await _utilityProviderService.CreateAsync(createDto, cancellationToken);
+
+            UtilityProviderViewModel createdViewModel = _utilityProviderMapper.ToViewModel(createdDto);
+
+            return CreatedAtAction(nameof(GetById), new { id = createdViewModel.Id }, createdViewModel);
         }
 
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<UtilityProviderViewModel>> Edit(long id, [FromBody] EditUtilityProviderViewModel editUtilityProviderViewModel)
+        public async Task<ActionResult<UtilityProviderViewModel>> Edit(long id, [FromBody] EditUtilityProviderViewModel editViewModel, CancellationToken cancellationToken)
         {
-            EditUtilityProviderDTO dto = _utilityProviderMapper.ToDto(editUtilityProviderViewModel);
+            EditUtilityProviderDTO editDto = _utilityProviderMapper.ToDto(editViewModel);
 
-            UtilityProviderDTO result = await _utilityProviderService.EditAsync(id, dto);
+            UtilityProviderDTO? updatedDto = await _utilityProviderService.EditAsync(id, editDto, cancellationToken);
+            if (updatedDto is null)
+            {
+                return NotFound($"Поставщик услуг с ID {id} не найден.");
+            }
 
-            UtilityProviderViewModel updatedViewModel = _utilityProviderMapper.ToViewModel(result);
-
+            UtilityProviderViewModel updatedViewModel = _utilityProviderMapper.ToViewModel(updatedDto);
             return Ok(updatedViewModel);
         }
 
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
-            await _utilityProviderService.DeleteAsync(id);
+            bool isDeleted = await _utilityProviderService.DeleteAsync(id, cancellationToken);
+            if (!isDeleted)
+            {
+                return NotFound($"Не удалось удалить. Поставщик услуг с ID {id} не найден.");
+            }
 
             return NoContent();
         }

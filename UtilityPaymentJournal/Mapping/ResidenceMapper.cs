@@ -64,5 +64,14 @@ namespace UtilityPaymentJournal.Mapping
                 Address = residenceDto.Address
             };
         }
+
+        public void UpdateEntity(EditResidenceDTO dto, Residence entity)
+        {
+            if (dto == null || entity == null)
+                return;
+
+            entity.Address = dto.Address;
+            //entity.UpdatedAt = DateTime.UtcNow;
+        }
     }
 }

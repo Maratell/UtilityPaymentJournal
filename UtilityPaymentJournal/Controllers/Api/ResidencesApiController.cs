@@ -4,6 +4,7 @@ using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.Residences;
 
+
 namespace UtilityPaymentJournal.Controllers.Api
 {
     [ApiController]
@@ -22,45 +23,65 @@ namespace UtilityPaymentJournal.Controllers.Api
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ResidenceViewModel>>> GetAll()
+        public async Task<ActionResult<IReadOnlyCollection<ResidenceViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<ResidenceDTO> result = await _residenceService.GetAllAsync();
+            IEnumerable<ResidenceDTO> dtos = await _residenceService.GetAllAsync(cancellationToken);
 
-            List<ResidenceViewModel> viewModels = result
+            List<ResidenceViewModel> viewModels = dtos
                 .Select(r => _residenceMapper.ToViewModel(r))
                 .ToList();
 
             return Ok(viewModels);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<ResidenceViewModel>> Create([FromBody] CreateResidenceViewModel createResidence)
+        [HttpGet("{id:long}")]
+        public async Task<ActionResult<ResidenceViewModel>> GetById(long id, CancellationToken cancellationToken)
         {
-            CreateResidenceDTO dto = _residenceMapper.ToDto(createResidence);
+            ResidenceDTO? dto = await _residenceService.GetByIdAsync(id, cancellationToken);
+            if (dto is null)
+            {
+                return NotFound($"Жилой объект с ID {id} не найден.");
+            }
 
-            ResidenceDTO result = await _residenceService.CreateAsync(dto);
+            ResidenceViewModel viewModel = _residenceMapper.ToViewModel(dto);
+            return Ok(viewModel);
+        }
 
-            ResidenceViewModel createdViewModel = _residenceMapper.ToViewModel(result);
+        [HttpPost]
+        public async Task<ActionResult<ResidenceViewModel>> Create([FromBody] CreateResidenceViewModel createResidence, CancellationToken cancellationToken)
+        {
+            CreateResidenceDTO createDto = _residenceMapper.ToDto(createResidence);
 
-            return CreatedAtAction(nameof(GetAll), createdViewModel);
+            ResidenceDTO createdDto = await _residenceService.CreateAsync(createDto, cancellationToken);
+
+            ResidenceViewModel createdViewModel = _residenceMapper.ToViewModel(createdDto);
+
+            return CreatedAtAction(nameof(GetById), new { id = createdViewModel.Id }, createdViewModel);
         }
 
         [HttpPut("{id:long}")]
-        public async Task<IActionResult> Edit(long id, [FromBody] EditResidenceViewModel editResidenceVm)
+        public async Task<ActionResult<ResidenceViewModel>> Edit(long id, [FromBody] EditResidenceViewModel editViewModel, CancellationToken cancellationToken)
         {
-            EditResidenceDTO dto = _residenceMapper.ToDto(editResidenceVm);
+            EditResidenceDTO editDto = _residenceMapper.ToDto(editViewModel);
 
-            ResidenceDTO result = await _residenceService.EditAsync(id, dto);
+            ResidenceDTO? updatedDto = await _residenceService.EditAsync(id, editDto, cancellationToken);
+            if (updatedDto is null)
+            {
+                return NotFound($"Жилой объект с ID {id} не найден.");
+            }
 
-            ResidenceViewModel updatedViewModel = _residenceMapper.ToViewModel(result);
-
+            ResidenceViewModel updatedViewModel = _residenceMapper.ToViewModel(updatedDto);
             return Ok(updatedViewModel);
         }
 
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete(long id)
+        public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
-            await _residenceService.DeleteAsync(id);
+            bool isDeleted = await _residenceService.DeleteAsync(id, cancellationToken);
+            if (!isDeleted)
+            {
+                return NotFound($"Не удалось удалить. Жилой объект с ID {id} не найден.");
+            }
 
             return NoContent();
         }

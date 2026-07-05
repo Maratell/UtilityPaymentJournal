@@ -1,7 +1,5 @@
-﻿using UtilityPaymentJournal.DTO.Utilities;
-using UtilityPaymentJournal.DTO.UtilityProviders;
+﻿using UtilityPaymentJournal.DTO.UtilityProviders;
 using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.Models.Utilities;
 using UtilityPaymentJournal.Models.UtilityProviders;
 using UtilityProviderPaymentJournal.Interface.Mapping;
 
@@ -66,6 +64,15 @@ namespace UtilityPaymentJournal.Mapping
                 Id = utilityProviderDto.Id,
                 Name = utilityProviderDto.Name
             };
+        }
+
+        public void UpdateEntity(EditUtilityProviderDTO dto, UtilityProvider entity)
+        {
+            if (dto == null || entity == null)
+                return;
+
+            entity.Name = dto.Name;
+            //entity.UpdatedAt = DateTime.UtcNow;
         }
     }
 }

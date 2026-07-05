@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System.Threading;
 using UtilityPaymentJournal.DTO.Residences;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Residences;
@@ -10,8 +9,8 @@ namespace UtilityPaymentJournal.Services
 {
     public class ResidenceService : IResidenceService
     {
-        private ApplicationDbContext _context;
-        private IResidenceMapper _residenceMapper;
+        private readonly ApplicationDbContext _context;
+        private readonly IResidenceMapper _residenceMapper;
 
         public ResidenceService(
             ApplicationDbContext context,
@@ -21,53 +20,66 @@ namespace UtilityPaymentJournal.Services
             _residenceMapper = residenceMapper;
         }
 
-        public async Task<ResidenceDTO> CreateAsync(CreateResidenceDTO residenceDto)
+        public async Task<ResidenceDTO> CreateAsync(CreateResidenceDTO dto, CancellationToken cancellationToken = default)
         {
-            Residence residence = _residenceMapper.ToEntity(residenceDto);
+            Residence entity = _residenceMapper.ToEntity(dto);
 
-            await _context.Residences.AddAsync(residence);
-            await _context.SaveChangesAsync();
+            // используем синхронный Add, так как операция происходит в памяти
+            _context.Residences.Add(entity);
+            await _context.SaveChangesAsync(cancellationToken);
 
-            return _residenceMapper.ToDto(residence);
+            return _residenceMapper.ToDto(entity);
         }
 
-        public async Task DeleteAsync(long id)
+        public async Task<ResidenceDTO?> EditAsync(long id, EditResidenceDTO dto, CancellationToken cancellationToken = default)
         {
-            Residence residence = await FindByIdOrThrowAsync(id);
+            Residence? entity = await FindEntityAsync(id, cancellationToken);
+            if (entity == null)
+                return null;
 
-            _context.Residences.Remove(residence);
-            await _context.SaveChangesAsync();
+            _residenceMapper.UpdateEntity(dto, entity);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return _residenceMapper.ToDto(entity);
         }
 
-        public async Task<ResidenceDTO> EditAsync(long id, EditResidenceDTO editResidenceDto)
+        public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
         {
-            Residence residence = await FindByIdOrThrowAsync(id);
+            // EF Core сразу генерирует SQL-запрос: DELETE FROM Residences WHERE Id = @id
+            // Метод возвращает количество удаленных строк (0 или 1)
+            int deletedRowsCount = await _context.Residences
+                .Where(w => w.Id == id)
+                .ExecuteDeleteAsync(cancellationToken);
 
-            residence.Address = editResidenceDto.Address;
-            residence.UpdatedAt = DateTime.UtcNow;
-
-            await _context.SaveChangesAsync();
-            return _residenceMapper.ToDto(residence);
+            // Если удалена 1 строка — возвращаем true, если 0 (id не найден) — возвращаем false
+            return deletedRowsCount > 0;
         }
 
-        public async Task<IEnumerable<ResidenceDTO>> GetAllAsync()
+
+
+        public async Task<IReadOnlyCollection<ResidenceDTO>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            List<Residence> result = await _context.Residences.ToListAsync();
-            return result.Select(r => _residenceMapper.ToDto(r));
+            List<Residence> entities = await _context.Residences
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            return entities
+                .Select(e => _residenceMapper.ToDto(e))
+                .ToList();
         }
 
-        private async Task<Residence> FindByIdOrThrowAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<ResidenceDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
-            // Использование FindAsync вместо FirstOrDefaultAsync — это стандарт для поиска по Primary Key.
-            // Оно сначала ищет объект в кэше контекста EF Core, не нагружая лишний раз базу данных PostgreSQL.
-            Residence? residence = await _context.Residences.FindAsync(new object[] { id }, cancellationToken);
+            // загружаем entity со всеми деталями для передачи клиенту в UI
+            Residence? entity = await FindEntityAsync(id, cancellationToken);
 
-            if (residence == null)
-            {
-                throw new KeyNotFoundException($"Жилой объект с ID {id} не найден.");
-            }
+            return entity is null ? null : _residenceMapper.ToDto(entity);
+        }
 
-            return residence;
+        private async Task<Residence?> FindEntityAsync(long id, CancellationToken cancellationToken)
+        {
+            return await _context.Residences
+                .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
     }
 }
