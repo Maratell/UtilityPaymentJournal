@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.DTO.ComplaintBoard;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
+using UtilityPaymentJournal.Enumerations;
 using UtilityPaymentJournal.Extensions;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.ComplaintBoard;
@@ -70,6 +71,23 @@ namespace UtilityPaymentJournal.Mapping
             };
         }
 
+        public EditComplaintDTO ToDto(ComplaintDTO dto, ComplaintStatus status)
+        {
+            if (dto == null)
+                return null!;
+
+            return new EditComplaintDTO
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                UtilityId = dto.UtilityId,
+                Status = status, // Устанавливаем новый статус
+                CreatedAt = dto.CreatedAt,
+                SubmissionDate = dto.SubmissionDate,
+                IssueResolutionDate = dto.IssueResolutionDate
+            };
+        }
+
         public Complaint ToEntity(CreateComplaintDTO dto)
         {
             if (dto == null)
@@ -119,8 +137,8 @@ namespace UtilityPaymentJournal.Mapping
 
             //entity.Utility = null!;
 
-            entity.SubmissionDate = dto.SubmissionDate.ToUniversalTime();
-            entity.IssueResolutionDate = dto.IssueResolutionDate.ToUniversalTime();
+            entity.SubmissionDate = dto.SubmissionDate?.ToUniversalTime();
+            entity.IssueResolutionDate = dto.IssueResolutionDate?.ToUniversalTime();
         }
     }
 }
