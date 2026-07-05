@@ -61,7 +61,7 @@ builder.Services.AddScoped<IUtilityService, UtilityService>();
 builder.Services.AddScoped<IWaterReadingService, WaterReadingService>();
 builder.Services.AddScoped<IElectricityReadingService, ElectricityReadingService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IComplaintBoardService, ComplaintBoardService>();
+builder.Services.AddScoped<IComplaintService, ComplaintService>();
 
 // Регистрируем маппер как Singleton (так как в нем нет состояния)
 builder.Services.AddSingleton<IResidenceMapper, ResidenceMapper>();
