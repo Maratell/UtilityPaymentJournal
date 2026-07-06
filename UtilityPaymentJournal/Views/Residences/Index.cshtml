@@ -10,13 +10,23 @@
             @* <h2 class="notebook-style-title mb-4">Жилые объекты</h2> *@
 
             <!-- Форма ввода и кнопка добавления -->
-            <div class="mb-4">
+            @* <div class="mb-4">
                 <div class="input-group notebook-style-group">
                     <input type="text" id="addressInput" class="form-control notebook-style-input" placeholder="Введите адрес жилого объекта..." maxlength="100">
                     <button class="btn notebook-style-btn" id="btnAdd">Добавить</button>
                 </div>
                 <div id="validationError" class="text-danger small mt-2 fw-medium" style="display: none;"></div>
-            </div>
+            </div> *@
+
+            <form id="residenceForm" class="mb-4">
+                @Html.AntiForgeryToken() @* Генерируем уникальный токен безопасности для этой страницы *@
+
+                <div class="input-group notebook-style-group">
+                    <input type="text" id="addressInput" class="form-control notebook-style-input" placeholder="Введите адрес жилого объекта..." maxlength="100">
+                    <button type="submit" class="btn notebook-style-btn" id="btnAdd">Добавить</button>
+                </div>
+                <div id="validationError" class="text-danger small mt-2 fw-medium" style="display: none;"></div>
+            </form>
 
             <!-- Контейнер для списка -->
             <ul class="list-group notebook-style-list" id="residenceList">
@@ -98,13 +108,18 @@
             }
 
             // 2. ДОБАВЛЕНИЕ ЭЛЕМЕНТА
-            $('#btnAdd').click(function () {
+            //$('#btnAdd').click(function () {
+            $('#residenceForm').on('submit', function (e) {
+                e.preventDefault(); // Блокируем стандартную перезагрузку страницы браузером
                 const addressText = $('#addressInput').val().trim();
 
                 if (!addressText) {
                     showAlert('Поле не может быть пустым!');
                     return;
                 }
+
+                // Извлекаем сгенерированный токен безопасности из нашей формы
+                const csrfToken = $(this).find('input[name="__RequestVerificationToken"]').val() || '';
 
                 const requestData = {
                     address: addressText
@@ -115,6 +130,10 @@
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(requestData),
+                    headers: {
+                        // Передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
                     success: function () {
                         $('#addressInput').val('');
                         loadResidences();
@@ -166,6 +185,9 @@
                     return;
                 }
 
+                // Извлекаем сгенерированный токен безопасности из нашей основной формы #residenceForm
+                const csrfToken = $('#residenceForm').find('input[name="__RequestVerificationToken"]').val() || '';
+
                 const requestData = {
                     address: newAddress
                 };
@@ -175,6 +197,10 @@
                     method: 'PUT',
                     contentType: 'application/json',
                     data: JSON.stringify(requestData),
+                    headers: {
+                        // Передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
                     success: function (updatedResidence) {
                         li.find('.notebook-item-text').text(updatedResidence.address); 
 
@@ -202,6 +228,10 @@
                 const id = listItemToDelete.data('id');
                 const address = listItemToDelete.find('.notebook-item-text').text();
 
+                 // Извлекаем сгенерированный токен безопасности из формы #residenceForm.
+                // За счет замыкания (Closure) переменная будет доступна внутри callback-функции ниже.
+                const csrfToken = $('#residenceForm').find('input[name="__RequestVerificationToken"]').val() || '';
+
                 // Передаем настройки и логику AJAX прямо внутрь функции
                 showConfirm({
                         title: 'Удаление объекта',
@@ -215,6 +245,10 @@
                     $.ajax({
                         url: `${apiUrl}/${id}`,
                         method: 'DELETE',
+                        headers: {
+                            // 2. ОБЯЗАТЕЛЬНО передаем токен безопасности в заголовке запроса
+                            'RequestVerificationToken': csrfToken
+                        },
                         success: function () {
                             listItemToDelete.fadeOut(250, function () {
                                 $(this).remove();
