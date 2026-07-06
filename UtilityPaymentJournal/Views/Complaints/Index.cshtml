@@ -87,6 +87,10 @@
 }
 
 <div class="container-fluid py-4 kanban-board-bg">
+
+    <!-- Генерируем токен защиты для операций POST, PUT, DELETE на доске жалоб -->
+    @Html.AntiForgeryToken()
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="notebook-kanban-title mb-0"></h2>
         <button class="notebook-kanban-add-btn" data-bs-toggle="modal" data-bs-target="#addModal">
@@ -405,22 +409,29 @@
 
             if (!column || !card) return;
 
-            // 1. Считываем данные через .attr() до перемещения элемента
+            // 1. Извлекаем токен безопасности ГЛОБАЛЬНО со всей страницы (так как общей формы тут нет)
+            const csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+            // 2. Считываем данные через .attr() до перемещения элемента
             const complaintId = parseInt($(card).attr('data-id'));
             const newStatus = parseInt($(column).attr('data-status'));
 
-            // 2. Перемещаем карточку в новую колонку
+            // 3. Перемещаем карточку в новую колонку
             column.appendChild(card);
 
-            // 3. Обновляем дата-атрибуты статуса на самой карточке
+            // 4. Обновляем дата-атрибуты статуса на самой карточке
             $(card).attr('data-status', newStatus);
             $(card).data('status', newStatus);
             $(card).find('.btn-edit-complaint').attr('data-status', newStatus);
 
-            // 4. Отправляем AJAX-запрос на новый REST-эндпоинт
+            // 5. Отправляем AJAX-запрос на новый REST-эндпоинт
             $.ajax({
                 url: `/api/complaints/${complaintId}/status/${newStatus}`,
-                type: 'PATCH',                                 
+                type: 'PATCH',
+                headers: {
+                    // ОБЯЗАТЕЛЬНО передаем токен безопасности в заголовке запроса
+                    'RequestVerificationToken': csrfToken
+                },
                 success: function () {
                     // Так как бэкенд возвращает NoContent(), ответа в response не будет.
                     // Если запрос дошел с кодом 2xx — просто обновляем счетчики на доске
@@ -453,7 +464,10 @@
                 e.preventDefault();
                 const form = this;
 
-                // 1. Извлекаем данные по новым чистым именам полей (без префиксов EmptyForm.)
+                // 1. Извлекаем токен безопасности со всей страницы 
+                const csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
+                // 2. Извлекаем данные по новым чистым именам полей (без префиксов EmptyForm.)
                 const requestData = {
                     title: $(form).find('input[name="title"]').val().trim(),
                     utilityId: parseInt($(form).find('select[name="utilityId"]').val()),
@@ -467,6 +481,10 @@
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(requestData),
+                    headers: {
+                        // Передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
                     success: function (createdCard) { 
                         // Закрываем модальное окно через Bootstrap API
                         $('#addModal').find('[data-bs-dismiss="modal"]').first().click();
@@ -548,6 +566,9 @@
 
                 const id = $('#editComplaintId').val();
 
+                // Извлекаем токен безопасности ГЛОБАЛЬНО со всей страницы (так как общей формы тут нет)
+                const csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
                 const requestData = {
                     title: $('#editTitle').val().trim(),
                     utilityId: parseInt($('#editUtilityId').val()),
@@ -562,6 +583,10 @@
                     type: 'PUT',                      
                     contentType: 'application/json',
                     data: JSON.stringify(requestData),
+                    headers: {
+                        // Передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
                     success: function (updatedCard) {
                         // Закрываем модальное окно
                         $('#editModal').find('[data-bs-dismiss="modal"]').first().click();
@@ -644,6 +669,10 @@
                 const id = $(this).data('id'); // Используем .data('id') или .attr('data-id')
                 const $card = $('#complaint-' + id);
 
+                // Извлекаем токен безопасности ГЛОБАЛЬНО со всей страницы (так как общей формы тут нет).
+                // За счет замыкания (Closure) переменная будет доступна внутри callback-функции ниже.
+                const csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
                 showConfirm({
                         title: 'Удаление объекта',
                         message: 'Вы действительно хотите удалить жалобу:',
@@ -654,7 +683,11 @@
                 }, function () {
                     $.ajax({
                         url: `/api/complaints/${id}`, 
-                        type: 'DELETE',                
+                        type: 'DELETE',
+                        headers: {
+                            // Передаем токен безопасности в заголовке запроса
+                            'RequestVerificationToken': csrfToken
+                        },
                         success: function () {
                             // Исправлено: так как бэкенд возвращает NoContent(), ответа в response не будет.
                             // Успешный HTTP статус 204 от сервера сразу запускает этот блок.
