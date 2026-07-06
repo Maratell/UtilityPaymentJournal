@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Enumerations;
+using UtilityPaymentJournal.Common.Extensions;
 using UtilityPaymentJournal.DTO.ComplaintBoard;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
-using UtilityPaymentJournal.Enumerations;
-using UtilityPaymentJournal.Extensions;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.ComplaintBoard;
 

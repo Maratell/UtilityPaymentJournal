@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.Models.ViewModels;
+using UtilityPaymentJournal.Models.Authentication;
 
 namespace UtilityPaymentJournal.Controllers
 {
@@ -75,7 +75,7 @@ namespace UtilityPaymentJournal.Controllers
 
         [HttpPost]
         //[ValidateAntiForgeryToken] // Верните защиту обратно
-        public async Task<IActionResult> Login(LoginViewModel login)
+        public async Task<IActionResult> Login(SignInRequestViewModel login)
         {
             // 1. Ищем пользователя по имени (или Email в зависимости от ваших настроек)
             var user = await _userManager.FindByNameAsync(login.UserName);

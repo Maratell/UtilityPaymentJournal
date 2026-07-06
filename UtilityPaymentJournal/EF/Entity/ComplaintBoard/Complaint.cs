@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using UtilityPaymentJournal.Common.Enumerations;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.Enumerations;
 using UtilityPaymentJournal.Interface.Entity;
 
 namespace UtilityPaymentJournal.EF.Entity.ComplaintBoard

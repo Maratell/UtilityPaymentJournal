@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 
-namespace UtilityPaymentJournal.Extensions
+namespace UtilityPaymentJournal.Common.Extensions
 {
     public static class EnumExtensions
     {

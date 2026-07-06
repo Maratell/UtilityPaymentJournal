@@ -1,6 +1,6 @@
-﻿using UtilityPaymentJournal.DTO.ElectricityReadings;
+﻿using UtilityPaymentJournal.Common.Extensions;
+using UtilityPaymentJournal.DTO.ElectricityReadings;
 using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
-using UtilityPaymentJournal.Extensions;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.ElectricityReadings;
 

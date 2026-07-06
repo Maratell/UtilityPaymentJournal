@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using UtilityPaymentJournal.Common.Extensions
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -61,28 +62,39 @@
                     </ul>
 
                     <!-- Правая часть: Имя + Иконка выхода -->
+                    @* <ul class="navbar-nav d-flex flex-row align-items-center ms-auto notebook-user-zone">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <i class="bi bi-person-circle notebook-user-icon me-2"></i>
+                                <span class="nav-link notebook-user-name p-0">
+                                    @User.GetFullName()
+                                </span>
+                            </li>
+                            <li class="nav-item d-flex align-items-center">
+                                <span class="notebook-user-divider me-3"></span>
+                                <form class="form-inline d-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" id="logoutButton" class="btn btn-link p-0 border-0 align-middle">
+                                        <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul> *@
+
                     <ul class="navbar-nav d-flex flex-row align-items-center ms-auto notebook-user-zone">
                         @if (User.Identity?.IsAuthenticated == true)
                         {
                             <li class="nav-item d-flex align-items-center me-3">
                                 <i class="bi bi-person-circle notebook-user-icon me-2"></i>
                                 <span class="nav-link notebook-user-name p-0">
-                                    @{
-                                        var firstName = User.FindFirst("FirstName")?.Value;
-                                        var lastName = User.FindFirst("LastName")?.Value;
-
-                                        // Соединяем имя и фамилию через пробел, игнорируя null и пустые строки
-                                        var fullName = string.Join(" ", new[] { firstName, lastName }.Where(s => !string.IsNullOrEmpty(s)));
-
-                                        var displayName = !string.IsNullOrEmpty(fullName) ? fullName : firstName;
-                                    }
-                                    @displayName
-@*                                  @User.FindFirst("FirstName")?.Value @User.FindFirst("LastName")?.Value *@
+                                    @User.GetFullName()
                                 </span>
                             </li>
                             <li class="nav-item d-flex align-items-center">
                                 <span class="notebook-user-divider me-3"></span>
-                                <form class="form-inline d-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+                                <form class="form-inline d-inline" action="/api/account/sign-out" method="post" id="logoutForm">
+                                    @Html.AntiForgeryToken() @* Защита от CSRF-атак. Без нее бэкенд может заблокировать запрос *@
                                     <button type="submit" id="logoutButton" class="btn btn-link p-0 border-0 align-middle">
                                         <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
                                     </button>
@@ -96,92 +108,6 @@
         </nav>
     </header>
 
-    @* <header class="notebook-header mb-4">
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light p-0">
-            <div class="container-fluid notebook-nav">
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between w-100">
-
-                    <!-- Левая часть: Закладки ежедневника -->
-                    <ul class="navbar-nav notebook-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link notebook-tab" asp-area="" asp-controller="Residence" asp-action="GetView">Жилые объекты</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link notebook-tab" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-
-                    <!-- Правая часть: Имя + Иконка выхода -->
-                    <ul class="navbar-nav d-flex flex-row align-items-center ms-auto notebook-user-zone">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item d-flex align-items-center me-3">
-                                <i class="bi bi-person-circle notebook-user-icon me-2"></i>
-                                <span class="nav-link notebook-user-name p-0">
-                                    @User.FindFirst("FullName")?.Value
-                                </span>
-                            </li>
-                            <li class="nav-item d-flex align-items-center">
-                                <!-- Убрали текстовый символ '|', оставив чистый класс -->
-                                <span class="notebook-user-divider me-3"></span>
-                                <form class="form-inline d-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
-                                    <button type="submit" id="logoutButton" class="btn btn-link p-0 border-0 align-middle">
-                                        <i class="bi bi-box-arrow-right" style="font-size: 1.1rem;"></i>
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                    </ul>
-
-                </div>
-            </div>
-        </nav>
-    </header> *@
-
-    @* <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Residence" asp-action="GetView">Жилые объекты</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-
-                    <!-- ОБНОВЛЕННЫЙ БЛОК: ИМЯ + ИКОНКА ВЫХОДА -->
-                    <ul class="navbar-nav d-flex flex-row align-items-center ms-auto">
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item d-flex align-items-center me-3">
-                                <!-- Элегантная иконка пользователя рядом с именем -->
-                                <i class="bi bi-person-circle text-secondary me-2" style="font-size: 1.2rem;"></i>
-                                <span class="nav-link text-dark fw-medium p-0">
-                                    @User.FindFirst("FullName")?.Value
-                                </span>
-                            </li>
-
-                            <li class="nav-item d-flex align-items-center">
-                                <!-- Вертикальный разделитель -->
-                                <span class="text-muted opacity-25 me-3">|</span>
-
-                                <form class="form-inline d-inline" asp-area="" asp-controller="Account" asp-action="Logout" method="post">
-                                    <!-- Кнопка-иконка с плавным изменением цвета при наведении -->
-                                    <button type="submit" id="logoutButton" class="btn btn-link text-secondary p-0 link-danger d-flex align-items-center" title="Выйти">
-                                        <i class="bi bi-box-arrow-right" style="font-size: 1.35rem;"></i>
-                                    </button>
-                                </form>
-                            </li>
-                        }
-                    </ul>
-                    <!-- /ОБНОВЛЕННЫЙ БЛОК -->
-                </div>
-            </div>
-        </nav>
-    </header> *@
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -216,7 +142,7 @@
         });
     </script>
 
-    <script>
+    @* <script>
         document.getElementById('logoutButton').addEventListener('click', function () {
             // Получаем URL действия, если скрипт в .cshtml файле
             const logoutUrl = '@Url.Action("Logout", "Account")';
@@ -242,6 +168,44 @@
                 }
             })
             .catch(error => console.error('Ошибка:', error));
+        });
+    </script> *@
+
+    <script>
+        $(document).ready(function () {
+            $('#logoutForm').on('submit', function (e) {
+                e.preventDefault(); // Блокируем обычную перезагрузку страницы
+
+                const form = this;
+
+                // Вытаскиваем токен антиподделки, который сгенерировал @Html.AntiForgeryToken()
+                const csrfToken = $(form).find('input[name="__RequestVerificationToken"]').val() || '';
+
+                // Отправляем асинхронный запрос на бэкенд
+                $.ajax({
+                    url: '/api/account/sign-out',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    headers: {
+                        // Передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
+                    success: function (data) {
+                        // Наш контроллер возвращает URL в свойстве redirectUrl.
+                        // Перенаправляем пользователя на страницу входа
+                        window.location.href = data.redirectUrl;
+                    },
+                    error: function (xhr) {
+                        // Если у вас есть глобальный хелпер ошибок, пускаем его в ход
+                        if (tryShowServerError(xhr)) {
+                            return;
+                        }
+
+                        // Резервное уведомление
+                        showAlert('Не удалось завершить сессию. Попробуйте позже.');
+                    }
+                });
+            });
         });
     </script>
     @await RenderSectionAsync("Scripts", required: false)

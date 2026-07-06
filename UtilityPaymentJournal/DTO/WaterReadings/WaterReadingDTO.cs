@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using UtilityPaymentJournal.Enumerations;
+using UtilityPaymentJournal.Common.Enumerations;
 
 namespace UtilityPaymentJournal.DTO.WaterReadings
 {

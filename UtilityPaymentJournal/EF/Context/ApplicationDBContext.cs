@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using UtilityPaymentJournal.Common.Extensions;
 using UtilityPaymentJournal.EF.Entity;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
@@ -8,7 +9,6 @@ using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
 using UtilityPaymentJournal.EF.Entity.Residences;
 using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
-using UtilityPaymentJournal.Extensions;
 using UtilityPaymentJournal.Interface.Service;
 
 namespace UtilityPaymentJournal.EF.Context

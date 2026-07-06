@@ -6,6 +6,7 @@ using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Filters;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
+using UtilityPaymentJournal.Infrastructure.Identity;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Mapping;
@@ -55,6 +56,7 @@ builder.Services.AddControllersWithViews();
 //    options.Filters.Add<ValidateModelAttribute>();
 //});
 
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IResidenceService, ResidenceService>();
 builder.Services.AddScoped<IUtilityProviderService, UtilityProviderService>();
 builder.Services.AddScoped<IUtilityService, UtilityService>();
@@ -62,6 +64,7 @@ builder.Services.AddScoped<IWaterReadingService, WaterReadingService>();
 builder.Services.AddScoped<IElectricityReadingService, ElectricityReadingService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
+
 
 // Регистрируем маппер как Singleton (так как в нем нет состояния)
 builder.Services.AddSingleton<IResidenceMapper, ResidenceMapper>();
@@ -109,7 +112,9 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Password.RequiredUniqueChars = 1;    // Количество уникальных символов
 })
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    // Подключаем кастомную фабрику клеймов
+    .AddClaimsPrincipalFactory<UserProfileClaimsPrincipalFactory>();
 
 builder.Services.AddControllers();
 

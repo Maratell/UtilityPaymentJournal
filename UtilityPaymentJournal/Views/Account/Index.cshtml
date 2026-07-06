@@ -1,13 +1,16 @@
-﻿@using UtilityPaymentJournal.Models.ViewModels
-@model LoginViewModel
+﻿@using UtilityPaymentJournal.Models.Authentication
+@using UtilityPaymentJournal.Models.ViewModels
+@model SignInRequestViewModel
 @{
     ViewData["Title"] = "Account";
 }
 
-
 <div>
     <div class="d-flex align-items-center justify-content-center min-vh-50 py-5">
         <form id="loginForm" class="w-100 p-4 p-sm-5 border-0 rounded-4 shadow bg-white" style="max-width: 420px;">
+            <!-- Автоматически генерирует input с токеном __RequestVerificationToken -->
+            @Html.AntiForgeryToken()
+            
             <!-- Заголовок с мягким цветом и уменьшенным весом -->
             <h2 class="text-center fw-semibold text-secondary mb-4">Вход в систему</h2>
 
@@ -37,40 +40,49 @@
 <partial name="_AlertModal" />
 
 <script>
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
-        const form = this;
-        const formData = new FormData(form);
+        // 1. Достаем токен безопасности (антиподделки) из формы
+        const tokenElement = document.querySelector('input[name="__RequestVerificationToken"]');
+        const csrfToken = tokenElement ? tokenElement.value : '';
 
-        // // Достаем токен безопасности из формы
-        // const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+        // 2. Формируем чистый JavaScript-объект.
+        const requestData = {
+            userName: document.getElementById('username').value.trim(),
+            password: document.getElementById('password').value
+        };
 
-        fetch('/Account/Login', {
+        // 3. Отправляем запрос через привычный вам $.ajax
+        $.ajax({
+            url: '/api/account/sign-in',
             method: 'POST',
-            body: formData,
+            contentType: 'application/json',
+            data: JSON.stringify(requestData),
             headers: {
-                // Обязательно указываем, что ожидаем JSON в ответ
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Ошибка сервера');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
+                // Передаем CSRF-токен в заголовке для прохождения валидации безопасности
+                'RequestVerificationToken': csrfToken
+            },
+            success: function (data) {
+                // Если сервер вернул 200 OK, проверяем успешность бизнес-логики
                 window.location.href = data.redirectUrl;
-            } else {
-                showAlert(data.message || 'Ошибка авторизации.');
+            },
+            error: function (xhr) {
+
+                // 1. Проверяем, вернул ли сервис кастомную ошибку авторизации (errorMessage)
+                if (xhr.responseJSON && xhr.responseJSON.errorMessage) {
+                    showAlert(xhr.responseJSON.errorMessage); // Выведет "Неверный логин или пароль" или "Аккаунт заблокирован"
+                    return;
+                }
+
+                // 2. Если это не кастомная ошибка авторизации, пускаем в ход стандартный глобальный хелпер
+                if (tryShowServerError(xhr)) {
+                    return;
+                }
+
+                // 3.Дефолтное сообщение при сбое сети или сервера
+                showAlert('Произошла ошибка при обработке запроса.');
             }
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            showAlert('Произошла ошибка при обработке запроса.');
         });
     });
 </script>
