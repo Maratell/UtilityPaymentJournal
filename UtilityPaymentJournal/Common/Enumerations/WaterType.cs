@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UtilityPaymentJournal.Enumerations
+namespace UtilityPaymentJournal.Common.Enumerations
 {
     public enum WaterType
     {

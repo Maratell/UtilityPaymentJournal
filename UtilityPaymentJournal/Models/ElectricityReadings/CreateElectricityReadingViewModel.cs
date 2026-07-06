@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using UtilityPaymentJournal.Enumerations;
 
 namespace UtilityPaymentJournal.Models.ElectricityReadings
 {

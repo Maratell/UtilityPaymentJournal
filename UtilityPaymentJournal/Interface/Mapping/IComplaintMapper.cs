@@ -1,6 +1,6 @@
-﻿using UtilityPaymentJournal.DTO.ComplaintBoard;
+﻿using UtilityPaymentJournal.Common.Enumerations;
+using UtilityPaymentJournal.DTO.ComplaintBoard;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
-using UtilityPaymentJournal.Enumerations;
 using UtilityPaymentJournal.Models.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Interface.Mapping

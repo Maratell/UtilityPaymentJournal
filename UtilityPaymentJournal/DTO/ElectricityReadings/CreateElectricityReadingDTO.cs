@@ -1,5 +1,4 @@
-﻿using UtilityPaymentJournal.Enumerations;
-
+﻿
 namespace UtilityPaymentJournal.DTO.ElectricityReadings
 {
     public class CreateElectricityReadingDTO

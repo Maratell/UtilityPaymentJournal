@@ -7,14 +7,16 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-            <!-- Форма ввода и кнопка добавления -->
-            <div class="mb-4">
+            <!-- Группа ввода теперь защищена и обернута в форму -->
+            <form id="utilityForm" class="mb-4">
+                @Html.AntiForgeryToken() @* Генерируем уникальный токен безопасности прямо на этой странице *@
+
                 <div class="input-group notebook-style-group">
                     <input type="text" id="utilityInput" class="form-control notebook-style-input" placeholder="Введите наименование поставщика услуг..." maxlength="100">
-                    <button class="btn notebook-style-btn" id="btnAdd">Добавить</button>
+                    <button type="submit" class="btn notebook-style-btn" id="btnAdd">Добавить</button>
                 </div>
                 <div id="validationError" class="text-danger small mt-2 fw-medium" style="display: none;"></div>
-            </div>
+            </form>
 
             <!-- Контейнер для списка -->
             <ul class="list-group notebook-style-list" id="utilityList">
@@ -96,13 +98,18 @@
             }
 
             // 2. ДОБАВЛЕНИЕ ЭЛЕМЕНТА
-            $('#btnAdd').click(function () {
+            //$('#btnAdd').click(function () {
+            $('#utilityForm').on('submit', function (e) {
+                e.preventDefault(); // блокируем перезагрузку страницы
                 const utilityText = $('#utilityInput').val().trim();
 
                 if (!utilityText) {
                     showAlert('Поле не может быть пустым!');
                     return;
                 }
+
+                // Извлекаем сгенерированный токен безопасности из нашей формы
+                const csrfToken = $(this).find('input[name="__RequestVerificationToken"]').val() || '';
 
                 const requestData = {
                     name: utilityText
@@ -113,6 +120,10 @@
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(requestData),
+                    headers: {
+                        // Передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
                     success: function () {
                         $('#utilityInput').val('');
                         loadUtilities();
@@ -164,6 +175,9 @@
                     return;
                 }
 
+                // Извлекаем сгенерированный токен безопасности из нашей формы #utilityForm
+                const csrfToken = $('#utilityForm').find('input[name="__RequestVerificationToken"]').val() || '';
+
                 const requestData = {
                     name: newUtility
                 };
@@ -173,6 +187,10 @@
                     method: 'PUT',
                     contentType: 'application/json',
                     data: JSON.stringify(requestData),
+                    headers: {
+                        // передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
                     success: function (updatedUtility) {
                         li.find('.notebook-item-text').text(updatedUtility.name); // Исправлен класс для обновления текста
 
@@ -199,6 +217,10 @@
                 const id = listItemToDelete.data('id');
                 const utilityName = listItemToDelete.find('.notebook-item-text').text();
 
+                // Извлекаем сгенерированный токен безопасности из нашей формы #utilityForm.
+                // Выносим получение токена в начало события клика, чтобы гарантированно зафиксировать его со страницы.
+                const csrfToken = $('#utilityForm').find('input[name="__RequestVerificationToken"]').val() || '';
+
                 // Передаем настройки и логику AJAX прямо внутрь функции
                 showConfirm({
                         title: 'Удаление объекта',
@@ -212,6 +234,10 @@
                     $.ajax({
                         url: `${apiUrl}/${id}`,
                         method: 'DELETE',
+                        headers: {
+                            // Передаем токен безопасности в заголовке запроса
+                            'RequestVerificationToken': csrfToken
+                        },
                         success: function () {
                             listItemToDelete.fadeOut(250, function () {
                                 $(this).remove();

@@ -4,7 +4,7 @@ using UtilityPaymentJournal.EF.Entity.Residences;
 using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Interface.Entity;
 
-namespace UtilityPaymentJournal.Extensions
+namespace UtilityPaymentJournal.Common.Extensions
 {
     public static class ModelBuilderExtensions
     {

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.EF.Entity.Residences;
 using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.Enumerations;
 using UtilityPaymentJournal.Interface.Entity;
 
 namespace UtilityPaymentJournal.EF.Entity.ElectricityReadings

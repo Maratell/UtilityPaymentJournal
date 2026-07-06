@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
 using UtilityPaymentJournal.Interface.Entity;
 
 namespace UtilityPaymentJournal.EF.Entity.Authentication

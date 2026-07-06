@@ -1,6 +1,6 @@
-﻿using UtilityPaymentJournal.DTO.WaterReadings;
+﻿using UtilityPaymentJournal.Common.Extensions;
+using UtilityPaymentJournal.DTO.WaterReadings;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
-using UtilityPaymentJournal.Extensions;
 using UtilityPaymentJournal.Models.WaterReadings;
 using WaterReadingPaymentJournal.Interface.Mapping;
 

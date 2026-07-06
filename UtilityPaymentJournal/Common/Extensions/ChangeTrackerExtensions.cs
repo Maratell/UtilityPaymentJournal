@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using UtilityPaymentJournal.Interface.Entity;
 
-namespace UtilityPaymentJournal.Extensions
+namespace UtilityPaymentJournal.Common.Extensions
 {
     public static class ChangeTrackerExtensions
     {

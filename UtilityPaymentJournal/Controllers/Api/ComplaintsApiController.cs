@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UtilityPaymentJournal.Common.Enumerations;
 using UtilityPaymentJournal.DTO.ComplaintBoard;
-using UtilityPaymentJournal.Enumerations;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.ComplaintBoard;
