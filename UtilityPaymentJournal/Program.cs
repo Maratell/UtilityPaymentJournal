@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using UtilityPaymentJournal.EF.Context;
@@ -48,7 +49,16 @@ builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // <-- Добавили
 // -------------------------------------------------
 
-builder.Services.AddControllersWithViews();
+//builder.Services.AddControllersWithViews();
+
+// Регистрируем контроллеры с поддержкой представлений (Razor-страниц) и настраиваем фильтры
+builder.Services.AddControllersWithViews(options =>
+{
+    // Фильтр автоматической проверки входящих CSRF / Antiforgery токенов.
+    // Защищает абсолютно все методы POST, PUT, DELETE в проекте, избавляя от рутины.
+    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+});
+
 //Add services to the container.
 //builder.Services.AddControllersWithViews(options =>
 //{

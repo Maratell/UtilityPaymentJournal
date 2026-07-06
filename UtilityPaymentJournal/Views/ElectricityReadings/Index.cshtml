@@ -3,6 +3,9 @@
 }
 
 <div class="container-fluid px-4 mt-5 mb-5">
+    <!-- Генерируем токен защиты для всех операций с таблицей электроэнергии -->
+    @Html.AntiForgeryToken()
+
     <div class="row">
         <div class="col-12">
 
@@ -528,6 +531,10 @@
                 // Формируем финальную строку для окна подтверждения
                 var targetText = "Показание электроэнергии";
 
+                // Извлекаем токен безопасности ГЛОБАЛЬНО со всей страницы (так как формы тут нет).
+                // За счет замыкания (Closure) переменная будет доступна внутри callback-функции ниже.
+                var csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
+
                 // Передаем настройки и логику AJAX прямо внутрь функции
                 showConfirm({
                         title: 'Удаление объекта',
@@ -552,7 +559,10 @@
                     $.ajax({
                         url: targetDeleteUrl,
                         type: "DELETE",
-                        data: { id: rowData.id },
+                        headers: {
+                            // Передаем токен безопасности в заголовке запроса
+                            'RequestVerificationToken': csrfToken
+                        },
                         success: function () {
                             // Перезагружаем данные с сервера БЕЗ жесткого сброса пагинации на предыдущую страницу
                             table.ajax.reload(function() {
@@ -599,6 +609,10 @@
                 var row = table.row($row);
                 var rowData = row.data();
                 var $errBlock = $('#validationError');
+
+                // Извлекаем токен безопасности ГЛОБАЛЬНО со всей страницы (так как формы тут нет).
+                // Делаем это в самом начале клика, чтобы зафиксировать его через замыкание (Closure)
+                var csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
 
                 // Извлекаем жилой объект и поставщика услуг
                 var selectedResidence = $row.find('.residence-select').val();
@@ -685,6 +699,10 @@
                     type: httpMethod,
                     contentType: "application/json", // говорим серверу, что шлем JSON
                     data: JSON.stringify(sendData),
+                    headers: {
+                        // ОБЯЗАТЕЛЬНО передаем токен безопасности в заголовке запроса
+                        'RequestVerificationToken': csrfToken
+                    },
                     success: function (response) {
 
                         // 1. Передаем обновленный объект от сервера напрямую в DataTables
