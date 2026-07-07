@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using UtilityPaymentJournal.DTO;
+using UtilityPaymentJournal.DTO.Admin;
 using UtilityPaymentJournal.Models.ViewModels;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
