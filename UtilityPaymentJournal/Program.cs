@@ -44,9 +44,10 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 builder.Services.AddProblemDetails();
 
 // Порядок регистрации критически важен! Общий обработчик ВСЕГДА идет самым последним.
+builder.Services.AddExceptionHandler<IdentityValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // <-- Добавили
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 // -------------------------------------------------
 
 //builder.Services.AddControllersWithViews();
@@ -67,6 +68,7 @@ builder.Services.AddControllersWithViews(options =>
 //});
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResidenceService, ResidenceService>();
 builder.Services.AddScoped<IUtilityProviderService, UtilityProviderService>();
 builder.Services.AddScoped<IUtilityService, UtilityService>();
@@ -77,6 +79,7 @@ builder.Services.AddScoped<IComplaintService, ComplaintService>();
 
 
 // Регистрируем маппер как Singleton (так как в нем нет состояния)
+builder.Services.AddScoped<IUserMapper, UserMapper>();
 builder.Services.AddSingleton<IResidenceMapper, ResidenceMapper>();
 builder.Services.AddSingleton<IUtilityProviderMapper, UtilityProviderMapper>();
 builder.Services.AddSingleton<IUtilityMapper, UtilityMapper>();
@@ -128,7 +131,7 @@ builder.Services.AddIdentity<User, Role>(options =>
 
 builder.Services.AddControllers();
 
-// 3. Настройка параметров куки для Identity (вместо AddCookie)
+// Настройка параметров куки для Identity (вместо AddCookie)
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -166,7 +169,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Index}/{id?}");
-
 
 // Автоматическое применение миграций при старте контейнера
 using (var scope = app.Services.CreateScope())

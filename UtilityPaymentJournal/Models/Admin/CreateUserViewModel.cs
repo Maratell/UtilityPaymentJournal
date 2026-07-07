@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using UtilityPaymentJournal.Common.Enumerations;
 
 namespace UtilityPaymentJournal.Models.ViewModels
 {
@@ -19,5 +20,9 @@ namespace UtilityPaymentJournal.Models.ViewModels
         [Display(Name = "Пароль")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+
+        [Required(ErrorMessage = "Выберите роль пользователя")]
+        [Display(Name = "Роль")]
+        public UserRole Role { get; set; }
     }
 }
