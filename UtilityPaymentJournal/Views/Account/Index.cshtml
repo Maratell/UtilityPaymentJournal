@@ -50,7 +50,8 @@
         // 2. Формируем чистый JavaScript-объект.
         const requestData = {
             userName: document.getElementById('username').value.trim(),
-            password: document.getElementById('password').value
+            password: document.getElementById('password').value,
+            isPersistent: false
         };
 
         // 3. Отправляем запрос через привычный вам $.ajax

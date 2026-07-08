@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UtilityPaymentJournal.Common.Enumerations;
+using UtilityPaymentJournal.DTO.Account;
 using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.Authentication;
 
@@ -13,70 +15,54 @@ namespace UtilityPaymentJournal.Services
     public class AuthenticationService : IAuthenticationService
     {
         private readonly SignInManager<User> _signInManager;
+        private readonly IAccountMapper _accountMapper;
 
-        public AuthenticationService(SignInManager<User> signInManager)
+        public AuthenticationService(
+            SignInManager<User> signInManager,
+            IAccountMapper accountMapper)
         {
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+            _accountMapper = accountMapper ?? throw new ArgumentNullException(nameof(accountMapper));
         }
 
         /// <summary>
-        /// Метод для проверки логина/пароля и создания сессии пользователя
+        /// Метод для проверки логина/пароля и создания сессии пользователя (без использования Email).
         /// </summary>
-        /// <param name="signInRequestViewModel"></param>
+        /// <param name="signInDto">Входное Dto с учетными данными пользователя.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
         /// <returns>
-        /// Объект <see cref="AuthenticationResultViewModel"/>, содержащий статус успешности операции sSuccess = true. 
-        /// В случае неудачи возвращает IsSuccess = false вместе с локализованным текстом ошибки в свойстве ErrorMessage.
+        /// Объект <see cref="AuthenticationResultDTO"/>, содержащий статус успешности операции и данные для маппинга.
         /// </returns>
-        /// <exception cref="ArgumentNullException"></exception>
-        public async Task<AuthenticationResultViewModel> SignInAsync(SignInRequestViewModel signInRequestViewModel)
+        /// <exception cref="ArgumentNullException">Выбрасывается, если переданный объект DTO равен null.</exception>
+        public async Task<AuthenticationResultDTO> SignInAsync(SignInDto signInDto, CancellationToken cancellationToken = default)
         {
-            if (signInRequestViewModel == null) 
-                throw new ArgumentNullException(nameof(signInRequestViewModel));
+            if (signInDto == null)
+                throw new ArgumentNullException(nameof(signInDto));
 
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Проверяем подлинность учетных данных по UserName и Password.
             SignInResult result = await _signInManager.PasswordSignInAsync(
-                signInRequestViewModel.UserName,
-                signInRequestViewModel.Password,
-                isPersistent: false,
-                lockoutOnFailure: false
+                signInDto.UserName,
+                signInDto.Password,
+                isPersistent: signInDto.IsPersistent, // Флаг запоминания сессии при выходе из браузера
+                lockoutOnFailure: false // Отключаем блокировку при многократных ошибках ввода
             );
 
-            return result switch
-            {
-                { Succeeded: true } => new AuthenticationResultViewModel
-                {
-                    IsSuccess = true,
-                    Status = SignInResultStatus.Success
-                },
+            cancellationToken.ThrowIfCancellationRequested();
 
-                { IsLockedOut: true } => new AuthenticationResultViewModel
-                {
-                    IsSuccess = false,
-                    Status = SignInResultStatus.LockedOut,
-                    ErrorMessage = "Аккаунт временно заблокирован."
-                },
-
-                { IsNotAllowed: true } => new AuthenticationResultViewModel
-                {
-                    IsSuccess = false,
-                    Status = SignInResultStatus.NotAllowed,
-                    ErrorMessage = "Вход не разрешен. Подтвердите ваш Email."
-                },
-
-                _ => new AuthenticationResultViewModel
-                {
-                    IsSuccess = false,
-                    Status = SignInResultStatus.InvalidCredentials,
-                    ErrorMessage = "Неверный логин или пароль."
-                }
-            };
+            return _accountMapper.ToDto(result);
         }
 
         /// <summary>
         /// Асинхронно завершает текущую сессию пользователя в приложении.
         /// </summary>
-        /// <returns></returns>
-        public async Task SignOutAsync()
+        /// <param name="cancellationToken">Токен отмены операции</param>
+        public async Task SignOutAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Удаляем куки аутентификации пользователя
             await _signInManager.SignOutAsync();
         }
     }
