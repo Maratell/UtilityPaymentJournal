@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.DTO.Account;
+using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.Authentication;
 
@@ -12,17 +12,27 @@ namespace UtilityPaymentJournal.Controllers.Api
     public class AccountApiController : ControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
+        private readonly IAccountMapper _accountMapper;
 
-        public AccountApiController(IAuthenticationService authenticationService)
+        public AccountApiController(
+            IAuthenticationService authenticationService,
+            IAccountMapper accountMapper)
         {
             _authenticationService = authenticationService 
                 ?? throw new ArgumentNullException(nameof(authenticationService));
+
+            _accountMapper = accountMapper
+                ?? throw new ArgumentNullException(nameof(accountMapper));
         }
 
         [HttpPost("sign-in")]
-        public async Task<IActionResult> SignIn([FromBody] SignInRequestViewModel signInRequestViewModel)
+        public async Task<IActionResult> SignIn([FromBody] SignInRequestViewModel signInRequestViewModel, CancellationToken cancellationToken = default)
         {
-            AuthenticationResultViewModel authenticationResultViewModel = await _authenticationService.SignInAsync(signInRequestViewModel);
+            SignInDto signInDto = _accountMapper.ToDto(signInRequestViewModel);
+
+            AuthenticationResultDTO authenticationResultDto = await _authenticationService.SignInAsync(signInDto, cancellationToken);
+
+            AuthenticationResultViewModel authenticationResultViewModel = _accountMapper.ToViewModel(authenticationResultDto);
 
             // Если вход успешен, генерируем путь перенаправления
             if (authenticationResultViewModel.Status == SignInResultStatus.Success)
@@ -31,37 +41,43 @@ namespace UtilityPaymentJournal.Controllers.Api
             }
             return authenticationResultViewModel.Status switch
             {
-                // Передаем наполненный объект с RedirectUrl на фронтенд
+                // Передаем наполненный объект с RedirectUrl на фронтенд (200 OK)
                 SignInResultStatus.Success => Ok(authenticationResultViewModel),
 
-                // Для неверного пароля/логина возвращаем 401 (RedirectUrl внутри равен null)
+                // Для неверного пароля/логина возвращаем 401 Unauthorized
                 SignInResultStatus.InvalidCredentials => Unauthorized(authenticationResultViewModel),
 
-                // Для блокировок и системных ограничений возвращаем 400 (RedirectUrl внутри равен null)
-                SignInResultStatus.LockedOut or SignInResultStatus.NotAllowed => BadRequest(authenticationResultViewModel),
+                // Для блокировок из-за превышения попыток ввода возвращаем 400 BadRequest (убрали NotAllowed)
+                SignInResultStatus.LockedOut => BadRequest(authenticationResultViewModel),
 
-                // Защитный дефолтный вариант на случай непредвиденных статусов
+                // Защитный дефолтный вариант на случай любых непредвиденных статусов
                 _ => BadRequest(new AuthenticationResultViewModel
                 {
                     IsSuccess = false,
-                    ErrorMessage = "Произошла непредвиденная ошибка при обработке запроса."
+                    ErrorMessage = "Не удалось выполнить вход. Пожалуйста, обратитесь к администратору."
                 })
             };
         }
 
+        /// <summary>
+        /// Выход пользователя из системы (завершение текущей сессии).
+        /// </summary>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
         [HttpPost("sign-out")]
-        public async Task<IActionResult> SignOut()
+        public async Task<IActionResult> SignOut(CancellationToken cancellationToken)
         {
-            await _authenticationService.SignOutAsync();
+            // Завершаем сессию 
+            await _authenticationService.SignOutAsync(cancellationToken);
 
-            var result = new AuthenticationResultViewModel
+            // Формируем ViewModel ответа и указываем страницу, куда нужно перенаправить пользователя после выхода
+            AuthenticationResultViewModel authenticationResultViewModel = new AuthenticationResultViewModel
             {
                 IsSuccess = true,
                 Status = SignInResultStatus.Success,
                 RedirectUrl = Url.Action("Index", "Account", null, Request.Scheme)
             };
 
-            return Ok(result);
+            return Ok(authenticationResultViewModel);
         }
     }
 }

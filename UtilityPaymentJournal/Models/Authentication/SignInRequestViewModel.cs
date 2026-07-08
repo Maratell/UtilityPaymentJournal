@@ -21,5 +21,11 @@ namespace UtilityPaymentJournal.Models.Authentication
         [Display(Name = "Пароль")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+
+        /// <summary>
+        /// Флаг, определяющий, должна ли сессия пользователя сохраняться после закрытия браузера.
+        /// </summary>
+        [Display(Name = "Оставаться в системе")]
+        public bool IsPersistent { get; set; } = false;
     }
 }
