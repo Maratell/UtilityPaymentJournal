@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.DTO.WaterReadings;
+using UtilityPaymentJournal.DTOs.WaterReadings;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
 using WaterReadingPaymentJournal.Interface.Mapping;

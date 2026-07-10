@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using UtilityPaymentJournal.DTO.Account;
+using UtilityPaymentJournal.DTOs.Account;
 using UtilityPaymentJournal.Models.Authentication;
 
 namespace UtilityPaymentJournal.Interface.Mapping

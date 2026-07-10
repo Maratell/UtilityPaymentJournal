@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTO.ComplaintBoard;
-using UtilityPaymentJournal.DTO.Utilities;
+using UtilityPaymentJournal.DTOs.ComplaintBoard;
+using UtilityPaymentJournal.DTOs.Utilities;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.ComplaintBoard;
 using UtilityPaymentJournal.Models.Utilities;
-using UtilityPaymentJournal.Services;
 
 
 namespace UtilityPaymentJournal.Controllers

@@ -1,4 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.Admin;
+﻿using UtilityPaymentJournal.DTOs.Admin;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.Admin;

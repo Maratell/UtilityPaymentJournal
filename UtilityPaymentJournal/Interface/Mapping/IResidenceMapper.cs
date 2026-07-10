@@ -1,18 +1,16 @@
-﻿using UtilityPaymentJournal.DTO.Residences;
-using UtilityPaymentJournal.DTO.UtilityProviders;
+﻿using UtilityPaymentJournal.DTOs.Residences;
 using UtilityPaymentJournal.EF.Entity.Residences;
-using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Models.Residences;
 
 namespace UtilityPaymentJournal.Interface.Mapping
 {
     public interface IResidenceMapper
     {
-        CreateResidenceDTO ToDto(CreateResidenceViewModel createViewModel);
-        ResidenceDTO ToDto(Residence entity);
-        EditResidenceDTO ToDto(EditResidenceViewModel editViewModel);
-        Residence ToEntity(CreateResidenceDTO dto);
-        ResidenceViewModel ToViewModel(ResidenceDTO dto);
-        void UpdateEntity(EditResidenceDTO dto, Residence entity);
+        CreateResidenceDto ToDto(CreateResidenceViewModel createViewModel);
+        ResidenceDto ToDto(Residence entity);
+        EditResidenceDto ToDto(EditResidenceViewModel editViewModel);
+        Residence ToEntity(CreateResidenceDto createDto);
+        ResidenceViewModel ToViewModel(ResidenceDto dto);
+        void UpdateEntity(EditResidenceDto editDto, Residence entity);
     }
 }

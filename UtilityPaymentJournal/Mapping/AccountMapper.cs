@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTO.Account;
+using UtilityPaymentJournal.DTOs.Account;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.Authentication;
 

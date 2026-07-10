@@ -1,5 +1,5 @@
 ﻿using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTO.ComplaintBoard;
+using UtilityPaymentJournal.DTOs.ComplaintBoard;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
 using UtilityPaymentJournal.Models.ComplaintBoard;
 

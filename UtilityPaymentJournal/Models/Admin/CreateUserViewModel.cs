@@ -10,10 +10,10 @@ namespace UtilityPaymentJournal.Models.ViewModels
         public string UserName { get; set; } // Вместо Email
 
         [Required(ErrorMessage = "Введите имя пользователя")]
-        [Display(Name = "имя")]
+        [Display(Name = "Имя")]
         public string FirstName { get; set; }
         [Required(ErrorMessage = "Введите фамилию пользователя")]
-        [Display(Name = "фамилия")]
+        [Display(Name = "Фамилия")]
         public string LastName { get; set; }
 
         [Required(ErrorMessage = "Введите пароль")]

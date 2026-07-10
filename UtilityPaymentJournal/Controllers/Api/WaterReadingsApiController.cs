@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.DTO.WaterReadings;
+using UtilityPaymentJournal.DTOs.WaterReadings;
 using UtilityPaymentJournal.Models.WaterReadings;
 using WaterReadingPaymentJournal.Interface.Mapping;
 using WaterReadingPaymentJournal.Interface.Service;

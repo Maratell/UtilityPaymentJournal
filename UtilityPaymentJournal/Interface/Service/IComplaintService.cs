@@ -1,4 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.ComplaintBoard;
+﻿using UtilityPaymentJournal.DTOs.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Interface.Service
 {

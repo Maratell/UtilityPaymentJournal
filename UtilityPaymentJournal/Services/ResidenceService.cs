@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.DTO.Residences;
+using UtilityPaymentJournal.DTOs.Residences;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Residences;
 using UtilityPaymentJournal.Interface.Mapping;
@@ -20,7 +20,7 @@ namespace UtilityPaymentJournal.Services
             _residenceMapper = residenceMapper;
         }
 
-        public async Task<ResidenceDTO> CreateAsync(CreateResidenceDTO createDto, CancellationToken cancellationToken = default)
+        public async Task<ResidenceDto> CreateAsync(CreateResidenceDto createDto, CancellationToken cancellationToken = default)
         {
             Residence entity = _residenceMapper.ToEntity(createDto);
 
@@ -31,7 +31,7 @@ namespace UtilityPaymentJournal.Services
             return _residenceMapper.ToDto(entity);
         }
 
-        public async Task<ResidenceDTO?> EditAsync(long id, EditResidenceDTO editDto, CancellationToken cancellationToken = default)
+        public async Task<ResidenceDto?> EditAsync(long id, EditResidenceDto editDto, CancellationToken cancellationToken = default)
         {
             Residence? entity = await FindEntityAsync(id, cancellationToken);
             if (entity == null)
@@ -57,7 +57,7 @@ namespace UtilityPaymentJournal.Services
 
 
 
-        public async Task<IReadOnlyCollection<ResidenceDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<ResidenceDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             List<Residence> entities = await _context.Residences
                 .AsNoTracking()
@@ -68,7 +68,7 @@ namespace UtilityPaymentJournal.Services
                 .ToList();
         }
 
-        public async Task<ResidenceDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<ResidenceDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             // загружаем entity со всеми деталями для передачи клиенту в UI
             Residence? entity = await FindEntityAsync(id, cancellationToken);

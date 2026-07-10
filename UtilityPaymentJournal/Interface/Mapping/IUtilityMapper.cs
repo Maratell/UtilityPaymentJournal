@@ -1,4 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.Utilities;
+﻿using UtilityPaymentJournal.DTOs.Utilities;
 using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Models.Utilities;
 

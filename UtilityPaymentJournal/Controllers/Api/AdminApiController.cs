@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.DTO.Admin;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using UtilityPaymentJournal.DTOs.Admin;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.Admin;
@@ -10,6 +11,7 @@ namespace UtilityPaymentJournal.Controllers.Api
     /// <summary>
     /// API-контроллер для административного управления пользователями и ролями
     /// </summary>
+    [AllowAnonymous] // Разрешает доступ неавторизованным гостям
     [ApiController]
     [Route("api/admin")]
     public class AdminApiController : ControllerBase

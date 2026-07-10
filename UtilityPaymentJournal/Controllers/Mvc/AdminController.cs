@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.EF.Entity.Authentication;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace UtilityPaymentJournal.Controllers.Mvc
 {
+    [AllowAnonymous] // Разрешает доступ неавторизованным гостям
     [Route("admin")]
     public class AdminController : Controller
     {
