@@ -1,8 +1,9 @@
 ﻿namespace UtilityPaymentJournal.DTOs.Utilities
 {
-    public class EditUtilityDTO
-    {
-        public long Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
+    /// <summary>
+    /// ДТО для редактирования существующей коммунальной услуги.
+    /// </summary>
+    /// <param name="Id">Уникальный идентификатор услуги в бд</param>
+    /// <param name="Name">Новое наименование коммунальной услуги</param>
+    public record EditUtilityDto(long Id, string Name);
 }

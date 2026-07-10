@@ -21,7 +21,7 @@ namespace UtilityPaymentJournal.Services
             _utilityMapper = utilityMapper;
         }
 
-        public async Task<UtilityDTO> CreateAsync(CreateUtilityDTO createDto, CancellationToken cancellationToken = default)
+        public async Task<UtilityDto> CreateAsync(CreateUtilityDto createDto, CancellationToken cancellationToken = default)
         {
             Utility entity = _utilityMapper.ToEntity(createDto);
 
@@ -32,7 +32,7 @@ namespace UtilityPaymentJournal.Services
             return _utilityMapper.ToDto(entity);
         }
 
-        public async Task<UtilityDTO?> EditAsync(long id, EditUtilityDTO editDto, CancellationToken cancellationToken = default)
+        public async Task<UtilityDto?> EditAsync(long id, EditUtilityDto editDto, CancellationToken cancellationToken = default)
         {
             Utility? entity = await FindEntityAsync(id, cancellationToken);
             if (entity == null)
@@ -56,7 +56,7 @@ namespace UtilityPaymentJournal.Services
             return deletedRowsCount > 0;
         }
 
-        public async Task<IReadOnlyCollection<UtilityDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<UtilityDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             List<Utility> entities = await _context.Utilities
                 .AsNoTracking()
@@ -67,7 +67,7 @@ namespace UtilityPaymentJournal.Services
                 .ToList();
         }
 
-        public async Task<UtilityDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<UtilityDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             // загружаем entity со всеми деталями для передачи клиенту в UI
             Utility? entity = await FindEntityAsync(id, cancellationToken);

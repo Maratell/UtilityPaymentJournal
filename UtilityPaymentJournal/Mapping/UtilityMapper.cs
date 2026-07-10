@@ -7,57 +7,36 @@ namespace UtilityPaymentJournal.Mapping
 {
     public class UtilityMapper : IUtilityMapper
     {
-        public CreateUtilityDTO ToDto(CreateUtilityViewModel vm)
+        public CreateUtilityDto ToDto(CreateUtilityViewModel createViewModel)
         {
-            if (vm == null)
-                return null!;
-
-            return new CreateUtilityDTO
-            {
-                Name = vm.Name
-            };
+            ArgumentNullException.ThrowIfNull(createViewModel);
+            return new CreateUtilityDto(createViewModel.Name);
         }
 
-        public UtilityDTO ToDto(Utility entity)
+        public UtilityDto ToDto(Utility entity)
         {
-            if (entity == null)
-                return null!;
-
-            return new UtilityDTO
-            {
-                Id = entity.Id,
-                Name = entity.Name
-            };
+            ArgumentNullException.ThrowIfNull(entity);
+            return new UtilityDto(entity.Id, entity.Name);
         }
 
-        public EditUtilityDTO ToDto(EditUtilityViewModel vm)
+        public EditUtilityDto ToDto(EditUtilityViewModel editViewModel)
         {
-            if (vm == null)
-                return null!;
-
-            return new EditUtilityDTO
-            {
-                Id = vm.Id,
-                Name = vm.Name
-            };
+            ArgumentNullException.ThrowIfNull(editViewModel);
+            return new EditUtilityDto(editViewModel.Id, editViewModel.Name);
         }
 
-        public Utility ToEntity(CreateUtilityDTO dto)
+        public Utility ToEntity(CreateUtilityDto createDto)
         {
-            if (dto == null)
-                return null!;
-
+            ArgumentNullException.ThrowIfNull(createDto);
             return new Utility
             {
-                Name = dto.Name
+                Name = createDto.Name
             };
         }
 
-        public UtilityViewModel ToViewModel(UtilityDTO dto)
+        public UtilityViewModel ToViewModel(UtilityDto dto)
         {
-            if (dto == null)
-                return null!;
-
+            ArgumentNullException.ThrowIfNull(dto);
             return new UtilityViewModel
             {
                 Id = dto.Id,
@@ -65,12 +44,12 @@ namespace UtilityPaymentJournal.Mapping
             };
         }
 
-        public void UpdateEntity(EditUtilityDTO dto, Utility entity)
+        public void UpdateEntity(EditUtilityDto editDto, Utility entity)
         {
-            if (dto == null || entity == null)
-                return;
+            ArgumentNullException.ThrowIfNull(editDto);
+            ArgumentNullException.ThrowIfNull(entity);
 
-            entity.Name = dto.Name;
+            entity.Name = editDto.Name;
         }
     }
 }
