@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.DTO.ElectricityReadings;
+using UtilityPaymentJournal.DTOs.ElectricityReadings;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
 using UtilityPaymentJournal.Interface.Mapping;

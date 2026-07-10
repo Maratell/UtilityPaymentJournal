@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
@@ -5,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.Filters;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
 using UtilityPaymentJournal.Infrastructure.Identity;
 using UtilityPaymentJournal.Interface.Mapping;
@@ -130,12 +130,21 @@ builder.Services.AddIdentity<User, Role>(options =>
     // Подключаем кастомную фабрику клеймов
     .AddClaimsPrincipalFactory<UserProfileClaimsPrincipalFactory>();
 
+// Включаем глобальную блокировку: по умолчанию неавторизованные пользователи не могут
+// отправлять запросы
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 builder.Services.AddControllers();
 
 // Настройка параметров куки для Identity (вместо AddCookie)
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login";
+    options.LoginPath = "/account";
     options.Cookie.HttpOnly = true;
     options.Cookie.SameSite = SameSiteMode.Lax;
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
@@ -167,6 +176,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers(); // Позволит атрибутам [Route(...)] работать на 100% правильно
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Index}/{id?}");

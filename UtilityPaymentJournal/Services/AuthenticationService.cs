@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTO.Account;
+using UtilityPaymentJournal.DTOs.Account;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Models.Authentication;
 
 namespace UtilityPaymentJournal.Services
 {

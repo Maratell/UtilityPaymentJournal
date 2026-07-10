@@ -1,4 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.WaterReadings;
+﻿using UtilityPaymentJournal.DTOs.WaterReadings;
 
 namespace WaterReadingPaymentJournal.Interface.Service
 {

@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using UtilityPaymentJournal.Common.Extensions;
-using UtilityPaymentJournal.DTO.Admin;
+using UtilityPaymentJournal.DTOs.Admin;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Exceptions;

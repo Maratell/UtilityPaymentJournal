@@ -36,7 +36,13 @@
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
 
-        <button type="submit" class="w-100 btn btn-primary">Создать</button>
+        <button type="submit" class="w-100 btn btn-primary">Создать пользователя</button>
+
+        <!-- Блок ссылки возврата на окно входа, связывающий контроллеры в кольцо -->
+        <div class="text-center mt-3 pt-2 border-top border-light-subtle">
+            <span class="text-muted small">Уже есть аккаунт?</span>
+            <a href="/account" class="text-decoration-none small fw-medium ms-1">Войти</a>
+        </div>
     </form>
 </div>
 

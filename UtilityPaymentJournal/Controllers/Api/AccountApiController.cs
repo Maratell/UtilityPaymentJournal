@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTO.Account;
+using UtilityPaymentJournal.DTOs.Account;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.Authentication;
 
 namespace UtilityPaymentJournal.Controllers.Api
 {
+    [AllowAnonymous] // Разрешает доступ неавторизованным гостям
     [ApiController]
     [Route("api/account")]
     public class AccountApiController : ControllerBase

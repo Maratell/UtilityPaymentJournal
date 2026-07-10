@@ -1,5 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.Utilities;
-using UtilityPaymentJournal.EF.Entity.Residences;
+﻿using UtilityPaymentJournal.DTOs.Utilities;
 using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.Utilities;

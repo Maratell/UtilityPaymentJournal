@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.DTO.UtilityProviders;
+using UtilityPaymentJournal.DTOs.UtilityProviders;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Interface.Service;

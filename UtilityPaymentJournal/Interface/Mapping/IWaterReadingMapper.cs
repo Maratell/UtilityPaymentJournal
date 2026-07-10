@@ -1,4 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.WaterReadings;
+﻿using UtilityPaymentJournal.DTOs.WaterReadings;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
 using UtilityPaymentJournal.Models.WaterReadings;
 

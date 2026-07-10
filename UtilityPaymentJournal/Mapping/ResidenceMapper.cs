@@ -1,4 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.Residences;
+﻿using UtilityPaymentJournal.DTOs.Residences;
 using UtilityPaymentJournal.EF.Entity.Residences;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.Residences;
@@ -7,70 +7,49 @@ namespace UtilityPaymentJournal.Mapping
 {
     public class ResidenceMapper : IResidenceMapper
     {
-        public CreateResidenceDTO ToDto(CreateResidenceViewModel residenceCreateViewModel)
+        public CreateResidenceDto ToDto(CreateResidenceViewModel createViewModel)
         {
-            if (residenceCreateViewModel == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(createViewModel);
+            return new CreateResidenceDto(createViewModel.Address);
+        }
 
-            return new CreateResidenceDTO
-            {
-                Address = residenceCreateViewModel.Address
+        public ResidenceDto ToDto(Residence entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+            return new ResidenceDto(entity.Id, entity.Address);
+        }
+
+        public EditResidenceDto ToDto(EditResidenceViewModel editViewModel)
+        {
+            ArgumentNullException.ThrowIfNull(editViewModel);
+            return new EditResidenceDto(editViewModel.Id, editViewModel.Address);
+        }
+
+        public Residence ToEntity(CreateResidenceDto createDto)
+        {
+            ArgumentNullException.ThrowIfNull(createDto);
+            return new Residence() 
+            { 
+                Address = createDto.Address 
             };
         }
 
-        public ResidenceDTO ToDto(Residence residence)
+        public ResidenceViewModel ToViewModel(ResidenceDto dto)
         {
-            if (residence == null)
-                return null!;
-
-            return new ResidenceDTO
-            {
-                Id = residence.Id,
-                Address = residence.Address
-            };
-        }
-
-        public EditResidenceDTO ToDto(EditResidenceViewModel editResidenceVM)
-        {
-            if (editResidenceVM == null)
-                return null!;
-
-            return new EditResidenceDTO
-            {
-                Id = editResidenceVM.Id,
-                Address = editResidenceVM.Address
-            };
-        }
-
-        public Residence ToEntity(CreateResidenceDTO residenceDto)
-        {
-            if (residenceDto == null)
-                return null!;
-
-            return new Residence
-            {
-                Address = residenceDto.Address
-            };
-        }
-
-        public ResidenceViewModel ToViewModel(ResidenceDTO residenceDto)
-        {
-            if (residenceDto == null)
-                return null!;
-
+            ArgumentNullException.ThrowIfNull(dto);
             return new ResidenceViewModel
             {
-                Id = residenceDto.Id,
-                Address = residenceDto.Address
+                Id = dto.Id,
+                Address = dto.Address
             };
         }
 
-        public void UpdateEntity(EditResidenceDTO dto, Residence entity)
+        public void UpdateEntity(EditResidenceDto editDto, Residence entity)
         {
-            if (dto == null || entity == null)
-                return;
+            ArgumentNullException.ThrowIfNull(editDto);
+            ArgumentNullException.ThrowIfNull(entity);
 
-            entity.Address = dto.Address;
+            entity.Address = editDto.Address;
             //entity.UpdatedAt = DateTime.UtcNow;
         }
     }

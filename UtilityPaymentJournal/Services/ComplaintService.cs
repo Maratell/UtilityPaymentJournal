@@ -1,7 +1,7 @@
 ﻿using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.DTO.ComplaintBoard;
+using UtilityPaymentJournal.DTOs.ComplaintBoard;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
 using Microsoft.EntityFrameworkCore;
 

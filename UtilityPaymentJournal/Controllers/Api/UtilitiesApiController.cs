@@ -1,13 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using UtilityPaymentJournal.DTO.Residences;
-using UtilityPaymentJournal.DTO.Utilities;
+using UtilityPaymentJournal.DTOs.Utilities;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Mapping;
-using UtilityPaymentJournal.Models.Residences;
 using UtilityPaymentJournal.Models.Utilities;
-using UtilityPaymentJournal.Services;
 
 namespace UtilityPaymentJournal.Controllers.Api
 {

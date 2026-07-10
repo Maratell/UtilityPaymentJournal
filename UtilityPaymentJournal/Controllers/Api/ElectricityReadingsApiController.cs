@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.DTO.ElectricityReadings;
+using UtilityPaymentJournal.DTOs.ElectricityReadings;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.ElectricityReadings;

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.DTO.UtilityProviders;
+using UtilityPaymentJournal.DTOs.UtilityProviders;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Models.UtilityProviders;
 using UtilityProviderPaymentJournal.Interface.Mapping;

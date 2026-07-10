@@ -1,4 +1,4 @@
-﻿using UtilityPaymentJournal.DTO.Utilities;
+﻿using UtilityPaymentJournal.DTOs.Utilities;
 
 namespace UtilityPaymentJournal.Interface.Service
 {
