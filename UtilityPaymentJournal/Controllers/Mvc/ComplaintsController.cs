@@ -35,7 +35,7 @@ namespace UtilityPaymentJournal.Controllers
         {
             // Загружаем данные из бд
             IReadOnlyCollection<ComplaintDTO> complaintDtos = await _complaintService.GetAllAsync(cancellationToken);
-            IReadOnlyCollection<UtilityDTO> utilityDtos = await _utilityService.GetAllAsync(cancellationToken);
+            IReadOnlyCollection<UtilityDto> utilityDtos = await _utilityService.GetAllAsync(cancellationToken);
 
             // Маппим результаты
             IEnumerable<ComplaintViewModel> complaints = complaintDtos.Select(_complaintMapper.ToViewModel);

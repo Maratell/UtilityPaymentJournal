@@ -24,7 +24,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<UtilityViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<UtilityDTO> dtos = await _utilityService.GetAllAsync(cancellationToken);
+            IEnumerable<UtilityDto> dtos = await _utilityService.GetAllAsync(cancellationToken);
 
             IEnumerable<UtilityViewModel> viewModels = dtos
                 .Select(dto => _utilityMapper.ToViewModel(dto))
@@ -36,7 +36,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet("{id:long}")]
         public async Task<ActionResult<UtilityViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
-            UtilityDTO? dto = await _utilityService.GetByIdAsync(id, cancellationToken);
+            UtilityDto? dto = await _utilityService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
             {
                 return NotFound($"Услуга с ID {id} не найдена.");
@@ -49,9 +49,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateUtilityViewModel createViewModel, CancellationToken cancellationToken)
         {
-            CreateUtilityDTO createDto = _utilityMapper.ToDto(createViewModel);
+            CreateUtilityDto createDto = _utilityMapper.ToDto(createViewModel);
 
-            UtilityDTO createdDto = await _utilityService.CreateAsync(createDto, cancellationToken);
+            UtilityDto createdDto = await _utilityService.CreateAsync(createDto, cancellationToken);
 
             UtilityViewModel createdViewModel = _utilityMapper.ToViewModel(createdDto);
 
@@ -63,9 +63,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPut("{id:long}")]
         public async Task<IActionResult> Edit([FromRoute] long id, [FromBody] EditUtilityViewModel editViewModel, CancellationToken cancellationToken)
         {
-            EditUtilityDTO editDto = _utilityMapper.ToDto(editViewModel);
+            EditUtilityDto editDto = _utilityMapper.ToDto(editViewModel);
 
-            UtilityDTO? updatedDto = await _utilityService.EditAsync(id, editDto, cancellationToken);
+            UtilityDto? updatedDto = await _utilityService.EditAsync(id, editDto, cancellationToken);
             if (updatedDto is null)
             {
                 return NotFound($"Услуга с ID {id} не найдена.");

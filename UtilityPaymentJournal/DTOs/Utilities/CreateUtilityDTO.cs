@@ -1,7 +1,8 @@
 ﻿namespace UtilityPaymentJournal.DTOs.Utilities
 {
-    public class CreateUtilityDTO
-    {
-        public string Name { get; set; } = string.Empty;
-    }
+    /// <summary>
+    /// ДТО для создания новой коммунальной услуги.
+    /// </summary>
+    /// <param name="Name">Наименование коммунальной услуги (например, "Водоснабжение", "Электроэнергия").</param>
+    public record CreateUtilityDto(string Name);
 }
