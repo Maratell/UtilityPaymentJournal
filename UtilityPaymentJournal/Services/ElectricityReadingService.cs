@@ -2,6 +2,7 @@
 using UtilityPaymentJournal.DTOs.ElectricityReadings;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
+using UtilityPaymentJournal.EF.Entity.WaterReadings;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 
@@ -38,15 +39,20 @@ namespace UtilityPaymentJournal.Services
 
         public async Task<ElectricityReadingDTO?> EditAsync(long id, EditElectricityReadingDTO editDto, CancellationToken cancellationToken = default)
         {
-            // загружаем entity с деталями, чтобы вернуть клиенту полный обновленный DTO
-            ElectricityReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
+            // Подход с двумя загрузками:
+            // 1. Загружаем "легковесное" entity без связанных деталей
+            ElectricityReading? entity = await FindEntityAsync(id, includeDetails: false, cancellationToken: cancellationToken);
             if (entity == null)
                 return null;
 
             _electricityReadingMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return _electricityReadingMapper.ToDto(entity);
+            // 2. После SaveChangesAsync EF Core зануляет или оставляет устаревшими навигационные свойства связей в памяти (Identity Map).
+            // Делаем повторный запрос с includeDetails: true, чтобы принудительно выкачать из бд актуальный объект 
+            // с обновленными связанными данными для корректного маппинга на фронтенд.
+            ElectricityReading? updatedEntity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
+            return _electricityReadingMapper.ToDto(updatedEntity ?? entity);
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
