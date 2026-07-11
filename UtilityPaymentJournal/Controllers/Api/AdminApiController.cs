@@ -31,7 +31,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet("users")]
         public async Task<ActionResult<IReadOnlyCollection<UserViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<UserDTO> dtos = await _userService.GetAllAsync(cancellationToken);
+            IEnumerable<UserDto> dtos = await _userService.GetAllAsync(cancellationToken);
 
             List<UserViewModel> viewModels = dtos
                 .Select(dto => _userMapper.ToViewModel(dto))
@@ -46,7 +46,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet("users/{id}")]
         public async Task<ActionResult<UserViewModel>> GetById([FromRoute] string id, CancellationToken cancellationToken)
         {
-            UserDTO? dto = await _userService.GetByIdAsync(id, cancellationToken);
+            UserDto? dto = await _userService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
             {
                 return NotFound($"Пользователь с ID {id} не найден.");
@@ -64,9 +64,9 @@ namespace UtilityPaymentJournal.Controllers.Api
             [FromBody] CreateUserViewModel createUserVM,
             CancellationToken cancellationToken)
         {
-            CreateUserDTO createDto = _userMapper.ToDto(createUserVM);
+            CreateUserDto createDto = _userMapper.ToDto(createUserVM);
 
-            UserDTO createdDto = await _userService.CreateAsync(createDto, cancellationToken);
+            UserDto createdDto = await _userService.CreateAsync(createDto, cancellationToken);
 
             UserViewModel createdViewModel = _userMapper.ToViewModel(createdDto);
 

@@ -9,7 +9,7 @@ namespace UtilityPaymentJournal.Mapping
         public MappingProfile()
         {
             // Базовый маппинг (если имена свойств совпадают)
-            CreateMap<CreateUserViewModel, CreateUserDTO>();
+            CreateMap<CreateUserViewModel, CreateUserDto>();
         }
     }
 }

@@ -30,7 +30,7 @@ namespace UtilityPaymentJournal.Services
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
-        public async Task<UserDTO> CreateAsync(CreateUserDTO createDto, CancellationToken cancellationToken = default)
+        public async Task<UserDto> CreateAsync(CreateUserDto createDto, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -39,6 +39,9 @@ namespace UtilityPaymentJournal.Services
             // мы объединяем все три шага в одну неделимую транзакцию: или запишется всё, или ничего.
             using (IDbContextTransaction transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken))
             {
+                // try нужен для того, чтобы перехватить любой сбой прямо в процессе выполнения шагов.
+                // Без этого блока мы не смогли бы вызвать асинхронный откат (RollbackAsync), и серверу 
+                // пришлось бы блокировать свои потоки, выполняя отмену синхронно внутри механизма using.
                 try
                 {
                     // Шаг 1: Создаем пользователя в таблице AspNetUsers
@@ -90,7 +93,7 @@ namespace UtilityPaymentJournal.Services
             }
         }
 
-        public async Task<UserDTO?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
+        public async Task<UserDto?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -111,7 +114,7 @@ namespace UtilityPaymentJournal.Services
             return _userMapper.ToDto(user, roleName);
         }
 
-        public async Task<IEnumerable<UserDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<UserDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
