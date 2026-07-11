@@ -2,11 +2,15 @@
 
 namespace UtilityPaymentJournal.DTOs.Account
 {
-    // Результат аутентификации из бизнес-логики (без инфраструктурных Url)
-    public class AuthenticationResultDTO
-    {
-        public bool IsSuccess { get; set; }
-        public SignInResultStatus Status { get; set; }
-        public string? ErrorMessage { get; set; }
-    }
+    /// <summary>
+    /// ДТО с результатом аутентификации пользователя (возвращается из бизнес-логики).
+    /// </summary>
+    /// <param name="IsSuccess">Флаг успешности проведения аутентификации</param>
+    /// <param name="Status">Детализированный статус результата входа (например: Успешно, Заблокирован, Требуется 2FA)</param>
+    /// <param name="ErrorMessage">Текст ошибки для отображения пользователю (заполняется только при IsSuccess = false)</param>
+    public record AuthenticationResultDto(
+        bool IsSuccess,
+        SignInResultStatus Status,
+        string? ErrorMessage
+    );
 }

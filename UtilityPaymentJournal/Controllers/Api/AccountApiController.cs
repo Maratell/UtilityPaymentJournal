@@ -32,7 +32,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         {
             SignInDto signInDto = _accountMapper.ToDto(signInRequestViewModel);
 
-            AuthenticationResultDTO authenticationResultDto = await _authenticationService.SignInAsync(signInDto, cancellationToken);
+            AuthenticationResultDto authenticationResultDto = await _authenticationService.SignInAsync(signInDto, cancellationToken);
 
             AuthenticationResultViewModel authenticationResultViewModel = _accountMapper.ToViewModel(authenticationResultDto);
 

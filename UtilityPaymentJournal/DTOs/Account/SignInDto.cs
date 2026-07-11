@@ -1,10 +1,14 @@
 ﻿namespace UtilityPaymentJournal.DTOs.Account
 {
-    // Данные для входа
-    public class SignInDto
-    {
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public bool IsPersistent { get; set; }
-    }
+    /// <summary>
+    /// ДТО с данными пользователя для входа в систему (аутентификация).
+    /// </summary>
+    /// <param name="UserName">Имя пользователя для входа</param>
+    /// <param name="Password">Пароль пользователя</param>
+    /// <param name="IsPersistent">Флаг "Запомнить меня" (сохранять ли сессию/куки после закрытия браузера)</param>
+    public record SignInDto(
+        string UserName,
+        string Password,
+        bool IsPersistent
+    );
 }

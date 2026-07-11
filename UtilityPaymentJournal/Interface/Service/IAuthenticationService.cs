@@ -13,8 +13,8 @@ namespace UtilityPaymentJournal.Interface.Service
         /// </summary>
         /// <param name="signInDto">DTO данных для входа (логин, пароль, флаг постоянной сессии).</param>
         /// <param name="cancellationToken">Токен отмены операции.</param>
-        /// <returns>Результат аутентификации в виде <see cref="AuthenticationResultDTO"/>.</returns>
-        Task<AuthenticationResultDTO> SignInAsync(SignInDto signInDto, CancellationToken cancellationToken = default);
+        /// <returns>Результат аутентификации в виде <see cref="AuthenticationResultDto"/>.</returns>
+        Task<AuthenticationResultDto> SignInAsync(SignInDto signInDto, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Завершает текущую активную сессию пользователя (выход из системы).
