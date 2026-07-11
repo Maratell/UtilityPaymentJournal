@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using UtilityPaymentJournal.Common.Enumerations;
 using UtilityPaymentJournal.DTOs.Account;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Interface.Mapping;
@@ -29,10 +30,10 @@ namespace UtilityPaymentJournal.Services
         /// <param name="signInDto">Входное Dto с учетными данными пользователя.</param>
         /// <param name="cancellationToken">Токен отмены операции.</param>
         /// <returns>
-        /// Объект <see cref="AuthenticationResultDTO"/>, содержащий статус успешности операции и данные для маппинга.
+        /// Объект <see cref="AuthenticationResultDto"/>, содержащий статус успешности операции и данные для маппинга.
         /// </returns>
         /// <exception cref="ArgumentNullException">Выбрасывается, если переданный объект DTO равен null.</exception>
-        public async Task<AuthenticationResultDTO> SignInAsync(SignInDto signInDto, CancellationToken cancellationToken = default)
+        public async Task<AuthenticationResultDto> SignInAsync(SignInDto signInDto, CancellationToken cancellationToken = default)
         {
             if (signInDto == null)
                 throw new ArgumentNullException(nameof(signInDto));
@@ -49,7 +50,22 @@ namespace UtilityPaymentJournal.Services
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            return _accountMapper.ToDto(result);
+            // 1. Успешная аутентификация
+            if (result.Succeeded)
+            {
+                return _accountMapper.ToDto(
+                    isSuccess: true,
+                    status: SignInResultStatus.Success
+                );
+            }
+
+            // 2. Все остальные случаи (неверный пароль, отсутствие пользователя и т.д.)
+            // Бизнес-логика сама определяет статус и текст ошибки, как мы и планировали
+            return _accountMapper.ToDto(
+                isSuccess: false,
+                status: SignInResultStatus.InvalidCredentials,
+                errorMessage: "Неверный логин или пароль."
+            );
         }
 
         /// <summary>
