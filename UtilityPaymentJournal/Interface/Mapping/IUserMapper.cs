@@ -7,8 +7,8 @@ namespace UtilityPaymentJournal.Interface.Mapping
 {
     public interface IUserMapper
     {
-        CreateUserDTO ToDto(CreateUserViewModel createUserVM);
-        UserDTO ToDto(User user, string roleName);
-        UserViewModel ToViewModel(UserDTO userDto);
+        CreateUserDto ToDto(CreateUserViewModel createUserViewModel);
+        UserDto ToDto(User user, string roleName);
+        UserViewModel ToViewModel(UserDto userDto);
     }
 }

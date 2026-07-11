@@ -8,42 +8,36 @@ namespace UtilityPaymentJournal.Mapping
 {
     public class UserMapper : IUserMapper
     {
-        public CreateUserDTO ToDto(CreateUserViewModel createUserVM)
+        public CreateUserDto ToDto(CreateUserViewModel createUserViewModel)
         {
-            if (createUserVM == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(createUserViewModel);
 
-            return new CreateUserDTO
-            {
-                UserName = createUserVM.UserName,
-                FirstName = createUserVM.FirstName,
-                LastName = createUserVM.LastName,
-                Password = createUserVM.Password,
-                Role = createUserVM.Role
-            };
+            return new CreateUserDto(
+                UserName: createUserViewModel.UserName,
+                FirstName: createUserViewModel.FirstName,
+                LastName: createUserViewModel.LastName,
+                Password: createUserViewModel.Password,
+                Role: createUserViewModel.Role
+            );
         }
 
-        // Первый новый метод: собирает User из базы данных и роль в промежуточный DTO (используется в UserService)
-        public UserDTO ToDto(User user, string roleName)
+        public UserDto ToDto(User user, string roleName)
         {
-            if (user == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(user);
+            ArgumentException.ThrowIfNullOrWhiteSpace(roleName);
 
-            return new UserDTO
-            {
-                Id = user.Id,
-                UserName = user.UserName,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                RoleName = roleName
-            };
+            return new UserDto(
+                Id: user.Id,
+                UserName: user.UserName ?? string.Empty,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+                RoleName: roleName
+            );
         }
 
-        // Второй новый метод: превращает DTO в UI-модель ответа (используется в AdminApiController)
-        public UserViewModel ToViewModel(UserDTO userDto)
+        public UserViewModel ToViewModel(UserDto userDto)
         {
-            if (userDto == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(userDto);
 
             return new UserViewModel
             {

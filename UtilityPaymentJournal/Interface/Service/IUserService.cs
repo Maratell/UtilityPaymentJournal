@@ -4,9 +4,9 @@ namespace UtilityPaymentJournal.Interface.Service
 {
     public interface IUserService
     {
-        Task<UserDTO> CreateAsync(CreateUserDTO dto, CancellationToken cancellationToken = default);
-        Task<UserDTO?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
-        Task<IEnumerable<UserDTO>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<UserDto> CreateAsync(CreateUserDto dto, CancellationToken cancellationToken = default);
+        Task<UserDto?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
+        Task<IEnumerable<UserDto>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(string id, CancellationToken cancellationToken = default);
     }
 }
