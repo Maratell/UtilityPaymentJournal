@@ -24,7 +24,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<UtilityProviderViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<UtilityProviderDTO> dtos = await _utilityProviderService.GetAllAsync(cancellationToken);
+            IEnumerable<UtilityProviderDto> dtos = await _utilityProviderService.GetAllAsync(cancellationToken);
 
             List<UtilityProviderViewModel> viewModels = dtos
                 .Select(dto => _utilityProviderMapper.ToViewModel(dto))
@@ -36,7 +36,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet("{id:long}")]
         public async Task<ActionResult<UtilityProviderViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
-            UtilityProviderDTO? dto = await _utilityProviderService.GetByIdAsync(id, cancellationToken);
+            UtilityProviderDto? dto = await _utilityProviderService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
             {
                 return NotFound($"Поставщик услуг с ID {id} не найден.");
@@ -49,9 +49,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<UtilityProviderViewModel>> Create([FromBody] CreateUtilityProviderViewModel createViewModel, CancellationToken cancellationToken)
         {
-            CreateUtilityProviderDTO createDto = _utilityProviderMapper.ToDto(createViewModel);
+            CreateUtilityProviderDto createDto = _utilityProviderMapper.ToDto(createViewModel);
 
-            UtilityProviderDTO createdDto = await _utilityProviderService.CreateAsync(createDto, cancellationToken);
+            UtilityProviderDto createdDto = await _utilityProviderService.CreateAsync(createDto, cancellationToken);
 
             UtilityProviderViewModel createdViewModel = _utilityProviderMapper.ToViewModel(createdDto);
 
@@ -61,9 +61,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPut("{id:long}")]
         public async Task<ActionResult<UtilityProviderViewModel>> Edit([FromRoute] long id, [FromBody] EditUtilityProviderViewModel editViewModel, CancellationToken cancellationToken)
         {
-            EditUtilityProviderDTO editDto = _utilityProviderMapper.ToDto(editViewModel);
+            EditUtilityProviderDto editDto = _utilityProviderMapper.ToDto(editViewModel);
 
-            UtilityProviderDTO? updatedDto = await _utilityProviderService.EditAsync(id, editDto, cancellationToken);
+            UtilityProviderDto? updatedDto = await _utilityProviderService.EditAsync(id, editDto, cancellationToken);
             if (updatedDto is null)
             {
                 return NotFound($"Поставщик услуг с ID {id} не найден.");

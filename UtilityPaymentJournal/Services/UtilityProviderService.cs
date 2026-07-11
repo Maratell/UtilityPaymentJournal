@@ -20,7 +20,7 @@ namespace UtilityPaymentJournal.Services
             _utilityProviderMapper = utilityProviderMapper;
         }
 
-        public async Task<UtilityProviderDTO> CreateAsync(CreateUtilityProviderDTO createDto, CancellationToken cancellationToken = default)
+        public async Task<UtilityProviderDto> CreateAsync(CreateUtilityProviderDto createDto, CancellationToken cancellationToken = default)
         {
             UtilityProvider entity = _utilityProviderMapper.ToEntity(createDto);
 
@@ -31,7 +31,7 @@ namespace UtilityPaymentJournal.Services
             return _utilityProviderMapper.ToDto(entity);
         }
 
-        public async Task<UtilityProviderDTO?> EditAsync(long id, EditUtilityProviderDTO editDto, CancellationToken cancellationToken = default)
+        public async Task<UtilityProviderDto?> EditAsync(long id, EditUtilityProviderDto editDto, CancellationToken cancellationToken = default)
         {
             UtilityProvider? entity = await FindEntityAsync(id, cancellationToken);
             if (entity == null)
@@ -55,7 +55,7 @@ namespace UtilityPaymentJournal.Services
             return deletedRowsCount > 0;
         }
 
-        public async Task<IReadOnlyCollection<UtilityProviderDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<UtilityProviderDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             List<UtilityProvider> entities = await _context.UtilityProviders
                 .AsNoTracking()
@@ -66,7 +66,7 @@ namespace UtilityPaymentJournal.Services
                 .ToList();
         }
 
-        public async Task<UtilityProviderDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<UtilityProviderDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             // загружаем entity со всеми деталями для передачи клиенту в UI
             UtilityProvider? entity = await FindEntityAsync(id, cancellationToken);

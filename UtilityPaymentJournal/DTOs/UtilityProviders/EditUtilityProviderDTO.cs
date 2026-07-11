@@ -1,8 +1,9 @@
 ﻿namespace UtilityPaymentJournal.DTOs.UtilityProviders
 {
-    public class EditUtilityProviderDTO
-    {
-        public long Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-    }
+    /// <summary>
+    /// ДТО для редактирования существующего поставщика коммунальных услуг.
+    /// </summary>
+    /// <param name="Id">Уникальный идентификатор поставщика в бд</param>
+    /// <param name="Name">Новое наименование поставщика услуг</param>
+    public record EditUtilityProviderDto(long Id, string Name);
 }

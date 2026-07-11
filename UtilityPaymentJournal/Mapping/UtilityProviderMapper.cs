@@ -1,4 +1,5 @@
-﻿using UtilityPaymentJournal.DTOs.UtilityProviders;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using UtilityPaymentJournal.DTOs.UtilityProviders;
 using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Models.UtilityProviders;
 using UtilityProviderPaymentJournal.Interface.Mapping;
@@ -8,70 +9,49 @@ namespace UtilityPaymentJournal.Mapping
 {
     public class UtilityProviderMapper : IUtilityProviderMapper
     {
-        public CreateUtilityProviderDTO ToDto(CreateUtilityProviderViewModel createUtilityProviderViewModel)
+        public CreateUtilityProviderDto ToDto(CreateUtilityProviderViewModel createViewModel)
         {
-            if (createUtilityProviderViewModel == null)
-                return null!;
-
-            return new CreateUtilityProviderDTO
-            {
-                Name = createUtilityProviderViewModel.Name
-            };
+            ArgumentNullException.ThrowIfNull(createViewModel);
+            return new CreateUtilityProviderDto(createViewModel.Name);
         }
 
-        public UtilityProviderDTO ToDto(UtilityProvider utilityProvider)
+        public UtilityProviderDto ToDto(UtilityProvider entity)
         {
-            if (utilityProvider == null)
-                return null!;
-
-            return new UtilityProviderDTO
-            {
-                Id = utilityProvider.Id,
-                Name = utilityProvider.Name
-            };
+            ArgumentNullException.ThrowIfNull(entity);
+            return new UtilityProviderDto(entity.Id, entity.Name);
         }
 
-        public EditUtilityProviderDTO ToDto(EditUtilityProviderViewModel editUtilityProviderViewModel)
+        public EditUtilityProviderDto ToDto(EditUtilityProviderViewModel editViewModel)
         {
-            if (editUtilityProviderViewModel == null)
-                return null!;
-
-            return new EditUtilityProviderDTO
-            {
-                Id = editUtilityProviderViewModel.Id,
-                Name = editUtilityProviderViewModel.Name
-            };
+            ArgumentNullException.ThrowIfNull(editViewModel);
+            return new EditUtilityProviderDto(editViewModel.Id, editViewModel.Name);
         }
 
-        public UtilityProvider ToEntity(CreateUtilityProviderDTO createUtilityProviderDto)
+        public UtilityProvider ToEntity(CreateUtilityProviderDto createDto)
         {
-            if (createUtilityProviderDto == null)
-                return null!;
-
+            ArgumentNullException.ThrowIfNull(createDto);
             return new UtilityProvider
             {
-                Name = createUtilityProviderDto.Name
+                Name = createDto.Name
             };
         }
 
-        public UtilityProviderViewModel ToViewModel(UtilityProviderDTO utilityProviderDto)
+        public UtilityProviderViewModel ToViewModel(UtilityProviderDto dto)
         {
-            if (utilityProviderDto == null)
-                return null!;
-
+            ArgumentNullException.ThrowIfNull(dto);
             return new UtilityProviderViewModel
             {
-                Id = utilityProviderDto.Id,
-                Name = utilityProviderDto.Name
+                Id = dto.Id,
+                Name = dto.Name
             };
         }
 
-        public void UpdateEntity(EditUtilityProviderDTO dto, UtilityProvider entity)
+        public void UpdateEntity(EditUtilityProviderDto editDto, UtilityProvider entity)
         {
-            if (dto == null || entity == null)
-                return;
+            ArgumentNullException.ThrowIfNull(editDto);
+            ArgumentNullException.ThrowIfNull(entity);
 
-            entity.Name = dto.Name;
+            entity.Name = editDto.Name;
             //entity.UpdatedAt = DateTime.UtcNow;
         }
     }
