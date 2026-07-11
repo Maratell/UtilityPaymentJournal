@@ -4,10 +4,10 @@ namespace UtilityPaymentJournal.Interface.Service
 {
     public interface IElectricityReadingService
     {
-        Task<ElectricityReadingDTO> CreateAsync(CreateElectricityReadingDTO dto, CancellationToken cancellationToken = default);
+        Task<ElectricityReadingDto> CreateAsync(CreateElectricityReadingDto dto, CancellationToken cancellationToken = default);
         Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default);
-        Task<ElectricityReadingDTO?> EditAsync(long id, EditElectricityReadingDTO dto, CancellationToken cancellationToken = default);
-        Task<IReadOnlyCollection<ElectricityReadingDTO>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<ElectricityReadingDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
+        Task<ElectricityReadingDto?> EditAsync(long id, EditElectricityReadingDto dto, CancellationToken cancellationToken = default);
+        Task<IReadOnlyCollection<ElectricityReadingDto>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<ElectricityReadingDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default);
     }
 }

@@ -21,7 +21,7 @@ namespace WaterReadingPaymentJournal.Services
             _waterReadingMapper = waterReadingMapper;
         }
 
-        public async Task<WaterReadingDTO> CreateAsync(CreateWaterReadingDTO createDto, CancellationToken cancellationToken = default)
+        public async Task<WaterReadingDto> CreateAsync(CreateWaterReadingDto createDto, CancellationToken cancellationToken = default)
         {
             WaterReading entity = _waterReadingMapper.ToEntity(createDto);
 
@@ -37,7 +37,7 @@ namespace WaterReadingPaymentJournal.Services
             return _waterReadingMapper.ToDto(savedEntity ?? entity);
         }
 
-        public async Task<WaterReadingDTO?> EditAsync(long id, EditWaterReadingDTO editDto, CancellationToken cancellationToken = default)
+        public async Task<WaterReadingDto?> EditAsync(long id, EditWaterReadingDto editDto, CancellationToken cancellationToken = default)
         {
             // Подход с двумя загрузками:
             // 1. Загружаем "легковесное" entity без связанных деталей
@@ -67,7 +67,7 @@ namespace WaterReadingPaymentJournal.Services
             return deletedRowsCount > 0;
         }
 
-        public async Task<IReadOnlyCollection<WaterReadingDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<WaterReadingDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             // Извлекаем данные из БД с жадной загрузкой (Eager Loading) связанных объектов
             List<WaterReading> entities =  await _context.WaterReadings
@@ -82,7 +82,7 @@ namespace WaterReadingPaymentJournal.Services
                 .ToList();
         }
 
-        public async Task<WaterReadingDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<WaterReadingDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             // загружаем entity со всеми деталями для передачи клиенту в UI
             WaterReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);

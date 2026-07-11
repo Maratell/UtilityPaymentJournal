@@ -8,148 +8,114 @@ namespace WaterReadingPaymentJournal.Mapping
 {
     public class WaterReadingMapper : IWaterReadingMapper
     {
-        public CreateWaterReadingDTO ToDto(CreateWaterReadingViewModel vm)
+        public CreateWaterReadingDto ToDto(CreateWaterReadingViewModel createViewModel)
         {
-            if (vm == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(createViewModel);
 
-            return new CreateWaterReadingDTO
-            {
-                ResidenceId = vm.ResidenceId ?? 0,
-                UtilityProviderId = vm.UtilityProviderId ?? 0,
-
-                WaterType = vm.WaterType,
-                
-                PaymentDate = vm.PaymentDate,
-                SubmissionDate = vm.SubmissionDate,
-
-                CurrentValue = vm.CurrentValue,
-                PreviousValue = vm.PreviousValue,
-                ResultValue = vm.ResultValue,
-
-                PaymentAmount = vm.PaymentAmount
-            };
+            return new CreateWaterReadingDto(
+                ResidenceId: createViewModel.ResidenceId,
+                UtilityProviderId: createViewModel.UtilityProviderId,
+                WaterType: createViewModel.WaterType,
+                PaymentDate: createViewModel.PaymentDate,
+                SubmissionDate: createViewModel.SubmissionDate,
+                CurrentValue: createViewModel.CurrentValue,
+                PreviousValue: createViewModel.PreviousValue,
+                ResultValue: createViewModel.ResultValue,
+                PaymentAmount: createViewModel.PaymentAmount
+            );
         }
 
-        public WaterReadingDTO ToDto(WaterReading entity)
+        public WaterReadingDto ToDto(WaterReading entity)
         {
-            if (entity == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(entity);
 
-            return new WaterReadingDTO
-            {
-                Id = entity.Id,
-
-                ResidenceId = entity.ResidenceId,
-                UtilityProviderId = entity.UtilityProviderId,
-
-                ResidenceAddress = entity.Residence?.Address,
-                UtilityProviderName = entity.UtilityProvider?.Name,
-
-                SubmissionDate = entity.SubmissionDate,
-                PaymentDate = entity.PaymentDate,
-
-                WaterType = entity.WaterType,
-
-                CurrentValue = entity.CurrentValue,
-                PreviousValue = entity.PreviousValue,
-                ResultValue = entity.ResultValue,
-
-                PaymentAmount = entity.PaymentAmount
-            };
+            return new WaterReadingDto(
+                Id: entity.Id,
+                ResidenceId: entity.ResidenceId,
+                UtilityProviderId: entity.UtilityProviderId,
+                ResidenceAddress: entity.Residence?.Address,
+                UtilityProviderName: entity.UtilityProvider?.Name,
+                WaterType: entity.WaterType,
+                SubmissionDate: entity.SubmissionDate,
+                PaymentDate: entity.PaymentDate,
+                CurrentValue: entity.CurrentValue,
+                PreviousValue: entity.PreviousValue,
+                ResultValue: entity.ResultValue,
+                PaymentAmount: entity.PaymentAmount
+            );
         }
 
-        public EditWaterReadingDTO ToDto(EditWaterReadingViewModel vm)
+        public EditWaterReadingDto ToDto(EditWaterReadingViewModel editViewModel)
         {
-            if (vm == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(editViewModel);
 
-            return new EditWaterReadingDTO
-            {
-                Id = vm.Id,
-
-                ResidenceId = vm.ResidenceId,
-                UtilityProviderId = vm.UtilityProviderId,
-
-                SubmissionDate = vm.SubmissionDate,
-                PaymentDate = vm.PaymentDate,
-
-                WaterType = vm.WaterType,
-
-                CurrentValue = vm.CurrentValue,
-                PreviousValue = vm.PreviousValue,
-                ResultValue = vm.ResultValue,
-
-                PaymentAmount =  vm.PaymentAmount
-            };
+            return new EditWaterReadingDto(
+                Id: editViewModel.Id,
+                ResidenceId: editViewModel.ResidenceId,
+                UtilityProviderId: editViewModel.UtilityProviderId,
+                SubmissionDate: editViewModel.SubmissionDate,
+                PaymentDate: editViewModel.PaymentDate,
+                WaterType: editViewModel.WaterType,
+                CurrentValue: editViewModel.CurrentValue,
+                PreviousValue: editViewModel.PreviousValue,
+                ResultValue: editViewModel.ResultValue,
+                PaymentAmount: editViewModel.PaymentAmount
+            );
         }
 
-        public WaterReading ToEntity(CreateWaterReadingDTO dto)
+        public WaterReading ToEntity(CreateWaterReadingDto createDto)
         {
-            if (dto == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(createDto);
 
             return new WaterReading
             {
-                ResidenceId = dto.ResidenceId,
-                UtilityProviderId = dto.UtilityProviderId,
-
-                SubmissionDate = dto.SubmissionDate.ToUtcKind(),
-                PaymentDate = dto.PaymentDate.ToUtcKind(),
-
-                WaterType = dto.WaterType,
-
-                CurrentValue = dto.CurrentValue,
-                PreviousValue= dto.PreviousValue,
-                ResultValue= dto.ResultValue,
-
-                PaymentAmount = dto.PaymentAmount
+                ResidenceId = createDto.ResidenceId,
+                UtilityProviderId = createDto.UtilityProviderId,
+                SubmissionDate = createDto.SubmissionDate.ToUtcKind(),
+                PaymentDate = createDto.PaymentDate.ToUtcKind(),
+                WaterType = createDto.WaterType,
+                CurrentValue = createDto.CurrentValue,
+                PreviousValue = createDto.PreviousValue,
+                ResultValue = createDto.ResultValue,
+                PaymentAmount = createDto.PaymentAmount
             };
         }
 
-        public WaterReadingViewModel ToViewModel(WaterReadingDTO dto)
+        public WaterReadingViewModel ToViewModel(WaterReadingDto dto)
         {
-            if (dto == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(dto);
 
             return new WaterReadingViewModel
             {
                 Id = dto.Id,
-
                 ResidenceId = dto.ResidenceId,
                 UtilityProviderId = dto.UtilityProviderId,
-
                 ResidenceAddress = dto.ResidenceAddress,
                 UtilityProviderName = dto.UtilityProviderName,
-
                 SubmissionDate = dto.SubmissionDate,
                 PaymentDate = dto.PaymentDate,
-
                 WaterType = dto.WaterType,
-
                 CurrentValue = dto.CurrentValue,
                 PreviousValue= dto.PreviousValue,
                 ResultValue= dto.ResultValue,
-
                 PaymentAmount = dto.PaymentAmount
             };
         }
 
-        public void UpdateEntity(EditWaterReadingDTO dto, WaterReading entity)
+        public void UpdateEntity(EditWaterReadingDto editDto, WaterReading entity)
         {
-            entity.UtilityProviderId = dto.UtilityProviderId;
-            entity.ResidenceId = dto.ResidenceId;
+            ArgumentNullException.ThrowIfNull(editDto);
+            ArgumentNullException.ThrowIfNull(entity);
 
-            entity.WaterType = dto.WaterType;
-
-            entity.SubmissionDate = dto.SubmissionDate.ToUtcKind();
-            entity.PaymentDate = dto.PaymentDate.ToUtcKind();
-
-            entity.CurrentValue = dto.CurrentValue;
-            entity.PreviousValue = dto.PreviousValue;
-            entity.ResultValue = dto.ResultValue;
-
-            entity.PaymentAmount = dto.PaymentAmount;
+            entity.UtilityProviderId = editDto.UtilityProviderId;
+            entity.ResidenceId = editDto.ResidenceId;
+            entity.WaterType = editDto.WaterType;
+            entity.SubmissionDate = editDto.SubmissionDate.ToUtcKind();
+            entity.PaymentDate = editDto.PaymentDate.ToUtcKind();
+            entity.CurrentValue = editDto.CurrentValue;
+            entity.PreviousValue = editDto.PreviousValue;
+            entity.ResultValue = editDto.ResultValue;
+            entity.PaymentAmount = editDto.PaymentAmount;
 
             //entity.UpdatedAt = DateTime.UtcNow;
         }

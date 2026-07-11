@@ -24,7 +24,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<WaterReadingViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<WaterReadingDTO> dtos = await _waterReadingService.GetAllAsync(cancellationToken);
+            IEnumerable<WaterReadingDto> dtos = await _waterReadingService.GetAllAsync(cancellationToken);
 
             List<WaterReadingViewModel> viewModels = dtos
                 .Select(dto => _waterReadingMapper.ToViewModel(dto))
@@ -36,7 +36,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet("{id:long}")]
         public async Task<ActionResult<WaterReadingViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
-            WaterReadingDTO? dto = await _waterReadingService.GetByIdAsync(id, cancellationToken);
+            WaterReadingDto? dto = await _waterReadingService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
             {
                 return NotFound($"Показание счетчика с ID {id} не найдено.");
@@ -50,9 +50,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<WaterReadingViewModel>> Create([FromBody] CreateWaterReadingViewModel createViewModel, CancellationToken cancellationToken)
         {
-            CreateWaterReadingDTO createDto = _waterReadingMapper.ToDto(createViewModel);
+            CreateWaterReadingDto createDto = _waterReadingMapper.ToDto(createViewModel);
 
-            WaterReadingDTO createdDto = await _waterReadingService.CreateAsync(createDto, cancellationToken);
+            WaterReadingDto createdDto = await _waterReadingService.CreateAsync(createDto, cancellationToken);
 
             WaterReadingViewModel createdViewModel = _waterReadingMapper.ToViewModel(createdDto);
 
@@ -62,9 +62,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPut("{id:long}")]
         public async Task<ActionResult<WaterReadingViewModel>> Edit([FromRoute] long id, [FromBody] EditWaterReadingViewModel editViewModel, CancellationToken cancellationToken)
         {
-            EditWaterReadingDTO editDto = _waterReadingMapper.ToDto(editViewModel);
+            EditWaterReadingDto editDto = _waterReadingMapper.ToDto(editViewModel);
 
-            WaterReadingDTO? updatedDto = await _waterReadingService.EditAsync(id, editDto, cancellationToken);
+            WaterReadingDto? updatedDto = await _waterReadingService.EditAsync(id, editDto, cancellationToken);
             if (updatedDto is null)
             {
                 return NotFound($"Показание счетчика с ID {id} не найдено.");

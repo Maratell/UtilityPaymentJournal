@@ -741,10 +741,11 @@
                 if (isNaN(parsedPaymentAmount) || parsedPaymentAmount < 0) { showAlert("Введите корректную сумму платежа (значение должно быть положительным)."); return; }
 
                 // Логическая проверка: текущее не может быть меньше предыдущего
-                if (parsedCurrent < parsedPrevious) {
-                    showAlert("Текущее показание не может быть меньше показания за прошлый период.");
-                    return;
-                }
+                // Эту проверку убрал
+                // if (parsedCurrent < parsedPrevious) {
+                //     showAlert("Текущее показание не может быть меньше показания за прошлый период.");
+                //     return;
+                // }
 
                 $errBlock.hide();
 

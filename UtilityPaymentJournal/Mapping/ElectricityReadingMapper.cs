@@ -8,136 +8,109 @@ namespace UtilityPaymentJournal.Mapping
 {
     public class ElectricityReadingMapper : IElectricityReadingMapper
     {
-        public CreateElectricityReadingDTO ToDto(CreateElectricityReadingViewModel vm)
+        public CreateElectricityReadingDto ToDto(CreateElectricityReadingViewModel createViewModel)
         {
-            if (vm == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(createViewModel);
 
-            return new CreateElectricityReadingDTO
-            {
-                ResidenceId = vm.ResidenceId ?? 0,
-                UtilityProviderId = vm.UtilityProviderId ?? 0,
-
-                PaymentDate = vm.PaymentDate,
-                SubmissionDate = vm.SubmissionDate,
-
-                CurrentValue = vm.CurrentValue,
-                PreviousValue = vm.PreviousValue,
-                ResultValue = vm.ResultValue,
-
-                PaymentAmount = vm.PaymentAmount
-            };
+            return new CreateElectricityReadingDto(
+                ResidenceId: createViewModel.ResidenceId,
+                UtilityProviderId: createViewModel.UtilityProviderId,
+                PaymentDate: createViewModel.PaymentDate,
+                SubmissionDate: createViewModel.SubmissionDate,
+                CurrentValue: createViewModel.CurrentValue,
+                PreviousValue: createViewModel.PreviousValue,
+                ResultValue: createViewModel.ResultValue,
+                PaymentAmount: createViewModel.PaymentAmount
+            );
         }
 
-        public ElectricityReadingDTO ToDto(ElectricityReading entity)
+        public ElectricityReadingDto ToDto(ElectricityReading entity)
         {
-            if (entity == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(entity);
 
-            return new ElectricityReadingDTO
-            {
-                Id = entity.Id,
-
-                ResidenceId = entity.ResidenceId,
-                UtilityProviderId = entity.UtilityProviderId,
-
-                ResidenceAddress = entity.Residence?.Address,
-                UtilityProviderName = entity.UtilityProvider?.Name,
-
-                SubmissionDate = entity.SubmissionDate,
-                PaymentDate = entity.PaymentDate,
-
-                CurrentValue = entity.CurrentValue,
-                PreviousValue = entity.PreviousValue,
-                ResultValue = entity.ResultValue,
-
-                PaymentAmount = entity.PaymentAmount
-            };
+            return new ElectricityReadingDto(
+                Id: entity.Id,
+                ResidenceId: entity.ResidenceId,
+                UtilityProviderId: entity.UtilityProviderId,
+                ResidenceAddress: entity.Residence?.Address,
+                UtilityProviderName: entity.UtilityProvider?.Name,
+                SubmissionDate: entity.SubmissionDate,
+                PaymentDate: entity.PaymentDate,
+                CurrentValue: entity.CurrentValue,
+                PreviousValue: entity.PreviousValue,
+                ResultValue: entity.ResultValue,
+                PaymentAmount: entity.PaymentAmount
+            );
         }
 
-        public EditElectricityReadingDTO ToDto(EditElectricityReadingViewModel vm)
+        public EditElectricityReadingDto ToDto(EditElectricityReadingViewModel editViewModel)
         {
-            if (vm == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(editViewModel);
 
-            return new EditElectricityReadingDTO
-            {
-                Id = vm.Id,
-
-                ResidenceId = vm.ResidenceId,
-                UtilityProviderId = vm.UtilityProviderId,
-
-                SubmissionDate = vm.SubmissionDate,
-                PaymentDate = vm.PaymentDate,
-
-                CurrentValue = vm.CurrentValue,
-                PreviousValue = vm.PreviousValue,
-                ResultValue = vm.ResultValue,
-
-                PaymentAmount = vm.PaymentAmount
-            };
+            return new EditElectricityReadingDto(
+            
+                Id: editViewModel.Id,
+                ResidenceId: editViewModel.ResidenceId,
+                UtilityProviderId: editViewModel.UtilityProviderId,
+                SubmissionDate: editViewModel.SubmissionDate,
+                PaymentDate: editViewModel.PaymentDate,
+                CurrentValue: editViewModel.CurrentValue,
+                PreviousValue: editViewModel.PreviousValue,
+                ResultValue: editViewModel.ResultValue,
+                PaymentAmount: editViewModel.PaymentAmount
+            );
         }
 
-        public ElectricityReading ToEntity(CreateElectricityReadingDTO dto)
+        public ElectricityReading ToEntity(CreateElectricityReadingDto createDto)
         {
-            if (dto == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(createDto);
 
             return new ElectricityReading
             {
-                ResidenceId = dto.ResidenceId,
-                UtilityProviderId = dto.UtilityProviderId,
-
-                SubmissionDate = dto.SubmissionDate.ToUtcKind(),
-                PaymentDate = dto.PaymentDate.ToUtcKind(),
-
-                CurrentValue = dto.CurrentValue,
-                PreviousValue = dto.PreviousValue,
-                ResultValue = dto.ResultValue,
-
-                PaymentAmount = dto.PaymentAmount
+                ResidenceId = createDto.ResidenceId,
+                UtilityProviderId = createDto.UtilityProviderId,
+                SubmissionDate = createDto.SubmissionDate.ToUtcKind(),
+                PaymentDate = createDto.PaymentDate.ToUtcKind(),
+                CurrentValue = createDto.CurrentValue,
+                PreviousValue = createDto.PreviousValue,
+                ResultValue = createDto.ResultValue,
+                PaymentAmount = createDto.PaymentAmount
             };
         }
 
-        public ElectricityReadingViewModel ToViewModel(ElectricityReadingDTO dto)
+        public ElectricityReadingViewModel ToViewModel(ElectricityReadingDto dto)
         {
-            if (dto == null)
-                return null!;
+            ArgumentNullException.ThrowIfNull(dto);
 
             return new ElectricityReadingViewModel
             {
                 Id = dto.Id,
-
                 ResidenceId = dto.ResidenceId,
                 UtilityProviderId = dto.UtilityProviderId,
-
                 ResidenceAddress = dto.ResidenceAddress,
                 UtilityProviderName = dto.UtilityProviderName,
-
                 SubmissionDate = dto.SubmissionDate,
                 PaymentDate = dto.PaymentDate,
-
                 CurrentValue = dto.CurrentValue,
                 PreviousValue = dto.PreviousValue,
                 ResultValue = dto.ResultValue,
-
                 PaymentAmount = dto.PaymentAmount
             };
         }
 
-        public void UpdateEntity(EditElectricityReadingDTO dto, ElectricityReading entity)
+        public void UpdateEntity(EditElectricityReadingDto editDto, ElectricityReading entity)
         {
-            entity.UtilityProviderId = dto.UtilityProviderId;
-            entity.ResidenceId = dto.ResidenceId;
+            ArgumentNullException.ThrowIfNull(editDto);
+            ArgumentNullException.ThrowIfNull(entity);
 
-            entity.SubmissionDate = dto.SubmissionDate.ToUtcKind();
-            entity.PaymentDate = dto.PaymentDate.ToUtcKind();
-
-            entity.CurrentValue = dto.CurrentValue;
-            entity.PreviousValue = dto.PreviousValue;
-            entity.ResultValue = dto.ResultValue;
-
-            entity.PaymentAmount = dto.PaymentAmount;
+            entity.UtilityProviderId = editDto.UtilityProviderId;
+            entity.ResidenceId = editDto.ResidenceId;
+            entity.SubmissionDate = editDto.SubmissionDate.ToUtcKind();
+            entity.PaymentDate = editDto.PaymentDate.ToUtcKind();
+            entity.CurrentValue = editDto.CurrentValue;
+            entity.PreviousValue = editDto.PreviousValue;
+            entity.ResultValue = editDto.ResultValue;
+            entity.PaymentAmount = editDto.PaymentAmount;
 
             //entity.UpdatedAt = DateTime.UtcNow;
         }

@@ -21,7 +21,7 @@ namespace UtilityPaymentJournal.Services
             _electricityReadingMapper = electricityReadingMapper;
         }
 
-        public async Task<ElectricityReadingDTO> CreateAsync(CreateElectricityReadingDTO createDto, CancellationToken cancellationToken = default)
+        public async Task<ElectricityReadingDto> CreateAsync(CreateElectricityReadingDto createDto, CancellationToken cancellationToken = default)
         {
             ElectricityReading entity = _electricityReadingMapper.ToEntity(createDto);
 
@@ -37,7 +37,7 @@ namespace UtilityPaymentJournal.Services
             return _electricityReadingMapper.ToDto(savedEntity ?? entity);
         }
 
-        public async Task<ElectricityReadingDTO?> EditAsync(long id, EditElectricityReadingDTO editDto, CancellationToken cancellationToken = default)
+        public async Task<ElectricityReadingDto?> EditAsync(long id, EditElectricityReadingDto editDto, CancellationToken cancellationToken = default)
         {
             // Подход с двумя загрузками:
             // 1. Загружаем "легковесное" entity без связанных деталей
@@ -67,7 +67,7 @@ namespace UtilityPaymentJournal.Services
             return deletedRowsCount > 0;
         }
 
-        public async Task<IReadOnlyCollection<ElectricityReadingDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<ElectricityReadingDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             // Извлекаем данные из БД с жадной загрузкой (Eager Loading) связанных объектов
             List<ElectricityReading> entities = await _context.ElectricityReadings
@@ -82,7 +82,7 @@ namespace UtilityPaymentJournal.Services
                 .ToList();
         }
 
-        public async Task<ElectricityReadingDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<ElectricityReadingDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             // загружаем entity со всеми деталями для передачи клиенту в UI
             ElectricityReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);

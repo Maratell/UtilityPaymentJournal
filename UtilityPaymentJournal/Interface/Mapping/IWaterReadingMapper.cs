@@ -6,16 +6,11 @@ namespace WaterReadingPaymentJournal.Interface.Mapping
 {
     public interface IWaterReadingMapper
     {
-        CreateWaterReadingDTO ToDto(CreateWaterReadingViewModel vm);
-
-        WaterReadingDTO ToDto(WaterReading entity);
-
-        EditWaterReadingDTO ToDto(EditWaterReadingViewModel vm);
-
-        WaterReading ToEntity(CreateWaterReadingDTO dto);
-
-        WaterReadingViewModel ToViewModel(WaterReadingDTO dto);
-
-        void UpdateEntity(EditWaterReadingDTO dto, WaterReading entity);
+        CreateWaterReadingDto ToDto(CreateWaterReadingViewModel createViewModel);
+        WaterReadingDto ToDto(WaterReading entity);
+        EditWaterReadingDto ToDto(EditWaterReadingViewModel editViewModel);
+        WaterReading ToEntity(CreateWaterReadingDto createDto);
+        WaterReadingViewModel ToViewModel(WaterReadingDto dto);
+        void UpdateEntity(EditWaterReadingDto editDto, WaterReading entity);
     }
 }

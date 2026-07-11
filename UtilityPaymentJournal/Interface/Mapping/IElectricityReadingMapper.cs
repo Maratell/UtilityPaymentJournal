@@ -6,16 +6,11 @@ namespace UtilityPaymentJournal.Interface.Mapping
 {
     public interface IElectricityReadingMapper
     {
-        CreateElectricityReadingDTO ToDto(CreateElectricityReadingViewModel vm);
-
-        ElectricityReadingDTO ToDto(ElectricityReading entity);
-
-        EditElectricityReadingDTO ToDto(EditElectricityReadingViewModel vm);
-
-        ElectricityReading ToEntity(CreateElectricityReadingDTO dto);
-
-        ElectricityReadingViewModel ToViewModel(ElectricityReadingDTO dto);
-
-        void UpdateEntity(EditElectricityReadingDTO dto, ElectricityReading entity);
+        CreateElectricityReadingDto ToDto(CreateElectricityReadingViewModel createViewModel);
+        ElectricityReadingDto ToDto(ElectricityReading entity);
+        EditElectricityReadingDto ToDto(EditElectricityReadingViewModel editViewModel);
+        ElectricityReading ToEntity(CreateElectricityReadingDto createDto);
+        ElectricityReadingViewModel ToViewModel(ElectricityReadingDto dto);
+        void UpdateEntity(EditElectricityReadingDto editDto, ElectricityReading entity);
     }
 }
