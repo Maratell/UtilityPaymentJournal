@@ -34,7 +34,7 @@ namespace UtilityPaymentJournal.Controllers
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
             // Загружаем данные из бд
-            IReadOnlyCollection<ComplaintDTO> complaintDtos = await _complaintService.GetAllAsync(cancellationToken);
+            IReadOnlyCollection<ComplaintDto> complaintDtos = await _complaintService.GetAllAsync(cancellationToken);
             IReadOnlyCollection<UtilityDto> utilityDtos = await _utilityService.GetAllAsync(cancellationToken);
 
             // Маппим результаты

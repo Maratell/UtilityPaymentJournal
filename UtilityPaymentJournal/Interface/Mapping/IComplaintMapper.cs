@@ -7,12 +7,12 @@ namespace UtilityPaymentJournal.Interface.Mapping
 {
     public interface IComplaintMapper
     {
-        CreateComplaintDTO ToDto(CreateComplaintViewModel vm);
-        ComplaintDTO ToDto(Complaint entity);
-        EditComplaintDTO ToDto(EditComplaintViewModel vm);
-        EditComplaintDTO ToDto(ComplaintDTO dto, ComplaintStatus status);
-        Complaint ToEntity(CreateComplaintDTO dto);
-        ComplaintViewModel ToViewModel(ComplaintDTO dto);
-        void UpdateEntity(EditComplaintDTO dto, Complaint entity);
+        CreateComplaintDto ToDto(CreateComplaintViewModel vm);
+        ComplaintDto ToDto(Complaint entity);
+        EditComplaintDto ToDto(EditComplaintViewModel vm);
+        EditComplaintDto ToDto(ComplaintDto dto, ComplaintStatus status);
+        Complaint ToEntity(CreateComplaintDto dto);
+        ComplaintViewModel ToViewModel(ComplaintDto dto);
+        void UpdateEntity(EditComplaintDto dto, Complaint entity);
     }
 }

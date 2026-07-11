@@ -20,7 +20,7 @@ namespace UtilityPaymentJournal.Services
             _complaintMapper = complaintMapper;
         }
 
-        public async Task<ComplaintDTO> CreateAsync(CreateComplaintDTO createDto, CancellationToken cancellationToken = default)
+        public async Task<ComplaintDto> CreateAsync(CreateComplaintDto createDto, CancellationToken cancellationToken = default)
         {
             Complaint entity = _complaintMapper.ToEntity(createDto);
 
@@ -34,7 +34,7 @@ namespace UtilityPaymentJournal.Services
             return _complaintMapper.ToDto(savedEntity ?? entity);
         }
 
-        public async Task<ComplaintDTO?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<ComplaintDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
             // Загружаем entity со всеми деталями для передачи клиенту
             Complaint? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
@@ -42,7 +42,7 @@ namespace UtilityPaymentJournal.Services
             return entity is null ? null : _complaintMapper.ToDto(entity);
         }
 
-        public async Task<ComplaintDTO?> EditAsync(long id, EditComplaintDTO editDto, CancellationToken cancellationToken = default)
+        public async Task<ComplaintDto?> EditAsync(long id, EditComplaintDto editDto, CancellationToken cancellationToken = default)
         {
             // Подход с двумя загрузками:
             // 1. Загружаем "легковесное" entity без связанных деталей
@@ -72,7 +72,7 @@ namespace UtilityPaymentJournal.Services
             return deletedRowsCount > 0;
         }
 
-        public async Task<IReadOnlyCollection<ComplaintDTO>> GetAllAsync(CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyCollection<ComplaintDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
             // Извлекаем данные из БД с жадной загрузкой (Eager Loading) связанных услуг
             List<Complaint> entities = await _context.Complaints
