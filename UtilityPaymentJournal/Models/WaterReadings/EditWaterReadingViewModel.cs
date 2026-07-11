@@ -10,12 +10,12 @@ namespace UtilityPaymentJournal.Models.WaterReadings
         [Display(Name = "Жилой объект")]
         [Required(ErrorMessage = "Пожалуйста, выберите жилой объект")]
         [Range(1, long.MaxValue, ErrorMessage = "Некорректный ID жилого объекта")]
-        public long ResidenceId { get; set; }
+        public long? ResidenceId { get; set; }
 
         [Display(Name = "Поставщик услуг")]
         [Required(ErrorMessage = "Пожалуйста, выберите поставщика услуг")]
         [Range(1, long.MaxValue, ErrorMessage = "Некорректный ID поставщика услуг")]
-        public long UtilityProviderId { get; set; }
+        public long? UtilityProviderId { get; set; }
 
         [Display(Name = "Тип ресурса")]
         [Required(ErrorMessage = "Укажите тип ресурса.")]

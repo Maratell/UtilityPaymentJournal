@@ -24,7 +24,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<ElectricityReadingViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<ElectricityReadingDTO> dtos = await _electricityReadingService.GetAllAsync(cancellationToken);
+            IEnumerable<ElectricityReadingDto> dtos = await _electricityReadingService.GetAllAsync(cancellationToken);
 
             List<ElectricityReadingViewModel> viewModels = dtos
                 .Select(r => _electricityReadingMapper.ToViewModel(r))
@@ -36,7 +36,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet("{id:long}")]
         public async Task<ActionResult<ElectricityReadingViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
-            ElectricityReadingDTO? dto = await _electricityReadingService.GetByIdAsync(id, cancellationToken);
+            ElectricityReadingDto? dto = await _electricityReadingService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
             {
                 return NotFound($"Показание счетчика с ID {id} не найдено.");
@@ -49,9 +49,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<ElectricityReadingViewModel>> Create([FromBody] CreateElectricityReadingViewModel createViewModel, CancellationToken cancellationToken)
         {
-            CreateElectricityReadingDTO createDto = _electricityReadingMapper.ToDto(createViewModel);
+            CreateElectricityReadingDto createDto = _electricityReadingMapper.ToDto(createViewModel);
 
-            ElectricityReadingDTO createdDto = await _electricityReadingService.CreateAsync(createDto, cancellationToken);
+            ElectricityReadingDto createdDto = await _electricityReadingService.CreateAsync(createDto, cancellationToken);
 
             ElectricityReadingViewModel createdViewModel = _electricityReadingMapper.ToViewModel(createdDto);
 
@@ -61,9 +61,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPut("{id:long}")]
         public async Task<ActionResult<ElectricityReadingViewModel>> Edit([FromRoute] long id, [FromBody] EditElectricityReadingViewModel editViewModel, CancellationToken cancellationToken)
         {
-            EditElectricityReadingDTO editDto = _electricityReadingMapper.ToDto(editViewModel);
+            EditElectricityReadingDto editDto = _electricityReadingMapper.ToDto(editViewModel);
 
-            ElectricityReadingDTO? updatedDto = await _electricityReadingService.EditAsync(id, editDto, cancellationToken);
+            ElectricityReadingDto? updatedDto = await _electricityReadingService.EditAsync(id, editDto, cancellationToken);
             if (updatedDto is null)
             {
                 return NotFound($"Показание счетчика с ID {id} не найдено.");

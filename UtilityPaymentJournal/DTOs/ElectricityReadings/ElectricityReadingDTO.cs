@@ -1,32 +1,31 @@
 ﻿
 namespace UtilityPaymentJournal.DTOs.ElectricityReadings
 {
-    public class ElectricityReadingDTO
-    {
-        public long Id { get; set; }
-
-        public long? ResidenceId { get; set; }
-
-        public long? UtilityProviderId { get; set; }
-
-        public string? ResidenceAddress { get; set; } = string.Empty;
-
-        public string? UtilityProviderName { get; set; } = string.Empty;
-
-
-        // Дата подачи показаний (может быть null)
-        public DateTime? SubmissionDate { get; set; }
-
-        // Дата оплаты (может быть null)
-        public DateTime? PaymentDate { get; set; }
-
-        public long CurrentValue { get; set; }
-
-        public long PreviousValue { get; set; }
-
-        public long ResultValue { get; set; }
-
-        // Сумма платежа (используем decimal для финансовых данных)
-        public decimal PaymentAmount { get; set; }
-    }
+    /// <summary>
+    /// ДТО для возврата данных о показаниях счетчика электроэнергии (ответ API).
+    /// </summary>
+    /// <param name="Id">Уникальный идентификатор записи показания</param>
+    /// <param name="ResidenceId">Уникальный идентификатор объекта недвижимости</param>
+    /// <param name="UtilityProviderId">Уникальный идентификатор поставщика услуг</param>
+    /// <param name="ResidenceAddress">Полный адрес объекта недвижимости</param>
+    /// <param name="UtilityProviderName">Наименование поставщика услуг</param>
+    /// <param name="SubmissionDate">Дата подачи показаний (может быть null, если еще не подано)</param>
+    /// <param name="PaymentDate">Дата оплаты (null, если еще не оплачено)</param>
+    /// <param name="CurrentValue">Текущее показание счетчика</param>
+    /// <param name="PreviousValue">Предыдущее показание счетчика</param>
+    /// <param name="ResultValue">Разница показаний (расход за период)</param>
+    /// <param name="PaymentAmount">Сумма платежа</param>
+    public record ElectricityReadingDto(
+        long Id,
+        long? ResidenceId,
+        long? UtilityProviderId,
+        string? ResidenceAddress,
+        string? UtilityProviderName,
+        DateTime? SubmissionDate,
+        DateTime? PaymentDate,
+        long CurrentValue,
+        long PreviousValue,
+        long ResultValue,
+        decimal PaymentAmount
+    );
 }

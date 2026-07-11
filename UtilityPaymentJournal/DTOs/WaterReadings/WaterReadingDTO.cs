@@ -2,33 +2,33 @@
 
 namespace UtilityPaymentJournal.DTOs.WaterReadings
 {
-    public class WaterReadingDTO
-    {
-        public long Id { get; set; }
-
-        public long? ResidenceId { get; set; }
-
-        public long? UtilityProviderId { get; set; }
-
-        public string? ResidenceAddress { get; set; } = string.Empty;
-
-        public string? UtilityProviderName { get; set; } = string.Empty;
-
-        public WaterType WaterType { get; set; }
-
-        // Дата подачи показаний (может быть null)
-        public DateTime? SubmissionDate { get; set; }
-
-        // Дата оплаты (может быть null)
-        public DateTime? PaymentDate { get; set; }
-
-        public long CurrentValue { get; set; }
-
-        public long PreviousValue { get; set; }
-
-        public long ResultValue { get; set; }
-
-        // Сумма платежа (используем decimal для финансовых данных)
-        public decimal PaymentAmount { get; set; }
-    }
+    /// <summary>
+    /// ДТО для возврата данных о показаниях счетчика воды (ответ API).
+    /// </summary>
+    /// <param name="Id">Уникальный идентификатор записи показания</param>
+    /// <param name="ResidenceId">Идентификатор связанного жилого объекта</param>
+    /// <param name="UtilityProviderId">Идентификатор связанного поставщика услуг</param>
+    /// <param name="ResidenceAddress">Полный адрес жилого объекта (для отображения на клиенте)</param>
+    /// <param name="UtilityProviderName">Наименование поставщика услуг (для отображения на клиенте)</param>
+    /// <param name="WaterType">Тип воды (холодная/горячая/канализация)</param>
+    /// <param name="SubmissionDate">Дата подачи показаний (null, если не подано)</param>
+    /// <param name="PaymentDate">Дата оплаты (null, если не оплачено)</param>
+    /// <param name="CurrentValue">Текущее показание счетчика</param>
+    /// <param name="PreviousValue">Предыдущее показание счетчика</param>
+    /// <param name="ResultValue">Разница показаний (расход за период)</param>
+    /// <param name="PaymentAmount">Сумма платежа</param>
+    public record WaterReadingDto(
+        long Id,
+        long? ResidenceId,
+        long? UtilityProviderId,
+        string? ResidenceAddress,
+        string? UtilityProviderName,
+        WaterType WaterType,
+        DateTime? SubmissionDate,
+        DateTime? PaymentDate,
+        long CurrentValue,
+        long PreviousValue,
+        long ResultValue,
+        decimal PaymentAmount
+    );
 }
