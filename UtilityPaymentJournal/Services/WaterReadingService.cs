@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.DTOs.WaterReadings;
 using UtilityPaymentJournal.EF.Context;
+using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
 using WaterReadingPaymentJournal.Interface.Mapping;
 using WaterReadingPaymentJournal.Interface.Service;
@@ -38,15 +39,20 @@ namespace WaterReadingPaymentJournal.Services
 
         public async Task<WaterReadingDTO?> EditAsync(long id, EditWaterReadingDTO editDto, CancellationToken cancellationToken = default)
         {
-            // загружаем entity с деталями, чтобы вернуть клиенту полный обновленный DTO
-            WaterReading? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken: cancellationToken);
+            // Подход с двумя загрузками:
+            // 1. Загружаем "легковесное" entity без связанных деталей
+            WaterReading? entity = await FindEntityAsync(id, includeDetails: false, cancellationToken: cancellationToken);
             if (entity == null)
                 return null;
 
             _waterReadingMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return _waterReadingMapper.ToDto(entity);
+            // 2. После SaveChangesAsync EF Core зануляет или оставляет устаревшими навигационные свойства связей в памяти (Identity Map).
+            // Делаем повторный запрос с includeDetails: true, чтобы принудительно выкачать из бд актуальный объект 
+            // с обновленными связанными данными для корректного маппинга на фронтенд.
+            WaterReading? updatedEntity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
+            return  _waterReadingMapper.ToDto(updatedEntity ?? entity);
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)

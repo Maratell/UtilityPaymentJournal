@@ -44,15 +44,20 @@ namespace UtilityPaymentJournal.Services
 
         public async Task<ComplaintDTO?> EditAsync(long id, EditComplaintDTO editDto, CancellationToken cancellationToken = default)
         {
-            // Загружаем entity со связанной услугой Utility, чтобы маппер вернул полный DTO
-            Complaint? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
+            // Подход с двумя загрузками:
+            // 1. Загружаем "легковесное" entity без связанных деталей
+            Complaint? entity = await FindEntityAsync(id, includeDetails: false, cancellationToken);
             if (entity is null)
                 return null;
 
             _complaintMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            return _complaintMapper.ToDto(entity);
+            // 2. После SaveChangesAsync EF Core зануляет или оставляет устаревшими навигационные свойства связей в памяти (Identity Map).
+            // Делаем повторный запрос с includeDetails: true, чтобы принудительно выкачать из бд актуальный объект 
+            // с обновленными связанными данными для корректного маппинга на фронтенд.
+            Complaint? updatedEntity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
+            return _complaintMapper.ToDto(updatedEntity ?? entity);
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)

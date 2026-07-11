@@ -591,65 +591,14 @@
                         // Закрываем модальное окно
                         $('#editModal').find('[data-bs-dismiss="modal"]').first().click();
 
-                        // Безопасно парсим свойства из ответа (поддерживает любой регистр ответа бэкенда)
-                        const uTitle = updatedCard.title ?? updatedCard.Title;
-                        const uDesc = updatedCard.description ?? updatedCard.Description;
-                        const uUtilityId = parseInt(updatedCard.utilityId ?? updatedCard.UtilityId);
-                        const uUtilityName = updatedCard.utilityName ?? updatedCard.UtilityName ?? '';
-                        const uUtilityIcon = updatedCard.utilityIcon ?? updatedCard.UtilityIcon ?? 'bi-tools';
-                        const uCreatedAt = updatedCard.createdAt ?? updatedCard.CreatedAt;
-                        const uSubmissionDate = updatedCard.submissionDate ?? updatedCard.SubmissionDate;
-                        const uIssueResolutionDate = updatedCard.issueResolutionDate ?? updatedCard.IssueResolutionDate;
-
-                        // Находим карточку в DOM по её ID
+                        // Находим старую карточку в DOM по её ID
                         const $card = $('#complaint-' + id);
-                        if ($card.length === 0) return; // Защита: если карточка не найдена
+                        if ($card.length === 0) 
+                        return;
 
-                        // 1. Обновляем текст заголовка и описания
-                        $card.find('.js-card-title').text(uTitle);
-                        $card.find('.js-card-description').text(uDesc);
-
-                        // 2. Жесткое обновление атрибутов кнопки редактирования
-                        const $editBtn = $card.find('button.btn-edit-complaint');
-                        $editBtn.attr('data-utility-id', uUtilityId);
-                        $editBtn.data('utility-id', uUtilityId);
-
-                        // 3. Перерисовка иконки услуги в DOM
-                        $card.find('.js-card-icon')
-                             .attr('class', 'bi ' + uUtilityIcon + ' fs-5 js-card-icon')
-                             .attr('title', uUtilityName);
-
-                        // 4. Динамическое обновление блока дат в футере карточки
-                        const $footerDates = $card.find('.card-footer-date');
-                        if ($footerDates.length > 0) {
-                            let htmlDates = `
-                                <div class="d-flex justify-content-start align-items-center">
-                                    <i class="bi bi-file-earmark-plus me-1 text-secondary"></i>
-                                    <span class="js-card-created-at">Создано: ${formatDate(uCreatedAt)}</span>
-                                </div>
-                            `;
-
-                            if (uSubmissionDate) {
-                                htmlDates += `
-                                    <div class="d-flex justify-content-start align-items-center mt-1">
-                                        <i class="bi bi-send me-1 text-primary"></i>
-                                        <span class="js-card-submission-date">Подано: ${formatDate(uSubmissionDate)}</span>
-                                    </div>
-                                `;
-                            }
-
-                            if (uIssueResolutionDate) {
-                                htmlDates += `
-                                    <div class="d-flex justify-content-start align-items-center mt-1">
-                                        <i class="bi bi-check-lg me-1 text-success"></i>
-                                        <span class="js-card-resolution-date">Решено: ${formatDate(uIssueResolutionDate)}</span>
-                                    </div>
-                                `;
-                            }
-
-                            // Перерисовываем весь футер с датами на лету
-                            $footerDates.html(htmlDates);
-                        }
+                        // Генерируем новый HTML карточки с помощью функции buildCardHtml
+                        // и полностью заменяем старую карточку в DOM на новую!
+                        $card.replaceWith(buildCardHtml(updatedCard));
                     },
                     error: function (xhr) {
                         // console.error("Ошибка при сохранении изменений жалобы:", xhr.status);
