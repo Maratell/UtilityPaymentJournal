@@ -2,22 +2,25 @@
 
 namespace UtilityPaymentJournal.DTOs.ComplaintBoard
 {
-    public class EditComplaintDTO
-    {
-        public long Id { get; set; }
-
-        public string Title { get; set; } = string.Empty;
-
-        public string Description { get; set; } = string.Empty;
-
-        public long UtilityId { get; set; }
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime? SubmissionDate { get; set; }
-
-        public DateTime? IssueResolutionDate { get; set; }
-
-        public ComplaintStatus Status { get; set; }
-    }
+    /// <summary>
+    /// ДТО для редактирования существующей жалобы.
+    /// </summary>
+    /// <param name="Id">Уникальный идентификатор жалобы в бд</param>
+    /// <param name="Title">Новый заголовок или краткая суть жалобы</param>
+    /// <param name="Description">Новое подробное описание проблемы</param>
+    /// <param name="UtilityId">Идентификатор новой связанной коммунальной услуги</param>
+    /// <param name="CreatedAt">Дата и время создания записи (передается для сохранения истории)</param>
+    /// <param name="SubmissionDate">Новая дата и время официальной подачи жалобы (опционально)</param>
+    /// <param name="IssueResolutionDate">Новая дата и время решения проблемы (опционально)</param>
+    /// <param name="Status">Новый статус рассмотрения жалобы</param>
+    public record EditComplaintDto(
+        long Id,
+        string Title,
+        string Description,
+        long UtilityId,
+        DateTime CreatedAt,
+        DateTime? SubmissionDate,
+        DateTime? IssueResolutionDate,
+        ComplaintStatus Status
+    );
 }

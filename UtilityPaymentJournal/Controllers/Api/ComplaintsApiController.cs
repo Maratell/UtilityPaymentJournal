@@ -25,7 +25,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IReadOnlyCollection<ComplaintViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            IEnumerable<ComplaintDTO> dtos = await _complaintService.GetAllAsync(cancellationToken);
+            IEnumerable<ComplaintDto> dtos = await _complaintService.GetAllAsync(cancellationToken);
 
             IEnumerable<ComplaintViewModel> viewModels = dtos
                 .Select(e => _complaintMapper.ToViewModel(e))
@@ -37,7 +37,7 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpGet("{id:long}")]
         public async Task<ActionResult<ComplaintViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
-            ComplaintDTO? dto = await _complaintService.GetByIdAsync(id, cancellationToken);
+            ComplaintDto? dto = await _complaintService.GetByIdAsync(id, cancellationToken);
             if (dto is null)
             {
                 return NotFound($"Жалоба с ID {id} не найдена.");
@@ -50,9 +50,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<ComplaintViewModel>> Create([FromBody] CreateComplaintViewModel createViewModel, CancellationToken cancellationToken)
         {
-            CreateComplaintDTO createDto = _complaintMapper.ToDto(createViewModel);
+            CreateComplaintDto createDto = _complaintMapper.ToDto(createViewModel);
 
-            ComplaintDTO createdDto = await _complaintService.CreateAsync(createDto, cancellationToken);
+            ComplaintDto createdDto = await _complaintService.CreateAsync(createDto, cancellationToken);
 
             ComplaintViewModel createdViewModel = _complaintMapper.ToViewModel(createdDto);
 
@@ -62,9 +62,9 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPut("{id:long}")]
         public async Task<IActionResult> Edit([FromRoute] long id, [FromBody] EditComplaintViewModel editViewModel, CancellationToken cancellationToken)
         {
-            EditComplaintDTO editDto = _complaintMapper.ToDto(editViewModel);
+            EditComplaintDto editDto = _complaintMapper.ToDto(editViewModel);
 
-            ComplaintDTO? updatedDto = await _complaintService.EditAsync(id, editDto, cancellationToken);
+            ComplaintDto? updatedDto = await _complaintService.EditAsync(id, editDto, cancellationToken);
             if (updatedDto is null)
             {
                 return NotFound($"Жалоба с ID {id} не найдена.");
@@ -85,12 +85,12 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPatch("{id:long}/status/{status:int}")]
         public async Task<ActionResult<ComplaintViewModel>> UpdateStatus([FromRoute] long id, [FromRoute] int status, CancellationToken cancellationToken)
         {
-            ComplaintDTO? dto = await _complaintService.GetByIdAsync(id, cancellationToken);
+            ComplaintDto? dto = await _complaintService.GetByIdAsync(id, cancellationToken);
             if (dto == null)
                 return NotFound($"Жалоба с ID {id} не найдена.");
 
-            EditComplaintDTO editDto = _complaintMapper.ToDto(dto, (ComplaintStatus)status);
-            ComplaintDTO? updatedDto = await _complaintService.EditAsync(id, editDto, cancellationToken);
+            EditComplaintDto editDto = _complaintMapper.ToDto(dto, (ComplaintStatus)status);
+            ComplaintDto? updatedDto = await _complaintService.EditAsync(id, editDto, cancellationToken);
             if (updatedDto is null)
             {
                 return NotFound($"Не удалось обновить статус. Жалоба с ID {id} не найдена.");

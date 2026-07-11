@@ -3,20 +3,23 @@ using UtilityPaymentJournal.Common.Enumerations;
 
 namespace UtilityPaymentJournal.DTOs.ComplaintBoard
 {
-    public class CreateComplaintDTO
-    {
-        public string Title { get; set; } = string.Empty;
-
-        public string Description { get; set; } = string.Empty;
-
-        public long UtilityId { get; set; }
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-
-        public DateTime? SubmissionDate { get; set; }
-
-        public DateTime? IssueResolutionDate { get; set; }
-
-        public ComplaintStatus Status { get; set; }
-    }
+    /// <summary>
+    /// ДТО для создания новой жалобы.
+    /// </summary>
+    /// <param name="Title">Заголовок или краткая суть жалобы</param>
+    /// <param name="Description">Подробное описание проблемы</param>
+    /// <param name="UtilityId">Идентификатор связанной коммунальной услуги</param>
+    /// <param name="CreatedAt">Дата и время создания записи (по умолчанию текущее время UTC)</param>
+    /// <param name="SubmissionDate">Дата и время официальной подачи жалобы (опционально)</param>
+    /// <param name="IssueResolutionDate">Планируемая дата и время решения проблемы (опционально)</param>
+    /// <param name="Status">Начальный статус жалобы (по умолчанию Новая)</param>
+    public record CreateComplaintDto(
+        string Title,
+        string Description,
+        long UtilityId,
+        DateTime CreatedAt, 
+        DateTime? SubmissionDate,
+        DateTime? IssueResolutionDate,
+        ComplaintStatus Status 
+    );
 }
