@@ -8,6 +8,7 @@ using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
 using UtilityPaymentJournal.Infrastructure.Identity;
+using UtilityPaymentJournal.Infrastructure.JsonConverters;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Mapping;
@@ -139,7 +140,14 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
-builder.Services.AddControllers();
+// Регистрируем контроллеры API
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Подключаем кастомный конвертер для корректного отображения DateTime и DateTime?.
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
+        options.JsonSerializerOptions.Converters.Add(new NullableUtcDateTimeJsonConverter());
+    });
 
 // Настройка параметров куки для Identity (вместо AddCookie)
 builder.Services.ConfigureApplicationCookie(options =>
@@ -153,6 +161,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Добавление AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+// Глобальная настройка для драйвера базы данных PostgreSQL (Npgsql).
+// Принудительно заставляет .NET помечать все даты, выгружаемые из колонок 'timestamptz', 
+// как DateTimeKind.Utc, исключая появление типа 'Unspecified'.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
 
 var app = builder.Build();
 

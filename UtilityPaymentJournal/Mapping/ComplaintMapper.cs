@@ -1,5 +1,4 @@
 ﻿using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.Common.Extensions;
 using UtilityPaymentJournal.DTOs.ComplaintBoard;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
 using UtilityPaymentJournal.Interface.Mapping;
@@ -36,9 +35,9 @@ namespace UtilityPaymentJournal.Mapping
                 UtilityId: entity.UtilityId,
                 UtilityName: entity.Utility?.Name,
                 UtilityIcon: entity.Utility?.IconClass,
-                SubmissionDate: entity.SubmissionDate.ToLocalTime(),
-                IssueResolutionDate: entity.IssueResolutionDate.ToLocalTime(),
-                CreatedAt: entity.CreatedAt.ToLocalTime()
+                SubmissionDate: entity.SubmissionDate,
+                IssueResolutionDate: entity.IssueResolutionDate,
+                CreatedAt: entity.CreatedAt
             );
         }
 
@@ -68,9 +67,9 @@ namespace UtilityPaymentJournal.Mapping
                 Description: dto.Description,
                 UtilityId: dto.UtilityId,
                 Status: status, // Устанавливаем новый статус
-                CreatedAt: dto.CreatedAt,
                 SubmissionDate: dto.SubmissionDate,
-                IssueResolutionDate: dto.IssueResolutionDate
+                IssueResolutionDate: dto.IssueResolutionDate,
+                CreatedAt: dto.CreatedAt
             );
         }
 
@@ -84,9 +83,9 @@ namespace UtilityPaymentJournal.Mapping
                 Description = createDto.Description,
                 Status = createDto.Status,
                 UtilityId = createDto.UtilityId,
-                SubmissionDate = createDto.SubmissionDate.ToUtcKind(),
-                IssueResolutionDate = createDto.IssueResolutionDate.ToUtcKind(),
-                CreatedAt = createDto.CreatedAt.ToUtcKind()
+                SubmissionDate = createDto.SubmissionDate,
+                IssueResolutionDate = createDto.IssueResolutionDate,
+                CreatedAt = createDto.CreatedAt
             };
         }
 
@@ -118,8 +117,8 @@ namespace UtilityPaymentJournal.Mapping
             entity.Description = editDto.Description;
             entity.Status = editDto.Status;
             entity.UtilityId = editDto.UtilityId;
-            entity.SubmissionDate = editDto.SubmissionDate.ToUtcKind();
-            entity.IssueResolutionDate = editDto.IssueResolutionDate.ToUtcKind();
+            entity.SubmissionDate = editDto.SubmissionDate;
+            entity.IssueResolutionDate = editDto.IssueResolutionDate;
         }
     }
 }

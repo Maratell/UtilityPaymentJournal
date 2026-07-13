@@ -1,5 +1,5 @@
 ﻿/**
- * Универсальное окно подтверждения в пастельно-голубом стиле
+ * Универсальное окно подтверждения
  * @param {Object} options Параметры конфигурации окна
  * @param {string} options.title Заголовок окна в шапке
  * @param {string} options.message Текст основного вопроса по центру
@@ -121,3 +121,110 @@ function tryShowServerError(xhr) {
 
     return false;
 }
+
+/* ==========================================================================
+   РЕГИОН: РАБОТА С ДАТАМИ И ВРЕМЕНЕМ (МУЛЬТИРЕГИОНАЛЬНЫЙ ПОДХОД)
+   --------------------------------------------------------------------------
+   АРХИТЕКТУРА: Сквозной UTC на бэкенде и динамическая локализация дат на клиенте.
+   БД (PostgreSQL) и сервер (ASP.NET Core) оперируют строго нулевым часовым поясом (UTC).
+   Браузер (клиент) отвечает за перевод UTC в локальное время пользователя и обратно.
+   ========================================================================== */
+
+/**
+ * 1. ИЗ ИНПУТА В UTC (Для отправки на бэкенд / POST, PUT запросы)
+ * 
+ * Назначение: Берет «сырое» локальное значение из <input type="datetime-local">,
+ * интерпретирует его по часовому поясу устройства пользователя и конвертирует
+ * в международный формат ISO 8601 (строку Гринвича с символом 'Z' на конце).
+ * 
+ * @param {string|null|undefined} inputVal - Значение свойства .val() из datetime-local инпута.
+ * @returns {string|null} Строка даты в UTC для API-запроса, либо null, если дата не выбрана.
+ */
+function toUtcIsoString(inputVal) {
+    if (!inputVal || String(inputVal).trim() === '') {
+        return null;
+    }
+
+    // Нормализуем строку (заменяем пробелы на разделитель T, если необходимо)
+    const normalizedInput = String(inputVal).replace(' ', 'T');
+    const localDate = new Date(normalizedInput);
+
+    // Защита от RangeError: если пользователь ввел некорректные данные, возвращаем null
+    if (isNaN(localDate.getTime())) {
+        console.warn(`[Dates Region]: Не удалось распознать локальную дату из значения: "${inputVal}"`);
+        return null;
+    }
+
+    return localDate.toISOString(); // Результат: "YYYY-MM-DDTHH:mm:ss.sssZ"
+}
+
+/**
+ * 2. ИЗ UTC В ИНПУТ (Для заполнения форм / Редактирование в модальных окнах)
+ * 
+ * Назначение: Принимает строку UTC от API, сдвигает её на часовой пояс текущего
+ * пользователя и форматирует строго в технический вид "YYYY-MM-DDTHH:mm".
+ * Без этой функции HTML-инпут <input type="datetime-local"> останется пустым.
+ * 
+ * @param {string|null|undefined} utcString - Строка даты в UTC от бэкенда (например, "2026-10-15T11:00:00Z")
+ * @returns {string} Строка для установки в .val() инпута, либо пустая строка.
+ */
+function formatForDateTimeLocal(utcString) {
+    if (!utcString || String(utcString).trim() === '') {
+        return '';
+    }
+
+    let normalizedStr = String(utcString).trim();
+
+    // Гарантируем, что строка парсится строго как UTC, даже если сервер стёр 'Z'
+    if (!normalizedStr.endsWith('Z') && !normalizedStr.includes('+') && !normalizedStr.match(/-\d{2}:\d{2}$/)) {
+        normalizedStr += 'Z';
+    }
+
+    const date = new Date(normalizedStr);
+
+    if (isNaN(date.getTime())) {
+        return '';
+    }
+
+    // Сдвигаем UTC-время на смещение часового пояса пользователя (в миллисекундах)
+    const clientOffsetMs = date.getTimezoneOffset() * 60000;
+    const localDate = new Date(date.getTime() - clientOffsetMs);
+
+    // Обрезаем строку до секунд, оставляя формат "YYYY-MM-DDTHH:mm"
+    return localDate.toISOString().slice(0, 16);
+}
+
+/**
+ * 3. ИЗ UTC В ТЕКСТ (Для чтения человеком / Рендеринг карточек и таблиц)
+ * 
+ * Назначение: Принимает строку UTC от бэкенда (включая авто-даты вроде CreatedAt),
+ * автоматически определяет язык браузера, текущую временную зону пользователя
+ * и выводит красивый, привычный для человека текст.
+ * 
+ * @param {string|null|undefined} utcString - Строка даты в UTC (например, "2026-10-15T11:00:00Z")
+ * @returns {string} Локализованная строка даты и времени, либо прочерк.
+ */
+function formatToReadableText(utcString) {
+    if (!utcString || String(utcString).trim() === '') {
+        return '—';
+    }
+
+    let normalizedStr = String(utcString).trim();
+
+    // Если сервер забыл прислать 'Z' или знак смещения, дописываем 'Z' (UTC)
+    if (!normalizedStr.endsWith('Z') && !normalizedStr.includes('+') && !normalizedStr.match(/-\d{2}:\d{2}$/)) {
+        normalizedStr += 'Z';
+    }
+
+    const date = new Date(normalizedStr);
+    if (isNaN(date.getTime())) return '—';
+
+    return date.toLocaleString([], {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+    });
+}
+
+/* ==========================================================================
+   КОНЕЦ РЕГИОНА РАБОТЫ С ДАТАМИ
+   ========================================================================== */
