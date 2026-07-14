@@ -56,6 +56,8 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<ResidenceViewModel>> Create([FromBody] CreateResidenceViewModel createResidence, CancellationToken cancellationToken)
         {
+            LogResidenceCreationRequested(_logger, createResidence);
+
             CreateResidenceDto createDto = _residenceMapper.ToDto(createResidence);
             ResidenceDto createdDto = await _residenceService.CreateAsync(createDto, cancellationToken);
             ResidenceViewModel createdViewModel = _residenceMapper.ToViewModel(createdDto);
@@ -67,6 +69,8 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpPut("{id:long}")]
         public async Task<ActionResult<ResidenceViewModel>> Edit([FromRoute] long id, [FromBody] EditResidenceViewModel editViewModel, CancellationToken cancellationToken)
         {
+            LogResidenceUpdateRequested(_logger, id, editViewModel);
+
             EditResidenceDto editDto = _residenceMapper.ToDto(editViewModel);
             ResidenceDto? updatedDto = await _residenceService.EditAsync(id, editDto, cancellationToken);
             if (updatedDto is null)
@@ -83,6 +87,8 @@ namespace UtilityPaymentJournal.Controllers.Api
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
+            LogResidenceDeletionRequested(_logger, id);
+
             bool isDeleted = await _residenceService.DeleteAsync(id, cancellationToken);
             if (!isDeleted)
             {
@@ -96,26 +102,35 @@ namespace UtilityPaymentJournal.Controllers.Api
 
         #region Шаблоны логов
 
-        [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Жилой объект {ResidenceId} успешно удален из системы")]
+        [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Жилой объект {ResidenceId} удален")]
         private static partial void LogResidenceDeleted(ILogger logger, long residenceId);
 
-        [LoggerMessage(EventId = 1002, Level = LogLevel.Information, Message = "Создан новый жилой объект с ID {ResidenceId}")]
+        [LoggerMessage(EventId = 1002, Level = LogLevel.Information, Message = "Создан жилой объект {ResidenceId}")]
         private static partial void LogResidenceCreated(ILogger logger, long residenceId);
 
-        [LoggerMessage(EventId = 1003, Level = LogLevel.Information, Message = "Жилой объект {ResidenceId} успешно обновлен")]
+        [LoggerMessage(EventId = 1003, Level = LogLevel.Information, Message = "Обновлен жилой объект {ResidenceId}")]
         private static partial void LogResidenceUpdated(ILogger logger, long residenceId);
 
         [LoggerMessage(EventId = 1004, Level = LogLevel.Debug, Message = "Запрос на получение всех жилых объектов")]
         private static partial void LogFetchingAllResidences(ILogger logger);
 
-        [LoggerMessage(EventId = 1005, Level = LogLevel.Debug, Message = "Успешно получено {Count} жилых объектов")]
+        [LoggerMessage(EventId = 1005, Level = LogLevel.Debug, Message = "Получено {Count} жилых объектов")]
         private static partial void LogFetchedAllResidencesCount(ILogger logger, int count);
 
-        [LoggerMessage(EventId = 1006, Level = LogLevel.Warning, Message = "Жилой объект с ID {ResidenceId} не найден в системе")]
+        [LoggerMessage(EventId = 1006, Level = LogLevel.Warning, Message = "Жилой объект {ResidenceId} не найден")]
         private static partial void LogResidenceNotFound(ILogger logger, long residenceId);
 
         [LoggerMessage(EventId = 1007, Level = LogLevel.Warning, Message = "Не удалось удалить жилой объект {ResidenceId}: объект не найден")]
         private static partial void LogResidenceDeleteFailedNotFound(ILogger logger, long residenceId);
+
+        [LoggerMessage(EventId = 1008, Level = LogLevel.Information, Message = "Запрос на создание жилого объекта: {@ResidenceData}")]
+        private static partial void LogResidenceCreationRequested(ILogger logger, CreateResidenceViewModel residenceData);
+
+        [LoggerMessage(EventId = 1009, Level = LogLevel.Information, Message = "Запрос на обновление жилого объекта {ResidenceId}: {@ResidenceData}")]
+        private static partial void LogResidenceUpdateRequested(ILogger logger, long residenceId, EditResidenceViewModel residenceData);
+
+        [LoggerMessage(EventId = 1010, Level = LogLevel.Information, Message = "Запрос на удаление жилого объекта {ResidenceId}")]
+        private static partial void LogResidenceDeletionRequested(ILogger logger, long residenceId);
 
         #endregion
     }
