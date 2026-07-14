@@ -9,6 +9,8 @@ services:
     depends_on:
       db:
         condition: service_healthy 
+    ports:                           
+      - "5121:8080"
 
   db:
     image: postgres:15-alpine
@@ -21,12 +23,21 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U puser -d postgredb"]
       interval: 3s
       timeout: 3s
       retries: 5
+
+  seq_server:
+    image: datalust/seq:2024.3
+    container_name: seq_server
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+    ports:  
+      - "8090:80"   
+      - "5341:5341"  
 
 volumes:
   pgdata:

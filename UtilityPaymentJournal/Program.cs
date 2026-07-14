@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Globalization;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
@@ -162,12 +163,20 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
+// Подключаем Serilog и заставляем его читать appsettings.json
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
+
 // Глобальная настройка для драйвера базы данных PostgreSQL (Npgsql).
 // Принудительно заставляет .NET помечать все даты, выгружаемые из колонок 'timestamptz', 
 // как DateTimeKind.Utc, исключая появление типа 'Unspecified'.
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
 
 var app = builder.Build();
+
+// Собирает данные о HTTP-запросе в один структурированный JSON-объект для Seq
+// (сохраняет метод, URL, статус-код и скорость ответа как отдельные поля для поиска)
+app.UseSerilogRequestLogging();
 
 // Активирует централизованную обработку ошибок. Все исключения из контроллеров и сервисов 
 // будут поочередно проходить через кастомные обработчики (NotFound, Database, Global), 
@@ -195,18 +204,37 @@ app.MapControllerRoute(
     pattern: "{controller=Account}/{action=Index}/{id?}");
 
 // Автоматическое применение миграций при старте контейнера
-using (var scope = app.Services.CreateScope())
+//using (var scope = app.Services.CreateScope())
+//{
+//    try
+//    {
+//        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//        db.Database.Migrate();
+//    }
+//    catch (Exception ex)
+//    {
+//        // Здесь можно логировать ошибку, если база данных еще не успела подняться
+//        Console.WriteLine($"Ошибка при применении миграций: {ex.Message}");
+//    }
+//}
+_ = Task.Run(async () =>
 {
+    // Небольшая пауза, чтобы Kestrel и Seq успели занять порты на старте
+    await Task.Delay(TimeSpan.FromSeconds(2));
+
+    using var scope = app.Services.CreateScope();
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        db.Database.Migrate();
+        await db.Database.MigrateAsync();
+        Console.WriteLine("=== База данных успешно проверена, миграции применены ===");
     }
     catch (Exception ex)
     {
-        // Здесь можно логировать ошибку, если база данных еще не успела подняться
-        Console.WriteLine($"Ошибка при применении миграций: {ex.Message}");
+        Console.WriteLine($"=== КРИТИЧЕСКАЯ ОШИБКА МИГРАЦИИ БД: {ex.Message} ===");
     }
-}
+});
 
 app.Run();
+
+

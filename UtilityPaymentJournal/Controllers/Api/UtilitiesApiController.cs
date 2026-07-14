@@ -8,17 +8,20 @@ namespace UtilityPaymentJournal.Controllers.Api
 {
     [ApiController]
     [Route("api/utilities")]
-    public class UtilitiesApiController : ControllerBase
+    public partial class UtilitiesApiController : ControllerBase
     {
         private readonly IUtilityService _utilityService;
         private readonly IUtilityMapper _utilityMapper;
+        private readonly ILogger<UtilitiesApiController> _logger;
 
         public UtilitiesApiController(
             IUtilityService utilityService,
-            IUtilityMapper utilityMapper)
+            IUtilityMapper utilityMapper,
+            ILogger<UtilitiesApiController> logger)
         {
             _utilityService = utilityService;
             _utilityMapper = utilityMapper;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -84,7 +87,15 @@ namespace UtilityPaymentJournal.Controllers.Api
                 return NotFound($"Не удалось удалить. Услуга с ID {id} не найдена.");
             }
 
+            LogUtilityDeleted(_logger, id);
             return NoContent();
         }
+
+        #region Logger Messages
+
+        [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Услуга {id} успешно удалена из системы")]
+        private static partial void LogUtilityDeleted(ILogger logger, long id);
+
+        #endregion
     }
 }
