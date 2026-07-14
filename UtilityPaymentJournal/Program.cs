@@ -5,11 +5,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Globalization;
+using System.Security.Claims;
+using UtilityPaymentJournal.Common.Constants;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
 using UtilityPaymentJournal.Infrastructure.Identity;
 using UtilityPaymentJournal.Infrastructure.JsonConverters;
+using UtilityPaymentJournal.Infrastructure.Middlewares;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Mapping;
@@ -78,6 +81,8 @@ builder.Services.AddScoped<IWaterReadingService, WaterReadingService>();
 builder.Services.AddScoped<IElectricityReadingService, ElectricityReadingService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
+// –егистраци€ Middleware дл€ добавлени€ ID пользовател€ в контекст логировани€
+builder.Services.AddScoped<UserLoggingMiddleware>();
 
 
 // –егистрируем маппер как Singleton (так как в нем нет состо€ни€)
@@ -176,7 +181,19 @@ var app = builder.Build();
 
 // —обирает данные о HTTP-запросе в один структурированный JSON-объект дл€ Seq
 // (сохран€ет метод, URL, статус-код и скорость ответа как отдельные пол€ дл€ поиска)
-app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging(options =>
+{
+    // ќбогащает финальный лог ответа (например: "HTTP GET /residences responded 200") данными (ID) пользовател€.
+    // Ёто необходимо, так как подобный системный лог записываетс€ вне зоны видимости кастомного UserLoggingMiddleware.
+    options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+    {
+        string? userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(userId))
+        {
+            diagnosticContext.Set(LogPropertyConstants.UserId, userId);
+        }
+    };
+});
 
 // јктивирует централизованную обработку ошибок. ¬се исключени€ из контроллеров и сервисов 
 // будут поочередно проходить через кастомные обработчики (NotFound, Database, Global), 
@@ -195,8 +212,13 @@ app.UseRequestLocalization();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+
+// —перва подключаем аутентификацию (кем €вл€етс€ пользвователь?) и авторизацию (какие у него права)
 app.UseAuthentication();
 app.UseAuthorization();
+
+// «атем обогащаем логи данными пользовател€ (он уже распознан системой Identity)
+app.UseMiddleware<UserLoggingMiddleware>();
 
 app.MapControllers(); // ѕозволит атрибутам [Route(...)] работать на 100% правильно
 app.MapControllerRoute(
