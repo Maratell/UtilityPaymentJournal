@@ -70,8 +70,8 @@ namespace UtilityPaymentJournal.Controllers.Api
             EditResidenceDto editDto = _residenceMapper.ToDto(editViewModel);
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
             ResidenceDto updatedDto = await _residenceService.EditAsync(id, editDto, cancellationToken);
-
             ResidenceViewModel updatedViewModel = _residenceMapper.ToViewModel(updatedDto);
+
             LogResidenceUpdated(_logger, id);
             return Ok(updatedViewModel);
         }
