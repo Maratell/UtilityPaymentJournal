@@ -7,82 +7,110 @@ using Microsoft.EntityFrameworkCore;
 
 namespace UtilityPaymentJournal.Services
 {
-    public class ComplaintService : IComplaintService
+    public partial class ComplaintService : IComplaintService
     {
         private readonly ApplicationDbContext _context;
         private readonly IComplaintMapper _complaintMapper;
+        private readonly ILogger<ComplaintService> _logger;
 
         public ComplaintService(
             ApplicationDbContext context,
-            IComplaintMapper complaintMapper)
+            IComplaintMapper complaintMapper,
+            ILogger<ComplaintService> logger)
         {
-            _context = context;
-            _complaintMapper = complaintMapper;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _complaintMapper = complaintMapper ?? throw new ArgumentNullException(nameof(complaintMapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<ComplaintDto> CreateAsync(CreateComplaintDto createDto, CancellationToken cancellationToken = default)
         {
+            LogComplaintCreationRequested(_logger, createDto.UtilityId, createDto.Title);
             Complaint entity = _complaintMapper.ToEntity(createDto);
 
             // Используем синхронный Add, так как операция происходит в памяти
             _context.Complaints.Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Подтягиваем полные детали из бд 
-            Complaint? savedEntity = await FindEntityAsync(entity.Id, includeDetails: true, cancellationToken);
+            // Подгружаем связи к entity
+            await LoadDetailsAsync(entity, cancellationToken);
 
-            return _complaintMapper.ToDto(savedEntity ?? entity);
+            LogComplaintCreatedInDb(_logger, entity.Id);
+            return _complaintMapper.ToDto(entity);
         }
 
-        public async Task<ComplaintDto?> GetByIdAsync(long id, CancellationToken cancellationToken = default)
+        public async Task<ComplaintDto> GetByIdAsync(long id, CancellationToken cancellationToken = default)
         {
+            LogFetchingComplaintByIdFromDb(_logger, id);
+
             // Загружаем entity со всеми деталями для передачи клиенту
             Complaint? entity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
+            if (entity is null)
+            {
+                LogComplaintNotFoundInDb(_logger, id);
+                throw new KeyNotFoundException($"Жалоба с ID {id} не найдена.");
+            }
 
-            return entity is null ? null : _complaintMapper.ToDto(entity);
+            return _complaintMapper.ToDto(entity);
         }
 
-        public async Task<ComplaintDto?> EditAsync(long id, EditComplaintDto editDto, CancellationToken cancellationToken = default)
+        public async Task<ComplaintDto> EditAsync(long id, EditComplaintDto editDto, CancellationToken cancellationToken = default)
         {
-            // Подход с двумя загрузками:
+            LogComplaintUpdateRequested(_logger, id, editDto.UtilityId, editDto.Title);
+
             // 1. Загружаем "легковесное" entity без связанных деталей
             Complaint? entity = await FindEntityAsync(id, includeDetails: false, cancellationToken);
             if (entity is null)
-                return null;
+            {
+                LogComplaintNotFoundInDb(_logger, id);
+                throw new KeyNotFoundException($"Жалоба с ID {id} не найдена в базе данных.");
+            }
 
+            // 2. Обновляем entity и сохраняем в бд
             _complaintMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // 2. После SaveChangesAsync EF Core зануляет или оставляет устаревшими навигационные свойства связей в памяти (Identity Map).
-            // Делаем повторный запрос с includeDetails: true, чтобы принудительно выкачать из бд актуальный объект 
-            // с обновленными связанными данными для корректного маппинга на фронтенд.
-            Complaint? updatedEntity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
-            return _complaintMapper.ToDto(updatedEntity ?? entity);
+            // 3. Подгружаем связи к entity
+            await LoadDetailsAsync(entity, cancellationToken);
+
+            LogComplaintUpdatedInDb(_logger, id);
+            return _complaintMapper.ToDto(entity);
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
         {
+            LogComplaintDeletionRequested(_logger, id);
+
             // EF Core сразу генерирует SQL: DELETE FROM Complaints WHERE Id = @id
-            // Метод возвращает количество удаленных строк (0 или 1) без предварительной выгрузки сущности в память
             int deletedRowsCount = await _context.Complaints
                 .Where(w => w.Id == id)
                 .ExecuteDeleteAsync(cancellationToken);
 
-            // Если удалена 1 строка — возвращаем true, если 0 (id не найден) — возвращаем false
-            return deletedRowsCount > 0;
+            if (deletedRowsCount == 0)
+            {
+                LogComplaintNotFoundInDb(_logger, id);
+                throw new KeyNotFoundException($"Не удалось удалить. Жалоба с ID {id} не найдена.");
+            }
+
+            LogComplaintDeletedFromDb(_logger, id);
+            return true;
         }
 
         public async Task<IReadOnlyCollection<ComplaintDto>> GetAllAsync(CancellationToken cancellationToken = default)
         {
+            LogFetchingAllComplaintsFromDb(_logger);
+
             // Извлекаем данные из БД с жадной загрузкой (Eager Loading) связанных услуг
             List<Complaint> entities = await _context.Complaints
                 .Include(c => c.Utility)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
+            LogFetchedAllComplaintsFromDbCount(_logger, entities.Count);
+
             return entities
                 .Select(e => _complaintMapper.ToDto(e))
-                .ToList();
+                .ToArray();
         }
 
         private async Task<Complaint?> FindEntityAsync(long id, bool includeDetails, CancellationToken cancellationToken)
@@ -94,7 +122,15 @@ namespace UtilityPaymentJournal.Services
                 query = query.Include(c => c.Utility);
             }
 
-            return await query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+            return await query.SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
+        }
+
+        private async Task LoadDetailsAsync(Complaint entity, CancellationToken cancellationToken)
+        {
+            await _context
+                .Entry(entity)
+                .Reference(e => e.Utility)
+                .LoadAsync(cancellationToken);
         }
     }
 }
