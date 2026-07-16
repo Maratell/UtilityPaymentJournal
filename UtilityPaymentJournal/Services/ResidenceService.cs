@@ -44,7 +44,6 @@ namespace UtilityPaymentJournal.Services
             if (entity == null)
             {
                 LogResidenceNotFoundInDb(_logger, id);
-                // Исключение автоматически перехватит кастомный NotFoundExceptionHandler
                 throw new KeyNotFoundException($"Жилой объект с ID {id} не найден в базе данных.");
             }
 
@@ -68,7 +67,6 @@ namespace UtilityPaymentJournal.Services
             if (deletedRowsCount == 0)
             {
                 LogResidenceNotFoundInDb(_logger, id);
-                // Исключение автоматически перехватит кастомный NotFoundExceptionHandler
                 throw new KeyNotFoundException($"Не удалось удалить. Жилой объект с ID {id} не найден.");
             }
 
@@ -102,7 +100,6 @@ namespace UtilityPaymentJournal.Services
             if (entity is null)
             {
                 LogResidenceNotFoundInDb(_logger, id);
-                // Исключение автоматически перехватит кастомный NotFoundExceptionHandler
                 throw new KeyNotFoundException($"Жилой объект с ID {id} не найден.");
             }
 

@@ -1,8 +1,9 @@
 ﻿using UtilityPaymentJournal.Common.Extensions;
 using UtilityPaymentJournal.DTOs.WaterReadings;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
+using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Models.WaterReadings;
-using WaterReadingPaymentJournal.Interface.Mapping;
+
 
 namespace WaterReadingPaymentJournal.Mapping
 {

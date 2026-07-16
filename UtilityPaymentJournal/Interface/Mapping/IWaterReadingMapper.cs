@@ -2,7 +2,7 @@
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
 using UtilityPaymentJournal.Models.WaterReadings;
 
-namespace WaterReadingPaymentJournal.Interface.Mapping
+namespace UtilityPaymentJournal.Interface.Mapping
 {
     public interface IWaterReadingMapper
     {
