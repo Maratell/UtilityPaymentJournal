@@ -18,10 +18,7 @@ using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Mapping;
 using UtilityPaymentJournal.Services;
 using UtilityProviderPaymentJournal.Interface.Mapping;
-using WaterReadingPaymentJournal.Interface.Mapping;
-using WaterReadingPaymentJournal.Interface.Service;
 using WaterReadingPaymentJournal.Mapping;
-using WaterReadingPaymentJournal.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
