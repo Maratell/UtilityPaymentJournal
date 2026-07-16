@@ -2,7 +2,7 @@
 {
     public partial class UtilitiesApiController
     {
-        #region Начало выполнения операций (Уровень Information) ---
+        #region Начало выполнения операций (Уровень Information)
 
         [LoggerMessage(EventId = 1208, Level = LogLevel.Information, Message = "Запрос на создание коммунальной услуги. Название: {name}")]
         private static partial void LogUtilityCreationRequested(ILogger<UtilitiesApiController> logger, string name);
@@ -15,7 +15,7 @@
 
         #endregion
 
-        #region Успешный финал операций (Уровень Information) ---
+        #region Успешный финал операций (Уровень Information)
 
         [LoggerMessage(EventId = 1201, Level = LogLevel.Information, Message = "Коммунальная услуга с ID: {id} успешно удалена из системы")]
         private static partial void LogUtilityDeleted(ILogger<UtilitiesApiController> logger, long id);
@@ -28,7 +28,7 @@
 
         #endregion
 
-        #region Чтение данных (Уровень Debug для снижения шума в Seq) ---
+        #region Чтение данных (Уровень Debug)
 
         [LoggerMessage(EventId = 1204, Level = LogLevel.Debug, Message = "Запрос на получение списка всех коммунальных услуг")]
         private static partial void LogFetchingAllUtilities(ILogger<UtilitiesApiController> logger);

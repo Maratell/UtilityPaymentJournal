@@ -43,8 +43,8 @@ namespace UtilityPaymentJournal.Controllers.Api
         {
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
             WaterReadingDto dto = await _waterReadingService.GetByIdAsync(id, cancellationToken);
-
             WaterReadingViewModel viewModel = _waterReadingMapper.ToViewModel(dto);
+
             return Ok(viewModel);
         }
 

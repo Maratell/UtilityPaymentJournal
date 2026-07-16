@@ -2,7 +2,7 @@
 {
     public partial class UtilityProvidersApiController
     {
-        #region Начало выполнения операций (Уровень Information) ---
+        #region Начало выполнения операций (Уровень Information)
 
         [LoggerMessage(EventId = 1108, Level = LogLevel.Information, Message = "Запрос на создание поставщика услуг. Название: {name}")]
         private static partial void LogUtilityProviderCreationRequested(ILogger<UtilityProvidersApiController> logger, string name);
@@ -15,7 +15,7 @@
 
         #endregion
 
-        #region Успешный финал операций (Уровень Information) ---
+        #region Успешный финал операций (Уровень Information)
 
         [LoggerMessage(EventId = 1101, Level = LogLevel.Information, Message = "Поставщик услуг с ID: {id} успешно удален из системы")]
         private static partial void LogUtilityProviderDeleted(ILogger<UtilityProvidersApiController> logger, long id);
@@ -28,7 +28,7 @@
 
         #endregion
 
-        #region Чтение данных (Уровень Debug для снижения шума в Seq) ---
+        #region Чтение данных (Уровень Debug)
 
         [LoggerMessage(EventId = 1104, Level = LogLevel.Debug, Message = "Запрос на получение списка всех поставщиков услуг")]
         private static partial void LogFetchingAllUtilityProviders(ILogger<UtilityProvidersApiController> logger);

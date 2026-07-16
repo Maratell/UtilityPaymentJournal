@@ -44,8 +44,8 @@ namespace UtilityPaymentJournal.Controllers.Api
         {
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
             ResidenceDto dto = await _residenceService.GetByIdAsync(id, cancellationToken);
-
             ResidenceViewModel viewModel = _residenceMapper.ToViewModel(dto);
+
             return Ok(viewModel);
         }
 
