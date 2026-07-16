@@ -28,20 +28,15 @@ namespace UtilityPaymentJournal.Services
             LogWaterReadingCreationRequested(_logger, createDto.CurrentValue);
             WaterReading entity = _waterReadingMapper.ToEntity(createDto);
 
-            // используем синхронный Add, так как операция происходит в памяти
+            // Используем синхронный Add, так как операция происходит в памяти
             _context.WaterReadings.Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Пытаемся подтянуть полные детали из бд
-            WaterReading? savedEntity = await FindEntityAsync(entity.Id, includeDetails: true, cancellationToken);
-            if (savedEntity == null)
-            {
-                LogWaterReadingNotFoundInDb(_logger, entity.Id);
-                throw new KeyNotFoundException($"Критическая ошибка: Созданная запись показания счетчика с ID {entity.Id} не найдена в БД после сохранения.");
-            }
+            // Подгружаем к entity связанные свойства для актуализации данных в памяти
+            await LoadDetailsAsync(entity, cancellationToken);
 
-            LogWaterReadingCreatedInDb(_logger, savedEntity.Id);
-            return _waterReadingMapper.ToDto(savedEntity);
+            LogWaterReadingCreatedInDb(_logger, entity.Id);
+            return _waterReadingMapper.ToDto(entity);
         }
 
         public async Task<WaterReadingDto> EditAsync(long id, EditWaterReadingDto editDto, CancellationToken cancellationToken = default)
@@ -57,21 +52,15 @@ namespace UtilityPaymentJournal.Services
                 throw new KeyNotFoundException($"Показание счетчика воды с ID {id} не найдено в базе данных.");
             }
 
+            // 2. Обновляем и сохраняем данные в бд
             _waterReadingMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // 2. После SaveChangesAsync EF Core зануляет или оставляет устаревшими навигационные свойства связей в памяти (Identity Map).
-            // Делаем повторный запрос с includeDetails: true, чтобы принудительно выкачать из бд актуальный объект 
-            // с обновленными связанными данными для корректного маппинга на фронтенд.
-            WaterReading? updatedEntity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
-            if (updatedEntity == null)
-            {
-                LogWaterReadingNotFoundInDb(_logger, id);
-                throw new KeyNotFoundException($"Критическая ошибка: Обновленная запись показания счетчика с ID {id} исчезла из БД.");
-            }
+            // 3. Подгружаем к entity связанные свойства для актуализации данных в памяти
+            await LoadDetailsAsync(entity, cancellationToken);
 
             LogWaterReadingUpdatedInDb(_logger, id);
-            return _waterReadingMapper.ToDto(updatedEntity);
+            return _waterReadingMapper.ToDto(entity);
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
@@ -103,7 +92,6 @@ namespace UtilityPaymentJournal.Services
                 .Include(w => w.Residence)
                 .Include(w => w.UtilityProvider)
                 .AsNoTracking()
-                .AsSplitQuery()
                 .ToListAsync(cancellationToken);
 
             LogFetchedAllWaterReadingsFromDbCount(_logger, entities.Count);
@@ -139,7 +127,21 @@ namespace UtilityPaymentJournal.Services
                     .Include(w => w.UtilityProvider);
             }
 
-            return await query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+            return await query.SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
+        }
+
+        private async Task LoadDetailsAsync(WaterReading entity, CancellationToken cancellationToken)
+        {
+            // Последовательно дозагружаем связанные сущности по ссылке в рамках трекера
+            await _context
+                .Entry(entity)
+                .Reference(e => e.Residence)
+                .LoadAsync(cancellationToken);
+
+            await _context
+                .Entry(entity)
+                .Reference(e => e.UtilityProvider)
+                .LoadAsync(cancellationToken);
         }
     }
 }

@@ -32,7 +32,7 @@ namespace UtilityPaymentJournal.Services
             _context.Complaints.Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Подгружаем связи к entity
+            // Подгружаем к entity связанные свойства для актуализации данных в памяти
             await LoadDetailsAsync(entity, cancellationToken);
 
             LogComplaintCreatedInDb(_logger, entity.Id);
@@ -70,7 +70,7 @@ namespace UtilityPaymentJournal.Services
             _complaintMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // 3. Подгружаем связи к entity
+            // 3. Подгружаем к entity связанные свойства для актуализации данных в памяти
             await LoadDetailsAsync(entity, cancellationToken);
 
             LogComplaintUpdatedInDb(_logger, id);

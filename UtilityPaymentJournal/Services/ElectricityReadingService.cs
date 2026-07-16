@@ -28,27 +28,21 @@ namespace UtilityPaymentJournal.Services
             LogElectricityReadingCreationRequested(_logger, createDto.CurrentValue);
             ElectricityReading entity = _electricityReadingMapper.ToEntity(createDto);
 
-            // используем синхронный Add, так как операция происходит в памяти
+            // Используем синхронный Add, так как операция происходит в памяти
             _context.ElectricityReadings.Add(entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // Пытаемся подтянуть полные детали из бд
-            ElectricityReading? savedEntity = await FindEntityAsync(entity.Id, includeDetails: true, cancellationToken);
-            if (savedEntity == null)
-            {
-                LogElectricityReadingNotFoundInDb(_logger, entity.Id);
-                throw new KeyNotFoundException($"Критическая ошибка: Созданная запись показания счетчика электроэнергии с ID {entity.Id} не найдена в БД после сохранения.");
-            }
+            // Подгружаем к entity связанные свойства для актуализации данных в памяти
+            await LoadDetailsAsync(entity, cancellationToken);
 
-            LogElectricityReadingCreatedInDb(_logger, savedEntity.Id);
-            return _electricityReadingMapper.ToDto(savedEntity);
+            LogElectricityReadingCreatedInDb(_logger, entity.Id);
+            return _electricityReadingMapper.ToDto(entity);
         }
 
         public async Task<ElectricityReadingDto> EditAsync(long id, EditElectricityReadingDto editDto, CancellationToken cancellationToken = default)
         {
             LogElectricityReadingUpdateRequested(_logger, id, editDto.CurrentValue);
 
-            // Подход с двумя загрузками:
             // 1. Загружаем "легковесное" entity без связанных деталей
             ElectricityReading? entity = await FindEntityAsync(id, includeDetails: false, cancellationToken: cancellationToken);
             if (entity == null)
@@ -57,21 +51,15 @@ namespace UtilityPaymentJournal.Services
                 throw new KeyNotFoundException($"Показание счетчика электроэнергии с ID {id} не найдено в базе данных.");
             }
 
+            // 2. Обновляем и сохраняем данные в бд
             _electricityReadingMapper.UpdateEntity(editDto, entity);
             await _context.SaveChangesAsync(cancellationToken);
 
-            // 2. После SaveChangesAsync EF Core зануляет или оставляет устаревшими навигационные свойства связей в памяти (Identity Map).
-            // Делаем повторный запрос с includeDetails: true, чтобы принудительно выкачать из бд актуальный объект 
-            // с обновленными связанными данными для корректного маппинга на фронтенд.
-            ElectricityReading? updatedEntity = await FindEntityAsync(id, includeDetails: true, cancellationToken);
-            if (updatedEntity == null)
-            {
-                LogElectricityReadingNotFoundInDb(_logger, id);
-                throw new KeyNotFoundException($"Критическая ошибка: Обновленная запись показания счетчика электроэнергии с ID {id} исчезла из БД.");
-            }
+            // 3. Подгружаем к entity связанные свойства для актуализации данных в памяти
+            await LoadDetailsAsync(entity, cancellationToken);
 
             LogElectricityReadingUpdatedInDb(_logger, id);
-            return _electricityReadingMapper.ToDto(updatedEntity);
+            return _electricityReadingMapper.ToDto(entity);
         }
 
         public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken = default)
@@ -103,7 +91,6 @@ namespace UtilityPaymentJournal.Services
                 .Include(w => w.Residence)
                 .Include(w => w.UtilityProvider)
                 .AsNoTracking()
-                .AsSplitQuery()
                 .ToListAsync(cancellationToken);
 
             LogFetchedAllElectricityReadingsFromDbCount(_logger, entities.Count);
@@ -139,7 +126,21 @@ namespace UtilityPaymentJournal.Services
                     .Include(w => w.UtilityProvider);
             }
 
-            return await query.FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
+            return await query.SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
+        }
+
+        private async Task LoadDetailsAsync(ElectricityReading entity, CancellationToken cancellationToken)
+        {
+            // Последовательно дозагружаем обе связанные сущности по ссылке в рамках одной транзакции трекера
+            await _context
+                .Entry(entity)
+                .Reference(e => e.Residence)
+                .LoadAsync(cancellationToken);
+
+            await _context
+                .Entry(entity)
+                .Reference(e => e.UtilityProvider)
+                .LoadAsync(cancellationToken);
         }
     }
 }
