@@ -4,7 +4,7 @@ namespace UtilityPaymentJournal.Controllers.Api
 {
     public partial class ResidencesApiController
     {
-        #region Начало выполнения операций (Уровень Information) ---
+        #region Начало выполнения операций (Уровень Information)
 
         [LoggerMessage(EventId = 1008, Level = LogLevel.Information, Message = "Запрос на создание жилого объекта. Адрес: {address}")]
         private static partial void LogResidenceCreationRequested(ILogger<ResidencesApiController> logger, string address);
@@ -17,7 +17,7 @@ namespace UtilityPaymentJournal.Controllers.Api
 
         #endregion
 
-        #region Успешный финал операций (Уровень Information) ---
+        #region Успешный финал операций (Уровень Information)
 
         [LoggerMessage(EventId = 1001, Level = LogLevel.Information, Message = "Жилой объект с ID: {id} успешно удален из системы")]
         private static partial void LogResidenceDeleted(ILogger<ResidencesApiController> logger, long id);
@@ -30,7 +30,7 @@ namespace UtilityPaymentJournal.Controllers.Api
 
         #endregion
 
-        #region Чтение данных (Уровень Debug) ---
+        #region Чтение данных (Уровень Debug)
 
         [LoggerMessage(EventId = 1004, Level = LogLevel.Debug, Message = "Запрос на получение всех жилых объектов")]
         private static partial void LogFetchingAllResidences(ILogger<ResidencesApiController> logger);

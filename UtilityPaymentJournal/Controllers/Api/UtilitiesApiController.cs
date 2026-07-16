@@ -43,8 +43,8 @@ namespace UtilityPaymentJournal.Controllers.Api
         {
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
             UtilityDto dto = await _utilityService.GetByIdAsync(id, cancellationToken);
-
             UtilityViewModel viewModel = _utilityMapper.ToViewModel(dto);
+
             return Ok(viewModel);
         }
 
