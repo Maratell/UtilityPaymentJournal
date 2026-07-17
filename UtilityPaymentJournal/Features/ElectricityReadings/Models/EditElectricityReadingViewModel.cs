@@ -2,10 +2,12 @@
 
 namespace UtilityPaymentJournal.Features.ElectricityReadings.Models
 {
+    /// <summary>
+    /// Модель представления для редактирования существующего показания счетчика электроэнергии.
+    /// Идентификатор изменяемой записи (Id) передается через маршрут URL.
+    /// </summary>
     public class EditElectricityReadingViewModel
     {
-        public long Id { get; set; }
-
         [Display(Name = "Жилой объект")]
         [Required(ErrorMessage = "Пожалуйста, выберите жилой объект")]
         [Range(1, long.MaxValue, ErrorMessage = "Некорректный ID жилого объекта")]

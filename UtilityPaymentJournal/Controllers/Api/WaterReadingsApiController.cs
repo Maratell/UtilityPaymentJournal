@@ -1,90 +1,94 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.DTOs.WaterReadings;
+using UtilityPaymentJournal.Features.WaterReadings.Commands;
+using UtilityPaymentJournal.Features.WaterReadings.Models;
+using UtilityPaymentJournal.Features.WaterReadings.Queries;
 using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Models.WaterReadings;
 
 namespace UtilityPaymentJournal.Controllers.Api
 {
+    /// <summary>
+    /// АПИ-контроллер для управления показаниями счетчиков воды.
+    /// </summary>
     [ApiController]
     [Route("api/water-readings")]
     public partial class WaterReadingsApiController : ControllerBase
     {
-        private readonly IWaterReadingService _waterReadingService;
+        private readonly IWaterReadingQueryService _queryService;
+        private readonly IWaterReadingCommandService _commandService;
         private readonly IWaterReadingMapper _waterReadingMapper;
-        private readonly ILogger<WaterReadingsApiController> _logger;
 
         public WaterReadingsApiController(
-            IWaterReadingService waterReadingService,
-            IWaterReadingMapper waterReadingMapper,
-            ILogger<WaterReadingsApiController> logger)
+            IWaterReadingQueryService queryService,
+            IWaterReadingCommandService commandService,
+            IWaterReadingMapper waterReadingMapper)
         {
-            _waterReadingService = waterReadingService ?? throw new ArgumentNullException(nameof(waterReadingService));
+            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
             _waterReadingMapper = waterReadingMapper ?? throw new ArgumentNullException(nameof(waterReadingMapper));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<WaterReadingViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<IReadOnlyCollection<WaterReadingDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            LogFetchingAllWaterReadings(_logger);
-
-            IEnumerable<WaterReadingDto> dtos = await _waterReadingService.GetAllAsync(cancellationToken);
-            WaterReadingViewModel[] viewModels = dtos
-                .Select(dto => _waterReadingMapper.ToViewModel(dto))
+            // Используем сервис запросов (Queries) для получения полного списка со всеми Include
+            IReadOnlyCollection<WaterReadingQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
+            WaterReadingDetailsViewModel[] viewModels = dtos
+                .Select(r => _waterReadingMapper.ToViewModel(r))
                 .ToArray();
 
-            LogFetchedAllWaterReadingsCount(_logger, viewModels.Length);
             return Ok(viewModels);
         }
 
+        /// <summary>
+        /// Получить развернутые детали показания счетчика воды по его уникальному идентификатору.
+        /// </summary>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<WaterReadingViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<WaterReadingDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            WaterReadingDto dto = await _waterReadingService.GetByIdAsync(id, cancellationToken);
-            WaterReadingViewModel viewModel = _waterReadingMapper.ToViewModel(dto);
+            WaterReadingQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
+            WaterReadingDetailsViewModel viewModel = _waterReadingMapper.ToViewModel(dto);
 
             return Ok(viewModel);
         }
 
-
+        /// <summary>
+        /// Создать новую запись показания счетчика воды.
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<WaterReadingViewModel>> Create([FromBody] CreateWaterReadingViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<WaterReadingCreatedViewModel>> Create([FromBody] CreateWaterReadingViewModel createViewModel, CancellationToken cancellationToken)
         {
-            LogWaterReadingCreationRequested(_logger, createViewModel.CurrentValue);
-
             CreateWaterReadingDto createDto = _waterReadingMapper.ToDto(createViewModel);
-            WaterReadingDto createdDto = await _waterReadingService.CreateAsync(createDto, cancellationToken);
-            WaterReadingViewModel createdViewModel = _waterReadingMapper.ToViewModel(createdDto);
+            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
+            WaterReadingCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
+            WaterReadingCreatedViewModel resultViewModel = _waterReadingMapper.ToCreatedViewModel(createdDto);
 
-            LogWaterReadingCreated(_logger, createdViewModel.Id);
-            return CreatedAtAction(nameof(GetById), new { id = createdViewModel.Id }, createdViewModel);
+            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
         }
 
+        /// <summary>
+        /// Отредактировать существующие данные показания счетчика воды.
+        /// </summary>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<WaterReadingViewModel>> Edit([FromRoute] long id, [FromBody] EditWaterReadingViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<WaterReadingUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditWaterReadingViewModel editViewModel, CancellationToken cancellationToken)
         {
-            LogWaterReadingUpdateRequested(_logger, id, editViewModel.CurrentValue);
-
             EditWaterReadingDto editDto = _waterReadingMapper.ToDto(editViewModel);
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            WaterReadingDto updatedDto = await _waterReadingService.EditAsync(id, editDto, cancellationToken);
-            WaterReadingViewModel updatedViewModel = _waterReadingMapper.ToViewModel(updatedDto);
+            WaterReadingCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
+            WaterReadingUpdatedViewModel resultViewModel = _waterReadingMapper.ToUpdatedViewModel(updatedDto);
 
-            LogUtilityProviderUpdated(_logger, id);
-            return Ok(updatedViewModel);
+            return Ok(resultViewModel);
         }
 
+        /// <summary>
+        /// Удалить запись показания счетчика воды из системы.
+        /// </summary>
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
-            LogWaterReadingDeletionRequested(_logger, id);
-
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            await _waterReadingService.DeleteAsync(id, cancellationToken);
+            await _commandService.DeleteAsync(id, cancellationToken);
 
-            LogWaterReadingDeleted(_logger, id);
             return NoContent();
         }
     }

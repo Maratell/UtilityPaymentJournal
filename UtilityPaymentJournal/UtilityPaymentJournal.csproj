@@ -31,7 +31,9 @@
 
   <ItemGroup>
     <Folder Include="DTOs\ElectricityReadings\" />
+    <Folder Include="DTOs\WaterReadings\" />
     <Folder Include="Models\ElectricityReadings\" />
+    <Folder Include="Models\WaterReadings\" />
     <Folder Include="wwwroot\lib\dt\css\" />
   </ItemGroup>
 

@@ -722,7 +722,7 @@
                 // Извлекаем даты подачи показаний и платежа
                 var submissionDateSelected = $row.find('.submission-date-input').val();
                 var paymentDateSelected = $row.find('.payment-date-input').val() || null;
-                
+
                 var currentId = 0;
                 if (rowData) {
                     currentId = rowData.id !== undefined ? rowData.id : (rowData.Id !== undefined ? rowData.Id : 0);
@@ -736,22 +736,14 @@
                 if (isNaN(parsedCurrent) || parsedCurrent < 0) { showAlert("Введите корректное текущее показание (значение должно быть положительным)."); return; }
                 if (isNaN(parsedPrevious) || parsedPrevious < 0) { showAlert("Введите корректное показание за прошлый период (значение должно быть положительным)."); return; }
                 if (isNaN(parsedResult) || parsedResult < 0) { showAlert("Введите корректное результирующее показание (значение должно быть положительным)."); return; }
-               
+
                 // Валидация суммы платежа
                 if (isNaN(parsedPaymentAmount) || parsedPaymentAmount < 0) { showAlert("Введите корректную сумму платежа (значение должно быть положительным)."); return; }
 
-                // Логическая проверка: текущее не может быть меньше предыдущего
-                // Эту проверку убрал
-                // if (parsedCurrent < parsedPrevious) {
-                //     showAlert("Текущее показание не может быть меньше показания за прошлый период.");
-                //     return;
-                // }
-
                 $errBlock.hide();
 
-                // Формируем плоский объект для отправки на контроллер ASP.NET Core
+                // Формируем плоский объект для отправки на контроллер ASP.NET Core (СТРОГО БЕЗ СВОЙСТВА ID)
                 var sendData = {
-                    id: currentId,
                     residenceId: selectedResidence,
                     utilityProviderId: selectedUtility,
                     waterType: waterTypeInt,
@@ -763,7 +755,6 @@
                     paymentAmount: parsedPaymentAmount
                 };
 
-                // Проверяем URL для создания или редактирования записи
                 var targetUrl;
                 var httpMethod;
 
@@ -773,43 +764,53 @@
                     httpMethod = "POST";                                // Метод для создания
                 } else {
                     // Редактирование существующей записи
-                    targetUrl = $('#readingsTable').data('edit-url') + currentId; // Приклеиваем id в конец пути /api/water-readings
+                    targetUrl = $('#readingsTable').data('edit-url') + currentId; // Приклеиваем id в конец пути /api/water-readings/
                     httpMethod = "PUT";                                            // Метод для обновления
                 }
 
                 // Блокируем строку на время AJAX-запроса через наш глобальный триггер
                 $row.trigger('editModeChanged', [false]).css('opacity', '0.5');
 
-                // Блокируем строку на время AJAX-запроса
-                //$row.find('button, select, input, .content-editable-box').prop('disabled', true).css('opacity', '0.5');
-
-                console.log("Отправляю PUT на адрес:", targetUrl);
-
                 $.ajax({
                     url: targetUrl,
                     type: httpMethod,
                     contentType: "application/json", // говорим серверу, что шлем JSON
-                    data: JSON.stringify(sendData),
+                    data: JSON.stringify(sendData),  // Отправляем чистый JSON без Id
                     headers: {
                         // Передаем токен безопасности в заголовке запроса
                         'RequestVerificationToken': csrfToken
                     },
                     success: function (response) {
-                        
-                        // 1. Передаем обновленный объект от сервера напрямую в DataTables
-                        table.row($row).data(response).draw(false);
+                        // Формируем URL для GET-запроса развернутых деталей (QueryResultDto со всеми текстовыми Include)
+                        var getDetailsUrl = httpMethod === "POST"
+                            ? (targetUrl + '/' + response.id) // Для POST: берем ID из WaterReadingCreatedViewModel ответа
+                            : targetUrl;                      // Для PUT: ID уже находится в самом targetUrl (/api/water-readings/123)
 
-                        // Так как данные перерисовались, находим строку в DOM заново
-                        var $updatedRow = $(table.row($row).node());
+                        // Запрашиваем из Query-сервиса развернутую модель с адресом и названием провайдера для UI
+                        $.ajax({
+                            url: getDetailsUrl,
+                            type: "GET",
+                            headers: { 'RequestVerificationToken': csrfToken },
+                            success: function (fullData) {
+                                // Передаем полноценный объект со всеми Include напрямую в DataTables
+                                table.row($row).data(fullData).draw(false);
 
-                        $updatedRow.css('opacity', '1');
+                                // Так как данные перерисовались, находим строку в DOM заново
+                                var $updatedRow = $(table.row($row).node());
+                                $updatedRow.css('opacity', '1');
 
-                        // 2. Возвращаем интерфейс строки в режим просмотра через классы Bootstrap
-                        $updatedRow.find('.edit-mode').removeClass('d-flex').addClass('d-none');
-                        $updatedRow.find('.view-mode').removeClass('d-none').addClass('d-flex');
+                                // Возвращаем интерфейс строки в режим просмотра через классы Bootstrap
+                                $updatedRow.find('.edit-mode').removeClass('d-flex').addClass('d-none');
+                                $updatedRow.find('.view-mode').removeClass('d-none').addClass('d-flex');
 
-                        // 3. Сбрасываем управляющие классы редактирования
-                        $updatedRow.removeClass('row-edit-mode row-new-item');
+                                // Сбрасываем управляющие классы редактирования
+                                $updatedRow.removeClass('row-edit-mode row-new-item');
+                            },
+                            error: function () {
+                                // В случае непредвиденного сбоя при GET-запросе, мягко перезагружаем всю таблицу
+                                table.ajax.reload(null, false);
+                            }
+                        });
                     },
                     error: function (xhr) {
                         // Разблокируем строку, чтобы пользователь мог исправить ошибки и нажать "Сохранить" еще раз
