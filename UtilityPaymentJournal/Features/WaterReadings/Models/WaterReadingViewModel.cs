@@ -1,19 +1,18 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using UtilityPaymentJournal.Common.Enumerations;
 
-namespace UtilityPaymentJournal.Features.ElectricityReadings.Models
+namespace UtilityPaymentJournal.Features.WaterReadings.Models
 {
     /// <summary>
-    /// Плоская модель представления для отображения данных о показании счетчика электроэнергии (ответ API).
+    /// Плоская модель представления для отображения данных о показании счетчика воды (ответ API).
     /// Не содержит вложенных объектов или навигационных свойств, передавая связанные данные в виде линейных строк.
     /// Используется как строгое описание выходного контракта.
     /// </summary>
-    public class ElectricityReadingViewModel
+    public class WaterReadingViewModel
     {
         /// <summary>
-        ///Уникальный идентификатор записи показания в БД
+        /// Уникальный идентификатор записи показания в БД
         /// </summary>
         public long Id { get; set; }
-
         /// <summary>
         /// Идентификатор связанного жилого объекта
         /// </summary>
@@ -22,6 +21,10 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings.Models
         /// Идентификатор связанного поставщика услуг
         /// </summary>
         public long? UtilityProviderId { get; set; }
+        /// <summary>
+        /// Тип воды (холодная или горячая)
+        /// </summary>
+        public WaterType WaterType { get; set; }
         /// <summary>
         /// Полный текстовый адрес объекта (заполняется только при чтении)
         /// </summary>

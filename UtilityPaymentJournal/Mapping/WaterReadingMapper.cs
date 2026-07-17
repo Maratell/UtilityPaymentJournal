@@ -1,8 +1,9 @@
 ﻿using UtilityPaymentJournal.Common.Extensions;
-using UtilityPaymentJournal.DTOs.WaterReadings;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
+using UtilityPaymentJournal.Features.WaterReadings.Commands;
+using UtilityPaymentJournal.Features.WaterReadings.Models;
+using UtilityPaymentJournal.Features.WaterReadings.Queries;
 using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Models.WaterReadings;
 
 
 namespace WaterReadingPaymentJournal.Mapping
@@ -17,32 +18,12 @@ namespace WaterReadingPaymentJournal.Mapping
                 ResidenceId: createViewModel.ResidenceId,
                 UtilityProviderId: createViewModel.UtilityProviderId,
                 WaterType: createViewModel.WaterType,
-                PaymentDate: createViewModel.PaymentDate,
                 SubmissionDate: createViewModel.SubmissionDate,
+                PaymentDate: createViewModel.PaymentDate,
                 CurrentValue: createViewModel.CurrentValue,
                 PreviousValue: createViewModel.PreviousValue,
                 ResultValue: createViewModel.ResultValue,
                 PaymentAmount: createViewModel.PaymentAmount
-            );
-        }
-
-        public WaterReadingDto ToDto(WaterReading entity)
-        {
-            ArgumentNullException.ThrowIfNull(entity);
-
-            return new WaterReadingDto(
-                Id: entity.Id,
-                ResidenceId: entity.ResidenceId,
-                UtilityProviderId: entity.UtilityProviderId,
-                ResidenceAddress: entity.Residence?.Address,
-                UtilityProviderName: entity.UtilityProvider?.Name,
-                WaterType: entity.WaterType,
-                SubmissionDate: entity.SubmissionDate,
-                PaymentDate: entity.PaymentDate,
-                CurrentValue: entity.CurrentValue,
-                PreviousValue: entity.PreviousValue,
-                ResultValue: entity.ResultValue,
-                PaymentAmount: entity.PaymentAmount
             );
         }
 
@@ -51,12 +32,11 @@ namespace WaterReadingPaymentJournal.Mapping
             ArgumentNullException.ThrowIfNull(editViewModel);
 
             return new EditWaterReadingDto(
-                Id: editViewModel.Id,
                 ResidenceId: editViewModel.ResidenceId,
                 UtilityProviderId: editViewModel.UtilityProviderId,
+                WaterType: editViewModel.WaterType,
                 SubmissionDate: editViewModel.SubmissionDate,
                 PaymentDate: editViewModel.PaymentDate,
-                WaterType: editViewModel.WaterType,
                 CurrentValue: editViewModel.CurrentValue,
                 PreviousValue: editViewModel.PreviousValue,
                 ResultValue: editViewModel.ResultValue,
@@ -72,34 +52,13 @@ namespace WaterReadingPaymentJournal.Mapping
             {
                 ResidenceId = createDto.ResidenceId,
                 UtilityProviderId = createDto.UtilityProviderId,
+                WaterType = createDto.WaterType,
                 SubmissionDate = createDto.SubmissionDate.ToUtcKind(),
                 PaymentDate = createDto.PaymentDate.ToUtcKind(),
-                WaterType = createDto.WaterType,
                 CurrentValue = createDto.CurrentValue,
                 PreviousValue = createDto.PreviousValue,
                 ResultValue = createDto.ResultValue,
                 PaymentAmount = createDto.PaymentAmount
-            };
-        }
-
-        public WaterReadingViewModel ToViewModel(WaterReadingDto dto)
-        {
-            ArgumentNullException.ThrowIfNull(dto);
-
-            return new WaterReadingViewModel
-            {
-                Id = dto.Id,
-                ResidenceId = dto.ResidenceId,
-                UtilityProviderId = dto.UtilityProviderId,
-                ResidenceAddress = dto.ResidenceAddress,
-                UtilityProviderName = dto.UtilityProviderName,
-                SubmissionDate = dto.SubmissionDate,
-                PaymentDate = dto.PaymentDate,
-                WaterType = dto.WaterType,
-                CurrentValue = dto.CurrentValue,
-                PreviousValue= dto.PreviousValue,
-                ResultValue= dto.ResultValue,
-                PaymentAmount = dto.PaymentAmount
             };
         }
 
@@ -108,8 +67,8 @@ namespace WaterReadingPaymentJournal.Mapping
             ArgumentNullException.ThrowIfNull(editDto);
             ArgumentNullException.ThrowIfNull(entity);
 
-            entity.UtilityProviderId = editDto.UtilityProviderId;
             entity.ResidenceId = editDto.ResidenceId;
+            entity.UtilityProviderId = editDto.UtilityProviderId;
             entity.WaterType = editDto.WaterType;
             entity.SubmissionDate = editDto.SubmissionDate.ToUtcKind();
             entity.PaymentDate = editDto.PaymentDate.ToUtcKind();
@@ -117,8 +76,103 @@ namespace WaterReadingPaymentJournal.Mapping
             entity.PreviousValue = editDto.PreviousValue;
             entity.ResultValue = editDto.ResultValue;
             entity.PaymentAmount = editDto.PaymentAmount;
+        }
 
-            //entity.UpdatedAt = DateTime.UtcNow;
+        public WaterReadingCommandResultDto ToCommandResultDto(WaterReading entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            return new WaterReadingCommandResultDto(
+                Id: entity.Id,
+                ResidenceId: entity.ResidenceId,
+                UtilityProviderId: entity.UtilityProviderId,
+                WaterType: entity.WaterType,
+                SubmissionDate: entity.SubmissionDate,
+                PaymentDate: entity.PaymentDate,
+                CurrentValue: entity.CurrentValue,
+                PreviousValue: entity.PreviousValue,
+                ResultValue: entity.ResultValue,
+                PaymentAmount: entity.PaymentAmount
+            );
+        }
+
+        public WaterReadingQueryResultDto ToQueryResultDto(WaterReading entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            return new WaterReadingQueryResultDto(
+                Id: entity.Id,
+                ResidenceId: entity.ResidenceId,
+                UtilityProviderId: entity.UtilityProviderId,
+                WaterType: entity.WaterType,
+                ResidenceAddress: entity.Residence?.Address,
+                UtilityProviderName: entity.UtilityProvider?.Name,
+                SubmissionDate: entity.SubmissionDate,
+                PaymentDate: entity.PaymentDate,
+                CurrentValue: entity.CurrentValue,
+                PreviousValue: entity.PreviousValue,
+                ResultValue: entity.ResultValue,
+                PaymentAmount: entity.PaymentAmount
+            );
+        }
+
+        public WaterReadingCreatedViewModel ToCreatedViewModel(WaterReadingCommandResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new WaterReadingCreatedViewModel
+            {
+                Id = dto.Id,
+                ResidenceId = dto.ResidenceId,
+                UtilityProviderId = dto.UtilityProviderId,
+                WaterType = dto.WaterType,
+                SubmissionDate = dto.SubmissionDate,
+                PaymentDate = dto.PaymentDate,
+                CurrentValue = dto.CurrentValue,
+                PreviousValue = dto.PreviousValue,
+                ResultValue = dto.ResultValue,
+                PaymentAmount = dto.PaymentAmount
+            };
+        }
+
+        public WaterReadingUpdatedViewModel ToUpdatedViewModel(WaterReadingCommandResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new WaterReadingUpdatedViewModel
+            {
+                Id = dto.Id,
+                ResidenceId = dto.ResidenceId,
+                UtilityProviderId = dto.UtilityProviderId,
+                WaterType = dto.WaterType,
+                SubmissionDate = dto.SubmissionDate,
+                PaymentDate = dto.PaymentDate,
+                CurrentValue = dto.CurrentValue,
+                PreviousValue = dto.PreviousValue,
+                ResultValue = dto.ResultValue,
+                PaymentAmount = dto.PaymentAmount
+            };
+        }
+
+        public WaterReadingDetailsViewModel ToViewModel(WaterReadingQueryResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new WaterReadingDetailsViewModel
+            {
+                Id = dto.Id,
+                ResidenceId = dto.ResidenceId,
+                UtilityProviderId = dto.UtilityProviderId,
+                WaterType = dto.WaterType,
+                ResidenceAddress = dto.ResidenceAddress,
+                UtilityProviderName = dto.UtilityProviderName,
+                SubmissionDate = dto.SubmissionDate,
+                PaymentDate = dto.PaymentDate,
+                CurrentValue = dto.CurrentValue,
+                PreviousValue = dto.PreviousValue,
+                ResultValue = dto.ResultValue,
+                PaymentAmount = dto.PaymentAmount
+            };
         }
     }
 }

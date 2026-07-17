@@ -1,6 +1,6 @@
 ﻿using UtilityPaymentJournal.Common.Enumerations;
 
-namespace UtilityPaymentJournal.DTOs.WaterReadings
+namespace UtilityPaymentJournal.Features.WaterReadings.Queries
 {
     /// <summary>
     /// ДТО для возврата данных о показаниях счетчика воды (ответ API).

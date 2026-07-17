@@ -1,5 +1,9 @@
 ﻿namespace UtilityPaymentJournal.Features.ElectricityReadings.Queries
 {
+    /// <summary>
+    /// Интерфейс сервиса запросов (чтения) для получения данных о показаниях счетчиков электроэнергии.
+    /// Отвечает исключительно за выборку и предоставление данных (R) без изменения состояния БД в рамках паттерна CQRS.
+    /// </summary>
     public interface IElectricityReadingQueryService
     {
         /// <summary>
