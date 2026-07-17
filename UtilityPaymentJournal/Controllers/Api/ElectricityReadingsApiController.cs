@@ -1,36 +1,44 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.DTOs.ElectricityReadings;
+using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
+using UtilityPaymentJournal.Features.ElectricityReadings.Models;
+using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
 using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Models.ElectricityReadings;
 
 namespace UtilityPaymentJournal.Controllers.Api
 {
+    /// <summary>
+    /// АПИ-контроллер для управления показаниями счетчиков электроэнергии.
+    /// </summary>
     [ApiController]
     [Route("api/electricity-readings")]
     public partial class ElectricityReadingsApiController : ControllerBase
     {
-        private readonly IElectricityReadingService _electricityReadingService;
+        private readonly IElectricityReadingQueryService _queryService;
+        private readonly IElectricityReadingCommandService _commandService;
         private readonly IElectricityReadingMapper _electricityReadingMapper;
         private readonly ILogger<ElectricityReadingsApiController> _logger;
 
         public ElectricityReadingsApiController(
-            IElectricityReadingService electricityReadingService,
+            IElectricityReadingQueryService queryService,
+            IElectricityReadingCommandService commandService,
             IElectricityReadingMapper electricityReadingMapper,
             ILogger<ElectricityReadingsApiController> logger)
         {
-            _electricityReadingService = electricityReadingService ?? throw new ArgumentNullException(nameof(electricityReadingService));
+            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
             _electricityReadingMapper = electricityReadingMapper ?? throw new ArgumentNullException(nameof(electricityReadingMapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<ElectricityReadingViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<IReadOnlyCollection<ElectricityReadingDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
         {
             LogFetchingAllElectricityReadings(_logger);
 
-            IEnumerable<ElectricityReadingDto> dtos = await _electricityReadingService.GetAllAsync(cancellationToken);
-            ElectricityReadingViewModel[] viewModels = dtos
+            // Используем сервис запросов (Queries) для получения полного списка со всеми Include
+            IReadOnlyCollection<ElectricityReadingQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
+            ElectricityReadingDetailsViewModel[] viewModels = dtos
                 .Select(r => _electricityReadingMapper.ToViewModel(r))
                 .ToArray();
 
@@ -38,50 +46,63 @@ namespace UtilityPaymentJournal.Controllers.Api
             return Ok(viewModels);
         }
 
+        /// <summary>
+        /// Получить развернутые детали показания счетчика электроэнергии по его уникальному идентификатору.
+        /// </summary>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<ElectricityReadingViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<ElectricityReadingDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ElectricityReadingDto dto = await _electricityReadingService.GetByIdAsync(id, cancellationToken);
-            ElectricityReadingViewModel viewModel = _electricityReadingMapper.ToViewModel(dto);
+            ElectricityReadingQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
+            ElectricityReadingDetailsViewModel viewModel = _electricityReadingMapper.ToViewModel(dto);
 
             return Ok(viewModel);
         }
 
+        /// <summary>
+        /// Создать новую запись показания счетчика электроэнергии.
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<ElectricityReadingViewModel>> Create([FromBody] CreateElectricityReadingViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<ElectricityReadingCreatedViewModel>> Create([FromBody] CreateElectricityReadingViewModel createViewModel, CancellationToken cancellationToken)
         {
             LogElectricityReadingCreationRequested(_logger, createViewModel.CurrentValue);
 
             CreateElectricityReadingDto createDto = _electricityReadingMapper.ToDto(createViewModel);
-            ElectricityReadingDto createdDto = await _electricityReadingService.CreateAsync(createDto, cancellationToken);
-            ElectricityReadingViewModel createdViewModel = _electricityReadingMapper.ToViewModel(createdDto);
+            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
+            ElectricityReadingCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
+            ElectricityReadingCreatedViewModel resultViewModel = _electricityReadingMapper.ToCreatedViewModel(createdDto);
 
-            LogElectricityReadingCreated(_logger, createdViewModel.Id);
-            return CreatedAtAction(nameof(GetById), new { id = createdViewModel.Id }, createdViewModel);
+            LogElectricityReadingCreated(_logger, resultViewModel.Id);
+            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
         }
 
+        /// <summary>
+        /// Отредактировать существующие данные показания счетчика электроэнергии.
+        /// </summary>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<ElectricityReadingViewModel>> Edit([FromRoute] long id, [FromBody] EditElectricityReadingViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<ElectricityReadingUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditElectricityReadingViewModel editViewModel, CancellationToken cancellationToken)
         {
             LogElectricityReadingUpdateRequested(_logger, id, editViewModel.CurrentValue);
 
             EditElectricityReadingDto editDto = _electricityReadingMapper.ToDto(editViewModel);
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ElectricityReadingDto updatedDto = await _electricityReadingService.EditAsync(id, editDto, cancellationToken);
-            ElectricityReadingViewModel updatedViewModel = _electricityReadingMapper.ToViewModel(updatedDto);
+            ElectricityReadingCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
+            ElectricityReadingUpdatedViewModel resultViewModel = _electricityReadingMapper.ToUpdatedViewModel(updatedDto);
 
             LogElectricityReadingUpdated(_logger, id);
-            return Ok(updatedViewModel);
+            return Ok(resultViewModel);
         }
 
+        /// <summary>
+        /// Удалить запись показания счетчика электроэнергии из системы.
+        /// </summary>
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
             LogElectricityReadingDeletionRequested(_logger, id);
 
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            await _electricityReadingService.DeleteAsync(id, cancellationToken);
+            await _commandService.DeleteAsync(id, cancellationToken);
 
             LogElectricityReadingDeleted(_logger, id);
             return NoContent();

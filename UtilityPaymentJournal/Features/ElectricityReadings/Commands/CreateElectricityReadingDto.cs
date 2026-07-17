@@ -1,5 +1,4 @@
-﻿
-namespace UtilityPaymentJournal.DTOs.ElectricityReadings
+﻿namespace UtilityPaymentJournal.Features.ElectricityReadings.Commands
 {
     /// <summary>
     /// ДТО для создания нового показания счетчика электроэнергии.

@@ -653,18 +653,10 @@
                 // Валидация суммы платежа
                 if (isNaN(parsedPaymentAmount) || parsedPaymentAmount < 0) { showAlert("Введите корректную сумму платежа (значение должно быть положительным)."); return; }
 
-                // Логическая проверка: текущее не может быть меньше предыдущего
-                // Эту проверку убрал
-                // if (parsedCurrent < parsedPrevious) {
-                //     showAlert("Текущее показание не может быть меньше показания за прошлый период.");
-                //     return;
-                // }
-
                 $errBlock.hide();
 
                 // Формируем плоский объект для отправки на контроллер ASP.NET Core
                 var sendData = {
-                    id: currentId,
                     residenceId: selectedResidence,
                     utilityProviderId: selectedUtility,
                     submissionDate: submissionDateSelected,
@@ -681,19 +673,16 @@
 
                 if (currentId === 0) {
                     // Создание новой записи
-                    targetUrl = $('#readingsTable').data('create-url'); // Получим: /api/water-readings
+                    targetUrl = $('#readingsTable').data('create-url'); // Получим: /api/electricity-readings
                     httpMethod = "POST";                                // Метод для создания
                 } else {
-                    // Редактирование существующей записи
-                    targetUrl = $('#readingsTable').data('edit-url') + currentId; // Приклеиваем id в конец пути /api/water-readings
+                    // Редактирование существующей записи — ВОЗВРАЩЕНО В ИСХОДНЫЙ ВИД
+                    targetUrl = $('#readingsTable').data('edit-url') + currentId; // Приклеиваем id в конец пути /api/electricity-readings/
                     httpMethod = "PUT";                                            // Метод для обновления
                 }
 
                 // Блокируем строку на время AJAX-запроса через наш глобальный триггер
                 $row.trigger('editModeChanged', [false]).css('opacity', '0.5');
-
-                // Блокируем строку на время AJAX-запроса
-                //$row.find('button, select, input, .content-editable-box').prop('disabled', true).css('opacity', '0.5');
 
                 $.ajax({
                     url: targetUrl,
@@ -705,22 +694,40 @@
                         'RequestVerificationToken': csrfToken
                     },
                     success: function (response) {
+                        // response содержит плоский объект: { id: 42, currentValue: 150 ... } без строк адреса.
 
-                        // 1. Передаем обновленный объект от сервера напрямую в DataTables
-                        table.row($row).data(response).draw(false);
+                        // КРИТИЧЕСКИ НЕОБХОДИМАЯ ПРАВКА: Чтобы не ломать сетку DataTables, запрашиваем
+                        // развернутые данные (с Include) через наш новый Query-сервис GET /api/electricity-readings/{id}
+                        var getDetailsUrl = httpMethod === "POST"
+                            ? (targetUrl + '/' + response.id) // Для POST: дописываем слэш и ID из ответа бэкенда
+                            : targetUrl;                      // Для PUT: ID уже находится внутри targetUrl
 
-                        // ИСПРАВЛЕНО: Так как данные перерисовались, находим строку в DOM заново
-                        var $updatedRow = $(table.row($row).node());
+                        $.ajax({
+                            url: getDetailsUrl,
+                            type: "GET",
+                            headers: { 'RequestVerificationToken': csrfToken },
+                            success: function (fullData) {
+                                // fullData — это честный ElectricityReadingDetailsViewModel со всеми адресами!
 
-                        $updatedRow.css('opacity', '1');
+                                // 1. Передаем полноценный обновленный объект напрямую в DataTables и перерисовываем строку
+                                table.row($row).data(fullData).draw(false);
 
-                        // 2. Возвращаем интерфейс строки в режим просмотра через классы Bootstrap
-                        $updatedRow.find('.edit-mode').removeClass('d-flex').addClass('d-none');
-                        $updatedRow.find('.view-mode').removeClass('d-none').addClass('d-flex');
+                                // Так как данные перерисовались, находим строку в DOM заново
+                                var $updatedRow = $(table.row($row).node());
+                                $updatedRow.css('opacity', '1');
 
-                        // 3. Сбрасываем управляющие классы редактирования
-                        $updatedRow.removeClass('row-edit-mode row-new-item');
+                                // 2. Возвращаем интерфейс строки в режим просмотра через классы Bootstrap
+                                $updatedRow.find('.edit-mode').removeClass('d-flex').addClass('d-none');
+                                $updatedRow.find('.view-mode').removeClass('d-none').addClass('d-flex');
 
+                                // 3. Сбрасываем управляющие классы редактирования
+                                $updatedRow.removeClass('row-edit-mode row-new-item');
+                            },
+                            error: function () {
+                                // Если GET-запрос сорвался, принудительно обновляем всю таблицу из источника, чтобы не терять данные
+                                table.ajax.reload(null, false);
+                            }
+                        });
                     },
                     error: function (xhr) {
                         $row.trigger('editModeChanged', [true]).css('opacity', '1');
