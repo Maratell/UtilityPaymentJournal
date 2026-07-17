@@ -9,6 +9,8 @@ using System.Security.Claims;
 using UtilityPaymentJournal.Common.Constants;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
+using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
 using UtilityPaymentJournal.Infrastructure.Identity;
 using UtilityPaymentJournal.Infrastructure.JsonConverters;
@@ -75,7 +77,8 @@ builder.Services.AddScoped<IResidenceService, ResidenceService>();
 builder.Services.AddScoped<IUtilityProviderService, UtilityProviderService>();
 builder.Services.AddScoped<IUtilityService, UtilityService>();
 builder.Services.AddScoped<IWaterReadingService, WaterReadingService>();
-builder.Services.AddScoped<IElectricityReadingService, ElectricityReadingService>();
+builder.Services.AddScoped<IElectricityReadingCommandService, ElectricityReadingCommandService>();
+builder.Services.AddScoped<IElectricityReadingQueryService, ElectricityReadingQueryService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IComplaintService, ComplaintService>();
 // Регистрация Middleware для добавления ID пользователя в контекст логирования

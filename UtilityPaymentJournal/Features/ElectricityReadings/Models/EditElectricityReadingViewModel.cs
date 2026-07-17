@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace UtilityPaymentJournal.Models.ElectricityReadings
+namespace UtilityPaymentJournal.Features.ElectricityReadings.Models
 {
-    public class CreateElectricityReadingViewModel
+    public class EditElectricityReadingViewModel
     {
+        public long Id { get; set; }
+
         [Display(Name = "Жилой объект")]
         [Required(ErrorMessage = "Пожалуйста, выберите жилой объект")]
         [Range(1, long.MaxValue, ErrorMessage = "Некорректный ID жилого объекта")]
