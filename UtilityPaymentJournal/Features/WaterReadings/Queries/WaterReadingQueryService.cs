@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
-using UtilityPaymentJournal.Interface.Mapping;
 
 namespace UtilityPaymentJournal.Features.WaterReadings.Queries
 {

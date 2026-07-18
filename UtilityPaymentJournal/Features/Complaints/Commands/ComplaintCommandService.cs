@@ -2,7 +2,6 @@
 using UtilityPaymentJournal.Common.Enumerations;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
-using UtilityPaymentJournal.Interface.Mapping;
 
 namespace UtilityPaymentJournal.Features.Complaints.Commands
 {

@@ -1,47 +1,47 @@
-﻿using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
-using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
-using UtilityPaymentJournal.Features.ElectricityReadings.Models;
-using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
+﻿using UtilityPaymentJournal.EF.Entity.WaterReadings;
+using UtilityPaymentJournal.Features.WaterReadings.Commands;
+using UtilityPaymentJournal.Features.WaterReadings.Models;
+using UtilityPaymentJournal.Features.WaterReadings.Queries;
 
-namespace UtilityPaymentJournal.Interface.Mapping
+namespace UtilityPaymentJournal.Features.WaterReadings
 {
-    public interface IElectricityReadingMapper
+    public interface IWaterReadingMapper
     {
         /// <summary>
         /// Преобразовать входящую модель создания во входной ДТО бизнес-логики.
         /// </summary>
-        CreateElectricityReadingDto ToDto(CreateElectricityReadingViewModel createViewModel);
+        CreateWaterReadingDto ToDto(CreateWaterReadingViewModel createViewModel);
         /// <summary>
         /// Преобразовать входящую модель редактирования во входной ДТО бизнес-логики.
         /// </summary>
-        EditElectricityReadingDto ToDto(EditElectricityReadingViewModel editViewModel);
+        EditWaterReadingDto ToDto(EditWaterReadingViewModel editViewModel);
         /// <summary>
         /// Преобразовать входной ДТО создания в доменную сущность для базы данных.
         /// </summary>
-        ElectricityReading ToEntity(CreateElectricityReadingDto createDto);
+        WaterReading ToEntity(CreateWaterReadingDto createDto);
         /// <summary>
         /// Обновить существующую доменную сущность на основе ДТО редактирования.
         /// </summary>
-        void UpdateEntity(EditElectricityReadingDto editDto, ElectricityReading entity);
+        void UpdateEntity(EditWaterReadingDto editDto, WaterReading entity);
         /// <summary>
         /// Преобразовать сущность после сохранения в плоский ДТО результата команды записи.
         /// </summary>
-        ElectricityReadingCommandResultDto ToCommandResultDto(ElectricityReading entity);
+        WaterReadingCommandResultDto ToCommandResultDto(WaterReading entity);
         /// <summary>
         /// Преобразовать сущность со всеми Include в ДТО результата запроса чтения.
         /// </summary>
-        ElectricityReadingQueryResultDto ToQueryResultDto(ElectricityReading entity);
+        WaterReadingQueryResultDto ToQueryResultDto(WaterReading entity);
         /// <summary>
         /// Преобразовать плоский ДТО записи в строго плоскую модель ответа API создания (для POST).
         /// </summary>
-        ElectricityReadingCreatedViewModel ToCreatedViewModel(ElectricityReadingCommandResultDto dto);
+        WaterReadingCreatedViewModel ToCreatedViewModel(WaterReadingCommandResultDto dto);
         /// <summary>
         /// Преобразовать плоский ДТО записи в строго плоскую модель ответа API обновления (для PUT).
         /// </summary>
-        ElectricityReadingUpdatedViewModel ToUpdatedViewModel(ElectricityReadingCommandResultDto dto);
+        WaterReadingUpdatedViewModel ToUpdatedViewModel(WaterReadingCommandResultDto dto);
         /// <summary>
         /// Преобразовать развернутый ДТО чтения в детальную модель представления для UI (для GET).
         /// </summary>
-        ElectricityReadingDetailsViewModel ToViewModel(ElectricityReadingQueryResultDto dto);
+        WaterReadingDetailsViewModel ToViewModel(WaterReadingQueryResultDto dto);
     }
 }

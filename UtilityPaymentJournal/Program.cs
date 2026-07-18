@@ -9,10 +9,13 @@ using System.Security.Claims;
 using UtilityPaymentJournal.Common.Constants;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.Features.Complaints;
 using UtilityPaymentJournal.Features.Complaints.Commands;
 using UtilityPaymentJournal.Features.Complaints.Queries;
+using UtilityPaymentJournal.Features.ElectricityReadings;
 using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
 using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
+using UtilityPaymentJournal.Features.WaterReadings;
 using UtilityPaymentJournal.Features.WaterReadings.Commands;
 using UtilityPaymentJournal.Features.WaterReadings.Queries;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
@@ -24,7 +27,6 @@ using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Mapping;
 using UtilityPaymentJournal.Services;
 using UtilityProviderPaymentJournal.Interface.Mapping;
-using WaterReadingPaymentJournal.Mapping;
 
 
 var builder = WebApplication.CreateBuilder(args);

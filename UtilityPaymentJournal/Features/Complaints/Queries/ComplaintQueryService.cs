@@ -3,7 +3,6 @@ using UtilityPaymentJournal.Common.Enumerations;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
 using UtilityPaymentJournal.Features.Complaints.Models;
-using UtilityPaymentJournal.Interface.Mapping;
 
 namespace UtilityPaymentJournal.Features.Complaints.Queries
 {

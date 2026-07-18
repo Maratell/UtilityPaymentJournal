@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
-using UtilityPaymentJournal.Interface.Mapping;
 
 namespace UtilityPaymentJournal.Features.ElectricityReadings.Commands
 {

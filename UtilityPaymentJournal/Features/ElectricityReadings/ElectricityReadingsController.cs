@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace UtilityPaymentJournal.Controllers.Mvc
+namespace UtilityPaymentJournal.Features.ElectricityReadings
 {
     [Route("electricity-readings")]
     public class ElectricityReadingsController : Controller

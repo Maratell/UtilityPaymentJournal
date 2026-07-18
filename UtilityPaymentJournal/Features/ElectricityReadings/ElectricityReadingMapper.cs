@@ -3,9 +3,8 @@ using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
 using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
 using UtilityPaymentJournal.Features.ElectricityReadings.Models;
 using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
-using UtilityPaymentJournal.Interface.Mapping;
 
-namespace UtilityPaymentJournal.Mapping
+namespace UtilityPaymentJournal.Features.ElectricityReadings
 {
     public class ElectricityReadingMapper : IElectricityReadingMapper
     {
