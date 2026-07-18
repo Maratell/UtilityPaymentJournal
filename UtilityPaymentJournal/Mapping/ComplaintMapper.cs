@@ -1,8 +1,8 @@
-﻿using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTOs.ComplaintBoard;
-using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
+﻿using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
+using UtilityPaymentJournal.Features.Complaints.Commands;
+using UtilityPaymentJournal.Features.Complaints.Models;
+using UtilityPaymentJournal.Features.Complaints.Queries;
 using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Models.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Mapping
 {
@@ -15,61 +15,33 @@ namespace UtilityPaymentJournal.Mapping
             return new CreateComplaintDto(
                 Title: createViewModel.Title,
                 Description: createViewModel.Description,
-                Status: createViewModel.Status,
                 UtilityId: createViewModel.UtilityId,
                 SubmissionDate: createViewModel.SubmissionDate,
                 IssueResolutionDate: createViewModel.IssueResolutionDate,
-                CreatedAt: createViewModel.CreatedAt
+                Status: createViewModel.Status
             );
         }
-
-        public ComplaintDto ToDto(Complaint entity)
-        {
-            ArgumentNullException.ThrowIfNull(entity);
-
-            return new ComplaintDto(
-                Id: entity.Id,
-                Title: entity.Title,
-                Description: entity.Description,
-                Status: entity.Status,
-                UtilityId: entity.UtilityId,
-                UtilityName: entity.Utility?.Name,
-                UtilityIcon: entity.Utility?.IconClass,
-                SubmissionDate: entity.SubmissionDate,
-                IssueResolutionDate: entity.IssueResolutionDate,
-                CreatedAt: entity.CreatedAt
-            );
-        }
-
         public EditComplaintDto ToDto(EditComplaintViewModel editViewModel)
         {
             ArgumentNullException.ThrowIfNull(editViewModel);
 
             return new EditComplaintDto(
-                Id: editViewModel.Id,
                 Title: editViewModel.Title,
                 Description: editViewModel.Description,
-                Status: editViewModel.Status,
                 UtilityId: editViewModel.UtilityId,
                 SubmissionDate: editViewModel.SubmissionDate,
                 IssueResolutionDate: editViewModel.IssueResolutionDate,
-                CreatedAt: editViewModel.CreatedAt
+                Status: editViewModel.Status
             );
         }
 
-        public EditComplaintDto ToDto(ComplaintDto dto, ComplaintStatus status)
+        public ChangeComplaintStatusDto ToDto(ChangeComplaintStatusViewModel changeStatusViewModel)
         {
-            ArgumentNullException.ThrowIfNull(dto);
+            ArgumentNullException.ThrowIfNull(changeStatusViewModel);
 
-            return new EditComplaintDto(
-                Id: dto.Id,
-                Title: dto.Title,
-                Description: dto.Description,
-                UtilityId: dto.UtilityId,
-                Status: status, // Устанавливаем новый статус
-                SubmissionDate: dto.SubmissionDate,
-                IssueResolutionDate: dto.IssueResolutionDate,
-                CreatedAt: dto.CreatedAt
+            return new ChangeComplaintStatusDto(
+                Id: changeStatusViewModel.Id,
+                NewStatus: changeStatusViewModel.NewStatus
             );
         }
 
@@ -81,30 +53,11 @@ namespace UtilityPaymentJournal.Mapping
             {
                 Title = createDto.Title,
                 Description = createDto.Description,
-                Status = createDto.Status,
                 UtilityId = createDto.UtilityId,
                 SubmissionDate = createDto.SubmissionDate,
                 IssueResolutionDate = createDto.IssueResolutionDate,
-                CreatedAt = createDto.CreatedAt
-            };
-        }
-
-        public ComplaintViewModel ToViewModel(ComplaintDto dto)
-        {
-            ArgumentNullException.ThrowIfNull(dto);
-
-            return new ComplaintViewModel
-            {
-                Id = dto.Id,
-                Title = dto.Title,
-                Description = dto.Description,
-                Status = dto.Status,
-                UtilityName = dto.UtilityName,
-                UtilityIcon = dto.UtilityIcon,
-                UtilityId = dto.UtilityId,
-                SubmissionDate = dto.SubmissionDate,
-                IssueResolutionDate = dto.IssueResolutionDate,
-                CreatedAt = dto.CreatedAt
+                Status = createDto.Status,
+                CreatedAt = DateTime.UtcNow // Задаем системную дату при создании новой сущности
             };
         }
 
@@ -115,10 +68,114 @@ namespace UtilityPaymentJournal.Mapping
 
             entity.Title = editDto.Title;
             entity.Description = editDto.Description;
-            entity.Status = editDto.Status;
             entity.UtilityId = editDto.UtilityId;
             entity.SubmissionDate = editDto.SubmissionDate;
             entity.IssueResolutionDate = editDto.IssueResolutionDate;
+            entity.Status = editDto.Status;
+        }
+
+        public ComplaintCommandResultDto ToCommandResultDto(Complaint entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            return new ComplaintCommandResultDto(
+                Id: entity.Id,
+                Title: entity.Title,
+                Description: entity.Description,
+                UtilityId: entity.UtilityId,
+                CreatedAt: entity.CreatedAt,
+                SubmissionDate: entity.SubmissionDate,
+                IssueResolutionDate: entity.IssueResolutionDate,
+                Status: entity.Status
+            );
+        }
+        public ComplaintQueryResultDto ToQueryResultDto(Complaint entity)
+        {
+            ArgumentNullException.ThrowIfNull(entity);
+
+            return new ComplaintQueryResultDto(
+                Id: entity.Id,
+                Title: entity.Title,
+                Description: entity.Description,
+                UtilityId: entity.UtilityId,
+                UtilityName: entity.Utility?.Name,       // Мапим из навигационного свойства
+                UtilityIcon: entity.Utility?.IconClass,  // Мапим из навигационного свойства
+                CreatedAt: entity.CreatedAt,
+                SubmissionDate: entity.SubmissionDate,
+                IssueResolutionDate: entity.IssueResolutionDate,
+                Status: entity.Status
+            );
+        }
+        public ComplaintCreatedViewModel ToCreatedViewModel(ComplaintCommandResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new ComplaintCreatedViewModel
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Description = dto.Description,
+                UtilityId = dto.UtilityId,
+                CreatedAt = dto.CreatedAt,
+                SubmissionDate = dto.SubmissionDate,
+                IssueResolutionDate = dto.IssueResolutionDate,
+                Status = dto.Status
+            };
+        }
+
+        public ComplaintUpdatedViewModel ToUpdatedViewModel(ComplaintCommandResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new ComplaintUpdatedViewModel
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Description = dto.Description,
+                UtilityId = dto.UtilityId,
+                CreatedAt = dto.CreatedAt,
+                SubmissionDate = dto.SubmissionDate,
+                IssueResolutionDate = dto.IssueResolutionDate,
+                Status = dto.Status
+            };
+        }
+
+        public ComplaintViewModel ToViewModel(ComplaintQueryResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new ComplaintViewModel
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Description = dto.Description,
+                UtilityId = dto.UtilityId,
+                UtilityName = dto.UtilityName,
+                UtilityIcon = dto.UtilityIcon,
+                CreatedAt = dto.CreatedAt,
+                SubmissionDate = dto.SubmissionDate,
+                IssueResolutionDate = dto.IssueResolutionDate,
+                Status = dto.Status
+            };
+        }
+
+        public ComplaintDetailsViewModel ToDetailsViewModel(ComplaintQueryResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new ComplaintDetailsViewModel
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Description = dto.Description,
+                UtilityId = dto.UtilityId,
+                UtilityName = dto.UtilityName,
+                UtilityIcon = dto.UtilityIcon,
+                CreatedAt = dto.CreatedAt,
+                SubmissionDate = dto.SubmissionDate,
+                IssueResolutionDate = dto.IssueResolutionDate,
+                Status = dto.Status
+            };
         }
     }
 }
