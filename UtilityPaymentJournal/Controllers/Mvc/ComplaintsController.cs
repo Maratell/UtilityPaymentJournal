@@ -1,64 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTOs.ComplaintBoard;
-using UtilityPaymentJournal.DTOs.Utilities;
-using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Models.ComplaintBoard;
-using UtilityPaymentJournal.Models.Utilities;
-
+using UtilityPaymentJournal.Features.Complaints.Models;
+using UtilityPaymentJournal.Features.Complaints.Queries;
 
 namespace UtilityPaymentJournal.Controllers
 {
     [Route("complaints")]
     public class ComplaintsController : Controller
     {
-        private readonly IComplaintService _complaintService; 
-        private readonly IUtilityService _utilityService;
-        private readonly IComplaintMapper _complaintMapper;
-        private readonly IUtilityMapper _utilityMapper;
+        private readonly IComplaintQueryService _complaintQueryService;
 
-        public ComplaintsController(
-            IComplaintService complaintService, 
-            IUtilityService utilityService,
-            IComplaintMapper complaintMapper,
-            IUtilityMapper utilityMapper)
+        public ComplaintsController(IComplaintQueryService complaintQueryService)
         {
-            _complaintService = complaintService;
-            _utilityService = utilityService;
-            _complaintMapper = complaintMapper;
-            _utilityMapper = utilityMapper;
+            _complaintQueryService = complaintQueryService ?? throw new ArgumentNullException(nameof(complaintQueryService));
         }
 
         [HttpGet]
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            // Загружаем данные из бд
-            IReadOnlyCollection<ComplaintDto> complaintDtos = await _complaintService.GetAllAsync(cancellationToken);
-            IReadOnlyCollection<UtilityDto> utilityDtos = await _utilityService.GetAllAsync(cancellationToken);
+            // 1. Извлекаем из сервиса чтения жалобы, сгруппированные по статусам внутри словаря
+            Dictionary<ComplaintStatus, List<ComplaintViewModel>> complaintsByStatus 
+                = await _complaintQueryService.GetComplaintsGroupedByStatusAsync(cancellationToken);
 
-            // Маппим результаты
-            IEnumerable<ComplaintViewModel> complaints = complaintDtos.Select(_complaintMapper.ToViewModel);
-            List<UtilityViewModel> utilities = utilityDtos.Select(_utilityMapper.ToViewModel).ToList();
-
-            ComplaintBoardViewModel boardViewModel = new ComplaintBoardViewModel { AvailableUtilities = utilities };
-
-            // Разделяем жалобы по статусам за один проход
-            foreach (ComplaintViewModel complaint in complaints)
+            // 2. Формируем чистую модель представления доски строго по нашему контракту
+            ComplaintBoardViewModel boardViewModel = new ComplaintBoardViewModel
             {
-                switch (complaint.Status)
-                {
-                    case ComplaintStatus.New:
-                        boardViewModel.NewComplaints.Add(complaint);
-                        break;
-                    case ComplaintStatus.InProgress:
-                        boardViewModel.InProgressComplaints.Add(complaint);
-                        break;
-                    case ComplaintStatus.Resolved:
-                        boardViewModel.ResolvedComplaints.Add(complaint);
-                        break;
-                }
-            }
+                ComplaintsByStatus = complaintsByStatus,
+                EmptyForm = new CreateComplaintViewModel() // Инициализируем форму для валидации на клиенте
+            };
 
             return View(boardViewModel);
         }

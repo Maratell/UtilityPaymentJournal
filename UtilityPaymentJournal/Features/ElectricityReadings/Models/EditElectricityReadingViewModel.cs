@@ -4,7 +4,6 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings.Models
 {
     /// <summary>
     /// Модель представления для редактирования существующего показания счетчика электроэнергии.
-    /// Идентификатор изменяемой записи (Id) передается через маршрут URL.
     /// </summary>
     public class EditElectricityReadingViewModel
     {

@@ -1,114 +1,98 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTOs.ComplaintBoard;
+using UtilityPaymentJournal.Features.Complaints.Commands;
+using UtilityPaymentJournal.Features.Complaints.Models;
+using UtilityPaymentJournal.Features.Complaints.Queries;
 using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Models.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Controllers.Api
 {
+    /// <summary>
+    /// АПИ-контроллер для управления жалобами.
+    /// </summary>
     [ApiController]
     [Route("api/complaints")]
-    public partial class ComplaintsApiController : ControllerBase
+    public class ComplaintsApiController : ControllerBase
     {
-        private readonly IComplaintService _complaintService;
+        private readonly IComplaintQueryService _queryService;
+        private readonly IComplaintCommandService _commandService;
         private readonly IComplaintMapper _complaintMapper;
-        private readonly ILogger<ComplaintsApiController> _logger;
-
         public ComplaintsApiController(
-            IComplaintService complaintService,
-            IComplaintMapper complaintMapper,
-            ILogger<ComplaintsApiController> logger)
+            IComplaintQueryService queryService,
+            IComplaintCommandService commandService,
+            IComplaintMapper complaintMapper)
         {
-            _complaintService = complaintService ?? throw new ArgumentNullException(nameof(complaintService));
+            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
+            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
             _complaintMapper = complaintMapper ?? throw new ArgumentNullException(nameof(complaintMapper));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<ComplaintViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<IReadOnlyCollection<ComplaintDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
         {
-            LogFetchingAllComplaints(_logger);
-
-            IEnumerable<ComplaintDto> dtos = await _complaintService.GetAllAsync(cancellationToken);
-            ComplaintViewModel[] viewModels = dtos
-                .Select(e => _complaintMapper.ToViewModel(e))
+            IReadOnlyCollection<ComplaintQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
+            ComplaintDetailsViewModel[] viewModels = dtos
+                .Select(_complaintMapper.ToDetailsViewModel)
                 .ToArray();
 
-            LogFetchedAllComplaintsCount(_logger, viewModels.Length);
             return Ok(viewModels);
         }
-
+        /// <summary>
+        /// Получить развернутые детали жалобы по её уникальному идентификатору.
+        /// </summary>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<ComplaintViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<ComplaintDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
         {
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ComplaintDto dto = await _complaintService.GetByIdAsync(id, cancellationToken);
-            ComplaintViewModel viewModel = _complaintMapper.ToViewModel(dto);
+            ComplaintQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
+            ComplaintDetailsViewModel viewModel = _complaintMapper.ToDetailsViewModel(dto);
 
             return Ok(viewModel);
         }
-
+        /// <summary>
+        /// Создать новую запись жалобы.
+        /// </summary>
         [HttpPost]
-        public async Task<ActionResult<ComplaintViewModel>> Create([FromBody] CreateComplaintViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<ComplaintCreatedViewModel>> Create([FromBody] CreateComplaintViewModel createViewModel, CancellationToken cancellationToken)
         {
-            LogComplaintCreationRequested(_logger, createViewModel.UtilityId, createViewModel.Title);
-
             CreateComplaintDto createDto = _complaintMapper.ToDto(createViewModel);
-            ComplaintDto createdDto = await _complaintService.CreateAsync(createDto, cancellationToken);
-            ComplaintViewModel createdViewModel = _complaintMapper.ToViewModel(createdDto);
+            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
+            ComplaintCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
+            ComplaintCreatedViewModel resultViewModel = _complaintMapper.ToCreatedViewModel(createdDto);
 
-            LogComplaintCreated(_logger, createdViewModel.Id);
-            return CreatedAtAction(nameof(GetById), new { id = createdViewModel.Id }, createdViewModel);
+            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
         }
-
+        /// <summary>
+        /// Отредактировать существующие данные жалобы.
+        /// </summary>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<ComplaintViewModel>> Edit([FromRoute] long id, [FromBody] EditComplaintViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<ComplaintUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditComplaintViewModel editViewModel, CancellationToken cancellationToken)
         {
-            LogComplaintUpdateRequested(_logger, id, editViewModel.UtilityId, editViewModel.Title);
-
             EditComplaintDto editDto = _complaintMapper.ToDto(editViewModel);
             // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ComplaintDto updatedDto = await _complaintService.EditAsync(id, editDto, cancellationToken);
-            ComplaintViewModel updatedViewModel = _complaintMapper.ToViewModel(updatedDto);
+            ComplaintCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
+            ComplaintUpdatedViewModel resultViewModel = _complaintMapper.ToUpdatedViewModel(updatedDto);
 
-            LogComplaintUpdated(_logger, id);
-            return Ok(updatedViewModel);
+            return Ok(resultViewModel);
         }
-
         /// <summary>
-        /// Возвращаю ComplaintViewModel при обновлении статуса с кодом 200ок для удобства тестирвоания
+        /// Точечно изменить статус существующей жалобы.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="status"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        [HttpPatch("{id:long}/status/{status:int}")]
-        public async Task<ActionResult<ComplaintViewModel>> UpdateStatus([FromRoute] long id, [FromRoute] int status, CancellationToken cancellationToken)
+        [HttpPatch("change-status")]
+        public async Task<ActionResult<ComplaintUpdatedViewModel>> ChangeStatus([FromBody] ChangeComplaintStatusViewModel changeStatusViewModel, CancellationToken cancellationToken)
         {
-            LogComplaintStatusUpdateRequested(_logger, id, status);
+            ChangeComplaintStatusDto changeStatusDto = _complaintMapper.ToDto(changeStatusViewModel);
+            ComplaintCommandResultDto updatedDto = await _commandService.ChangeStatusAsync(changeStatusDto, cancellationToken);
+            ComplaintUpdatedViewModel resultViewModel = _complaintMapper.ToUpdatedViewModel(updatedDto);
 
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ComplaintDto currentDto = await _complaintService.GetByIdAsync(id, cancellationToken);
-            EditComplaintDto editDto = _complaintMapper.ToDto(currentDto, (ComplaintStatus)status);
-
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ComplaintDto updatedDto = await _complaintService.EditAsync(id, editDto, cancellationToken);
-            ComplaintViewModel updatedViewModel = _complaintMapper.ToViewModel(updatedDto);
-
-            LogComplaintStatusUpdated(_logger, id, status);
-            return Ok(updatedViewModel);
+            return Ok(resultViewModel);
         }
-
+        /// <summary>
+        /// Удалить запись жалобы из системы.
+        /// </summary>
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
         {
-            LogComplaintDeletionRequested(_logger, id);
+            await _commandService.DeleteAsync(id, cancellationToken);
 
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            await _complaintService.DeleteAsync(id, cancellationToken);
-
-            LogComplaintDeleted(_logger, id);
             return NoContent();
         }
     }
