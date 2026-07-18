@@ -2,9 +2,8 @@
 using UtilityPaymentJournal.Features.Complaints.Commands;
 using UtilityPaymentJournal.Features.Complaints.Models;
 using UtilityPaymentJournal.Features.Complaints.Queries;
-using UtilityPaymentJournal.Interface.Mapping;
 
-namespace UtilityPaymentJournal.Controllers.Api
+namespace UtilityPaymentJournal.Features.Complaints
 {
     /// <summary>
     /// АПИ-контроллер для управления жалобами.

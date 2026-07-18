@@ -3,7 +3,7 @@ using UtilityPaymentJournal.Features.Complaints.Commands;
 using UtilityPaymentJournal.Features.Complaints.Models;
 using UtilityPaymentJournal.Features.Complaints.Queries;
 
-namespace UtilityPaymentJournal.Interface.Mapping
+namespace UtilityPaymentJournal.Features.Complaints
 {
     public interface IComplaintMapper
     {

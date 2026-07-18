@@ -3,7 +3,7 @@ using UtilityPaymentJournal.Common.Enumerations;
 using UtilityPaymentJournal.Features.Complaints.Models;
 using UtilityPaymentJournal.Features.Complaints.Queries;
 
-namespace UtilityPaymentJournal.Controllers
+namespace UtilityPaymentJournal.Features.Complaints
 {
     [Route("complaints")]
     public class ComplaintsController : Controller
@@ -22,11 +22,11 @@ namespace UtilityPaymentJournal.Controllers
             Dictionary<ComplaintStatus, List<ComplaintViewModel>> complaintsByStatus 
                 = await _complaintQueryService.GetComplaintsGroupedByStatusAsync(cancellationToken);
 
-            // 2. Формируем чистую модель представления доски строго по нашему контракту
+            // 2. Формируем модель представления доски
             ComplaintBoardViewModel boardViewModel = new ComplaintBoardViewModel
             {
                 ComplaintsByStatus = complaintsByStatus,
-                EmptyForm = new CreateComplaintViewModel() // Инициализируем форму для валидации на клиенте
+                EmptyForm = new CreateComplaintViewModel() // Инициализируем форму для создания карточки
             };
 
             return View(boardViewModel);

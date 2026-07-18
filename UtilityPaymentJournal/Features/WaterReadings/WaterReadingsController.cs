@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace UtilityPaymentJournal.Controllers.Mvc
+namespace UtilityPaymentJournal.Features.WaterReadings
 {
     [Route("water-readings")]
     public class WaterReadingsController : Controller

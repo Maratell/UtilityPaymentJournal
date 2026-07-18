@@ -3,10 +3,9 @@ using UtilityPaymentJournal.EF.Entity.WaterReadings;
 using UtilityPaymentJournal.Features.WaterReadings.Commands;
 using UtilityPaymentJournal.Features.WaterReadings.Models;
 using UtilityPaymentJournal.Features.WaterReadings.Queries;
-using UtilityPaymentJournal.Interface.Mapping;
 
 
-namespace WaterReadingPaymentJournal.Mapping
+namespace UtilityPaymentJournal.Features.WaterReadings
 {
     public class WaterReadingMapper : IWaterReadingMapper
     {

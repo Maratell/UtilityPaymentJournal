@@ -2,9 +2,8 @@
 using UtilityPaymentJournal.Features.WaterReadings.Commands;
 using UtilityPaymentJournal.Features.WaterReadings.Models;
 using UtilityPaymentJournal.Features.WaterReadings.Queries;
-using UtilityPaymentJournal.Interface.Mapping;
 
-namespace UtilityPaymentJournal.Controllers.Api
+namespace UtilityPaymentJournal.Features.WaterReadings
 {
     /// <summary>
     /// АПИ-контроллер для управления показаниями счетчиков воды.

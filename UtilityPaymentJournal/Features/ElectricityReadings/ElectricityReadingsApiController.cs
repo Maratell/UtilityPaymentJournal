@@ -2,9 +2,8 @@
 using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
 using UtilityPaymentJournal.Features.ElectricityReadings.Models;
 using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
-using UtilityPaymentJournal.Interface.Mapping;
 
-namespace UtilityPaymentJournal.Controllers.Api
+namespace UtilityPaymentJournal.Features.ElectricityReadings
 {
     /// <summary>
     /// АПИ-контроллер для управления показаниями счетчиков электроэнергии.
