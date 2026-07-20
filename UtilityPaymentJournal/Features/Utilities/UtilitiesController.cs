@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace UtilityPaymentJournal.Controllers.Mvc
+namespace UtilityPaymentJournal.Features.Utilities
 {
     [Route("utilities")]
     public class UtilitiesController : Controller

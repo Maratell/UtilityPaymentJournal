@@ -32,9 +32,11 @@
   <ItemGroup>
     <Folder Include="DTOs\ComplaintBoard\" />
     <Folder Include="DTOs\ElectricityReadings\" />
+    <Folder Include="DTOs\Utilities\" />
     <Folder Include="DTOs\WaterReadings\" />
     <Folder Include="Models\ComplaintBoard\" />
     <Folder Include="Models\ElectricityReadings\" />
+    <Folder Include="Models\Utilities\" />
     <Folder Include="Models\WaterReadings\" />
     <Folder Include="wwwroot\lib\dt\css\" />
   </ItemGroup>

@@ -1,28 +1,33 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.DTOs.Utilities;
-using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Models.Utilities;
+using UtilityPaymentJournal.Common.Specifications;
+using UtilityPaymentJournal.EF.Entity.Utilities;
+using UtilityPaymentJournal.Features.Utilities;
+using UtilityPaymentJournal.Features.Utilities.Models;
+using UtilityPaymentJournal.Features.Utilities.Queries;
 
 namespace UtilityPaymentJournal.Common.Components
 {
     public class UtilityDropdownViewComponent : ViewComponent
     {
-        private readonly IUtilityService _utilityService;
+        private readonly IUtilityQueryService _utilityQueryService;
         private readonly IUtilityMapper _utilityMapper;
 
-        public UtilityDropdownViewComponent(IUtilityService utilityService, IUtilityMapper utilityMapper)
+        public UtilityDropdownViewComponent(IUtilityQueryService utilityQueryService, IUtilityMapper utilityMapper)
         {
-            _utilityService = utilityService;
+            _utilityQueryService = utilityQueryService;
             _utilityMapper = utilityMapper;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+        public async Task<IViewComponentResult> InvokeAsync(CancellationToken cancellationToken)
         {
-            IReadOnlyCollection<UtilityDto> dtos = await _utilityService
-                .GetAllAsync();
+            // отображаем для выбора только активные коммунальные услуги
+            UtilityQueryFilter filter = new UtilityQueryFilter(IsActive: true);
+            ICriteriaSpecification<Utility> criteria = new UtilityFilterSpecification(filter);
 
-            UtilityViewModel[] viewModels = dtos.Select(_utilityMapper.ToViewModel)
+            IReadOnlyCollection<UtilityQueryResultDto> dtos = await _utilityQueryService
+                .GetAllAsync(criteria, cancellationToken);
+
+            UtilityDetailsViewModel[] viewModels = dtos.Select(_utilityMapper.ToViewModel)
                 .ToArray();
 
             return View(viewModels);

@@ -1,9 +1,9 @@
-﻿@using UtilityPaymentJournal.Models.Utilities
-@model UtilityViewModel[]
+﻿@using UtilityPaymentJournal.Features.Utilities.Models
+@model UtilityDetailsViewModel[]
 
 <select name="utilityId" class="form-select notebook-form-input js-utility-dropdown" required>
     <option value="">-- Выберите услугу --</option>
-    @foreach (UtilityViewModel utility in Model)
+    @foreach (UtilityDetailsViewModel utility in Model)
     {
         <option value="@utility.Id">@utility.Name</option>
     }
