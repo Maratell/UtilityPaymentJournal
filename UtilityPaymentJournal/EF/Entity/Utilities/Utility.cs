@@ -1,7 +1,5 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Interface.Entity;
 
 namespace UtilityPaymentJournal.EF.Entity.Utilities
@@ -25,7 +23,15 @@ namespace UtilityPaymentJournal.EF.Entity.Utilities
         // Поле для хранения класса иконки Bootstrap Icons
         [Required]
         [MaxLength(50)]
-        public string IconClass { get; set; } 
+        public string IconClass { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Статус активности коммунальной услуги. Визуально реализует паттерн "Мягкое удаление" (Soft Delete):
+        /// true — активна (доступна для выбора), false — деактивирована (архивная / мягко удаленная запись).
+        /// Вместо физического удаления строки (DELETE) флаг сбрасывается в false для сохранения целостности исторических данных.
+        /// </summary>
+        [Required]
+        public bool IsActive { get; set; } = true; // По умолчанию услуга активна
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -15,6 +15,9 @@ using UtilityPaymentJournal.Features.Complaints.Queries;
 using UtilityPaymentJournal.Features.ElectricityReadings;
 using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
 using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
+using UtilityPaymentJournal.Features.Utilities;
+using UtilityPaymentJournal.Features.Utilities.Commands;
+using UtilityPaymentJournal.Features.Utilities.Queries;
 using UtilityPaymentJournal.Features.WaterReadings;
 using UtilityPaymentJournal.Features.WaterReadings.Commands;
 using UtilityPaymentJournal.Features.WaterReadings.Queries;
@@ -81,7 +84,8 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResidenceService, ResidenceService>();
 builder.Services.AddScoped<IUtilityProviderService, UtilityProviderService>();
-builder.Services.AddScoped<IUtilityService, UtilityService>();
+builder.Services.AddScoped<IUtilityCommandService, UtilityCommandService>();
+builder.Services.AddScoped<IUtilityQueryService, UtilityQueryService>();
 builder.Services.AddScoped<IWaterReadingCommandService, WaterReadingCommandService>();
 builder.Services.AddScoped<IWaterReadingQueryService, WaterReadingQueryService>();
 builder.Services.AddScoped<IElectricityReadingCommandService, ElectricityReadingCommandService>();
@@ -176,7 +180,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 
-// Подключаем Serilog и заставляем его читать appsettings.json
+//Подключаем Serilog и заставляем его читать appsettings.json
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 

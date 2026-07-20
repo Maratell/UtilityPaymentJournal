@@ -28,8 +28,13 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings.Queries
         {
             LogFetchingElectricityReadingByIdFromDb(_logger, id);
 
-            // Загружаем entity со всеми деталями (Eager Loading) для передачи клиенту в UI
-            ElectricityReading? entity = await FindEntityAsync(id, cancellationToken: cancellationToken);
+            // Загружаем entity со всеми деталями (Eager Loading)
+            ElectricityReading? entity = await _context.ElectricityReadings
+                .Include(w => w.Residence)
+                .Include(w => w.UtilityProvider)
+                .AsNoTracking()
+                .SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
+
             if (entity is null)
             {
                 LogElectricityReadingNotFoundInDb(_logger, id);
@@ -55,14 +60,6 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings.Queries
             return entities
                 .Select(w => _electricityReadingMapper.ToQueryResultDto(w))
                 .ToArray();
-        }
-
-        private async Task<ElectricityReading?> FindEntityAsync(long id, CancellationToken cancellationToken)
-        {
-            return await _context.ElectricityReadings
-                .Include(w => w.Residence)
-                .Include(w => w.UtilityProvider)
-                .SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
         }
     }
 }
