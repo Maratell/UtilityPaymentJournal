@@ -21,6 +21,9 @@ using UtilityPaymentJournal.Features.Residences.Queries;
 using UtilityPaymentJournal.Features.Utilities;
 using UtilityPaymentJournal.Features.Utilities.Commands;
 using UtilityPaymentJournal.Features.Utilities.Queries;
+using UtilityPaymentJournal.Features.UtilityProviders;
+using UtilityPaymentJournal.Features.UtilityProviders.Commands;
+using UtilityPaymentJournal.Features.UtilityProviders.Queries;
 using UtilityPaymentJournal.Features.WaterReadings;
 using UtilityPaymentJournal.Features.WaterReadings.Commands;
 using UtilityPaymentJournal.Features.WaterReadings.Queries;
@@ -32,7 +35,6 @@ using UtilityPaymentJournal.Interface.Mapping;
 using UtilityPaymentJournal.Interface.Service;
 using UtilityPaymentJournal.Mapping;
 using UtilityPaymentJournal.Services;
-using UtilityProviderPaymentJournal.Interface.Mapping;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,7 +89,8 @@ builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
 builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
-builder.Services.AddScoped<IUtilityProviderService, UtilityProviderService>();
+builder.Services.AddScoped<IUtilityProviderCommandService, UtilityProviderCommandService>();
+builder.Services.AddScoped<IUtilityProviderQueryService, UtilityProviderQueryService>();
 builder.Services.AddScoped<IUtilityCommandService, UtilityCommandService>();
 builder.Services.AddScoped<IUtilityQueryService, UtilityQueryService>();
 builder.Services.AddScoped<IWaterReadingCommandService, WaterReadingCommandService>();
