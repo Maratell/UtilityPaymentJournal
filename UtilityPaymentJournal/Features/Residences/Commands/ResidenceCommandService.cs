@@ -41,7 +41,6 @@ namespace UtilityPaymentJournal.Features.Residences.Commands
         {
             LogResidenceUpdateRequested(_logger, id, editDto.Address);
 
-            // Загружаем "легковесное" entity без связанных деталей по уникальному первичному ключу
             Residence? entity = await _context.Residences
                 .SingleOrDefaultAsync(r => r.Id == id, cancellationToken);
 
