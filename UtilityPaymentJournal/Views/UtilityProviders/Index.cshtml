@@ -74,7 +74,7 @@
                                     </div>
 
                                     <!-- Режим редактирования -->
-                                    <div class="edit-mode w-100 d-flex justify-content-between align-items-center" style="display: none !important;">
+                                    <div class="edit-mode w-100 d-none justify-content-between align-items-center">
                                         <div class="w-100 me-3">
                                             <input type="text" class="form-control notebook-style-edit-input edit-input" value="${utility.name}" maxlength="100">
                                             <div class="text-danger small edit-error mt-2 fw-medium" style="display: none;"></div>
@@ -144,8 +144,11 @@
             // 3. ВКЛЮЧЕНИЕ РЕЖИМА РЕДАКТИРОВАНИЯ
             $('#utilityList').on('click', '.clickable-address, .btn-edit-trigger', function () {
                 const li = $(this).closest('li');
-                li.find('.view-mode').attr('style', 'display: none !important;');
-                li.find('.edit-mode').attr('style', 'display: flex !important;');
+
+                // Скрываем режим просмотра и показываем режим редактирования через классы Bootstrap
+                li.find('.view-mode').removeClass('d-flex').addClass('d-none');
+                li.find('.edit-mode').removeClass('d-none').addClass('d-flex');
+
                 li.find('.edit-input').focus().select();
             });
 
@@ -157,8 +160,9 @@
                 li.find('.edit-input').val(originalText);
                 li.find('.edit-error').hide().text('');
 
-                li.find('.edit-mode').attr('style', 'display: none !important;');
-                li.find('.view-mode').attr('style', 'display: flex !important;');
+                // Возвращаем видимость режима просмотра и скрываем форму редактирования
+                li.find('.edit-mode').removeClass('d-flex').addClass('d-none');
+                li.find('.view-mode').removeClass('d-none').addClass('d-flex');
             });
 
             // 5. СОХРАНЕНИЕ ИЗМЕНЕНИЙ
@@ -194,8 +198,9 @@
                     success: function (updatedUtility) {
                         li.find('.notebook-item-text').text(updatedUtility.name); // Исправлен класс для обновления текста
 
-                        li.find('.edit-mode').attr('style', 'display: none !important;');
-                        li.find('.view-mode').attr('style', 'display: flex !important;');
+                        // ИСПРАВЛЕНО: Вместо инлайновых стилей переключаем классы Bootstrap
+                        li.find('.edit-mode').removeClass('d-flex').addClass('d-none');
+                        li.find('.view-mode').removeClass('d-none').addClass('d-flex');
                     },
                     error: function (xhr) {
                         // Пытаемся распарсить ошибку бэкенда

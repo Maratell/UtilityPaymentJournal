@@ -15,6 +15,9 @@ using UtilityPaymentJournal.Features.Complaints.Queries;
 using UtilityPaymentJournal.Features.ElectricityReadings;
 using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
 using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
+using UtilityPaymentJournal.Features.Residences;
+using UtilityPaymentJournal.Features.Residences.Commands;
+using UtilityPaymentJournal.Features.Residences.Queries;
 using UtilityPaymentJournal.Features.Utilities;
 using UtilityPaymentJournal.Features.Utilities.Commands;
 using UtilityPaymentJournal.Features.Utilities.Queries;
@@ -82,7 +85,8 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IResidenceService, ResidenceService>();
+builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
+builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
 builder.Services.AddScoped<IUtilityProviderService, UtilityProviderService>();
 builder.Services.AddScoped<IUtilityCommandService, UtilityCommandService>();
 builder.Services.AddScoped<IUtilityQueryService, UtilityQueryService>();
