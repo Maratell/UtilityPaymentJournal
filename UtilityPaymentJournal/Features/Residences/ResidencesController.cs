@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
 
-namespace UtilityPaymentJournal.Controllers.Mvc
+namespace UtilityPaymentJournal.Features.Residences
 {
     [Route("residences")]
     public class ResidencesController : Controller

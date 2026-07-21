@@ -394,6 +394,13 @@ button.accept-policy {
     background-color: #cbd6e2 !important;
 }
 
+.notebook-style-btn:focus,
+.notebook-style-btn:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    border-left: 2px solid #cbd6e2 !important; /* Насильно удерживаем ваш серо-голубой цвет при клике */
+}
+
 /* Стиль контейнера списка (аккуратные серо-голубые границы) */
 .notebook-style-list {
     border: 2px solid #cbd6e2;
