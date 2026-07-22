@@ -1,4 +1,4 @@
-﻿namespace UtilityPaymentJournal.DTOs.Account
+﻿namespace UtilityPaymentJournal.Features.Account
 {
     /// <summary>
     /// ДТО с данными пользователя для входа в систему (аутентификация).

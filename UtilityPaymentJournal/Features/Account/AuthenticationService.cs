@@ -1,27 +1,24 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTOs.Account;
 using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Interface.Service;
 
-namespace UtilityPaymentJournal.Services
+namespace UtilityPaymentJournal.Features.Account
 {
     /// <summary>
     /// Реализация сервиса аутентификации.
     /// Инкапсулирует в себе работу с механизмами ASP.NET Core Identity.
     /// </summary>
-    public class AuthenticationService : IAuthenticationService
+    public partial class AuthenticationService : IAuthenticationService
     {
         private readonly SignInManager<User> _signInManager;
-        private readonly IAccountMapper _accountMapper;
+        private readonly ILogger<AuthenticationService> _logger;
 
         public AuthenticationService(
             SignInManager<User> signInManager,
-            IAccountMapper accountMapper)
+            ILogger<AuthenticationService> logger)
         {
             _signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
-            _accountMapper = accountMapper ?? throw new ArgumentNullException(nameof(accountMapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -38,33 +35,49 @@ namespace UtilityPaymentJournal.Services
             if (signInDto == null)
                 throw new ArgumentNullException(nameof(signInDto));
 
-            cancellationToken.ThrowIfCancellationRequested();
-
             // Проверяем подлинность учетных данных по UserName и Password.
             SignInResult result = await _signInManager.PasswordSignInAsync(
                 signInDto.UserName,
                 signInDto.Password,
                 isPersistent: signInDto.IsPersistent, // Флаг запоминания сессии при выходе из браузера
-                lockoutOnFailure: false // Отключаем блокировку при многократных ошибках ввода
+                lockoutOnFailure: true // Включаем блокировку при многократных ошибках ввода
             );
-
-            cancellationToken.ThrowIfCancellationRequested();
 
             // 1. Успешная аутентификация
             if (result.Succeeded)
             {
-                return _accountMapper.ToDto(
-                    isSuccess: true,
-                    status: SignInResultStatus.Success
+                LogUserSignedIn(_logger, signInDto.UserName);
+                return new AuthenticationResultDto(IsSuccess: true, Status: SignInResultStatus.Success);
+            }
+
+            // 2. Аккаунт заблокирован из-за перебора паролей
+            if (result.IsLockedOut)
+            {
+                LogUserLockedOut(_logger, signInDto.UserName);
+                return new AuthenticationResultDto(
+                    IsSuccess: false,
+                    Status: SignInResultStatus.LockedOut,
+                    ErrorMessage: "Аккаунт временно заблокирован из-за множества неудачных попыток входа."
                 );
             }
 
-            // 2. Все остальные случаи (неверный пароль, отсутствие пользователя и т.д.)
-            // Бизнес-логика сама определяет статус и текст ошибки, как мы и планировали
-            return _accountMapper.ToDto(
-                isSuccess: false,
-                status: SignInResultStatus.InvalidCredentials,
-                errorMessage: "Неверный логин или пароль."
+            // 3. Пользователю запрещен вход администратором / бизнес-логикой
+            if (result.IsNotAllowed)
+            {
+                LogUserLoginNotAllowed(_logger, signInDto.UserName);
+                return new AuthenticationResultDto(
+                    IsSuccess: false,
+                    Status: SignInResultStatus.NotAllowed,
+                    ErrorMessage: "Доступ к системе ограничен. Обратитесь к администратору."
+                );
+            }
+
+            // 4. Общая ошибка (неверный логин или пароль)
+            LogUserSignInFailed(_logger, signInDto.UserName);
+            return new AuthenticationResultDto(
+                IsSuccess: false,
+                Status: SignInResultStatus.InvalidCredentials,
+                ErrorMessage: "Неверный логин или пароль."
             );
         }
 
@@ -74,8 +87,6 @@ namespace UtilityPaymentJournal.Services
         /// <param name="cancellationToken">Токен отмены операции</param>
         public async Task SignOutAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             // Удаляем куки аутентификации пользователя
             await _signInManager.SignOutAsync();
         }
