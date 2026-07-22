@@ -1,6 +1,6 @@
 ﻿using UtilityPaymentJournal.Common.Enumerations;
 
-namespace UtilityPaymentJournal.DTOs.Account
+namespace UtilityPaymentJournal.Features.Account
 {
     /// <summary>
     /// ДТО с результатом аутентификации пользователя (возвращается из бизнес-логики).
@@ -11,6 +11,6 @@ namespace UtilityPaymentJournal.DTOs.Account
     public record AuthenticationResultDto(
         bool IsSuccess,
         SignInResultStatus Status,
-        string? ErrorMessage
+        string? ErrorMessage = null
     );
 }

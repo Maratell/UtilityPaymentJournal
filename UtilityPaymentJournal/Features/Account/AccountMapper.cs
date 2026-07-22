@@ -1,17 +1,14 @@
-﻿using Microsoft.AspNetCore.Identity;
-using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.DTOs.Account;
-using UtilityPaymentJournal.Interface.Mapping;
+﻿using UtilityPaymentJournal.Common.Enumerations;
 using UtilityPaymentJournal.Models.Authentication;
 
-namespace UtilityPaymentJournal.Mapping
+namespace UtilityPaymentJournal.Features.Account
 {
     public class AccountMapper : IAccountMapper
     {
         /// <summary>
         /// Маппинг входных данных фронтенда в DTO для бизнес-логики
         /// </summary>
-        public SignInDto ToDto(SignInRequestViewModel signInRequestViewModel)
+        public SignInDto ToSignInDto(SignInRequestViewModel signInRequestViewModel)
         {
             ArgumentNullException.ThrowIfNull(signInRequestViewModel);
 
@@ -38,8 +35,5 @@ namespace UtilityPaymentJournal.Mapping
                 // так как за генерацию путей отвечает исключительно Контроллер
             };
         }
-
-        public AuthenticationResultDto ToDto(bool isSuccess, SignInResultStatus status, string? errorMessage = null)
-            => new AuthenticationResultDto(isSuccess, status, errorMessage);
     }
 }

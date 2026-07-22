@@ -9,6 +9,7 @@ using System.Security.Claims;
 using UtilityPaymentJournal.Common.Constants;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.Features.Account;
 using UtilityPaymentJournal.Features.Complaints;
 using UtilityPaymentJournal.Features.Complaints.Commands;
 using UtilityPaymentJournal.Features.Complaints.Queries;
@@ -150,6 +151,11 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Password.RequireUppercase = false;   // Отключить обязательные заглавные буквы
     options.Password.RequireNonAlphanumeric = false; // Отключить спецсимволы
     options.Password.RequiredUniqueChars = 1;    // Количество уникальных символов
+
+    // Настройки блокировки аккаунта (Lockout)
+    options.Lockout.AllowedForNewUsers = true;      // Включить блокировку для новых пользователей
+    options.Lockout.MaxFailedAccessAttempts = 5;    // Блокировать после 5 неудачных попыток ввода
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // Время блокировки — 15 минут
 })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
@@ -177,10 +183,18 @@ builder.Services.AddControllers()
 // Настройка параметров куки для Identity (вместо AddCookie)
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    // Адрес перенаправления, если неавторизованный пользователь пытается открыть защищенную страницу
     options.LoginPath = "/account";
+    // Запрещает доступ к куке из JavaScript - защита от кражи сессии через XSS-атаки (Cross-Site Scripting)
     options.Cookie.HttpOnly = true;
+    // Защищает от CSRF-атак (Cross-Site Request Forgery), запрещая отправку куки при скрытых запросах со сторонних сайтов
     options.Cookie.SameSite = SameSiteMode.Lax;
+    // Подстраивает режим передачи куки под текущий запрос: если сайт открыт по http — кука идет без шифрования, если по https — с шифрованием
     options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    // Срок действия сессии пользователя при его полной неактивности на сайте
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    // Автоматически продлевает время жизни куки еще на 60 минут при каждом действии пользователя
+    options.SlidingExpiration = true;
 });
 
 // Добавление AutoMapper

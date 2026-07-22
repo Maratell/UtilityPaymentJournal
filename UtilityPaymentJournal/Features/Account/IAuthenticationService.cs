@@ -1,6 +1,4 @@
-﻿using UtilityPaymentJournal.DTOs.Account;
-
-namespace UtilityPaymentJournal.Interface.Service
+﻿namespace UtilityPaymentJournal.Features.Account
 {
     /// <summary>
     /// Интерфейс сервиса аутентификации пользователей.

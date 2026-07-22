@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace UtilityPaymentJournal.Controllers.Mvc
+namespace UtilityPaymentJournal.Features.Account
 {
     [AllowAnonymous] // Разрешает доступ неавторизованным гостям
     [Route("account")]
