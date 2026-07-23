@@ -10,6 +10,8 @@ using UtilityPaymentJournal.Common.Constants;
 using UtilityPaymentJournal.EF.Context;
 using UtilityPaymentJournal.EF.Entity.Authentication;
 using UtilityPaymentJournal.Features.Account;
+using UtilityPaymentJournal.Features.Account.Commands;
+using UtilityPaymentJournal.Features.Account.Queries;
 using UtilityPaymentJournal.Features.Complaints;
 using UtilityPaymentJournal.Features.Complaints.Commands;
 using UtilityPaymentJournal.Features.Complaints.Queries;
@@ -86,7 +88,8 @@ builder.Services.AddControllersWithViews(options =>
 //    options.Filters.Add<ValidateModelAttribute>();
 //});
 
-builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IAuthenticationCommandService, AuthenticationCommandService>();
+builder.Services.AddScoped<IAuthenticationQueryService, AuthenticationQueryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
 builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
