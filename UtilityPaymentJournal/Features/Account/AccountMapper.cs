@@ -1,38 +1,45 @@
-﻿using UtilityPaymentJournal.Common.Enumerations;
+﻿using UtilityPaymentJournal.Features.Account.Commands;
+using UtilityPaymentJournal.Features.Account.Models;
+using UtilityPaymentJournal.Features.Account.Queries;
 using UtilityPaymentJournal.Models.Authentication;
 
 namespace UtilityPaymentJournal.Features.Account
 {
     public class AccountMapper : IAccountMapper
     {
-        /// <summary>
-        /// Маппинг входных данных фронтенда в DTO для бизнес-логики
-        /// </summary>
-        public SignInDto ToSignInDto(SignInRequestViewModel signInRequestViewModel)
+        public SignInDto ToSignInDto(SignInRequestViewModel signInViewModel)
         {
-            ArgumentNullException.ThrowIfNull(signInRequestViewModel);
+            ArgumentNullException.ThrowIfNull(signInViewModel);
 
             return new SignInDto(
-                UserName: signInRequestViewModel.UserName,
-                Password: signInRequestViewModel.Password,
-                IsPersistent: signInRequestViewModel.IsPersistent
+                UserName: signInViewModel.UserName,
+                Password: signInViewModel.Password, 
+                IsPersistent: signInViewModel.IsPersistent
             );
         }
 
-        /// <summary>
-        /// Маппинг результата бизнес-логики во ViewModel ответа (без Url)
-        /// </summary>
-        public AuthenticationResultViewModel ToViewModel(AuthenticationResultDto authenticationResultDto)
+        public UserSignedInViewModel ToSignedInViewModel(AuthenticationCommandResultDto dto)
         {
-            ArgumentNullException.ThrowIfNull(authenticationResultDto);
+            ArgumentNullException.ThrowIfNull(dto);
 
-            return new AuthenticationResultViewModel
+            return new UserSignedInViewModel
             {
-                IsSuccess = authenticationResultDto.IsSuccess,
-                Status = authenticationResultDto.Status,
-                ErrorMessage = authenticationResultDto.ErrorMessage
+                IsSuccess = dto.IsSuccess,
+                Status = dto.Status,
+                ErrorMessage = dto.ErrorMessage
                 // Свойство RedirectUrl намеренно оставляем пустым, 
                 // так как за генерацию путей отвечает исключительно Контроллер
+            };
+        }
+
+        public CurrentUserDetailsViewModel ToDetailsViewModel(CurrentUserQueryResultDto dto)
+        {
+            ArgumentNullException.ThrowIfNull(dto);
+
+            return new CurrentUserDetailsViewModel
+            {
+                Id = dto.Id,
+                UserName = dto.UserName
             };
         }
     }

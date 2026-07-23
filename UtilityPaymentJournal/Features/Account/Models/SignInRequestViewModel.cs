@@ -13,7 +13,6 @@ namespace UtilityPaymentJournal.Models.Authentication
         [Required(ErrorMessage = "Введите логин")]
         [Display(Name = "Логин")]
         public string UserName { get; set; } // Вместо Email
-
         /// <summary>
         /// Секретный пароль учетной записи.
         /// </summary>
@@ -21,7 +20,6 @@ namespace UtilityPaymentJournal.Models.Authentication
         [Display(Name = "Пароль")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
-
         /// <summary>
         /// Флаг, определяющий, должна ли сессия пользователя сохраняться после закрытия браузера.
         /// </summary>

@@ -37,6 +37,7 @@
     <Folder Include="DTOs\Utilities\" />
     <Folder Include="DTOs\UtilityProviders\" />
     <Folder Include="DTOs\WaterReadings\" />
+    <Folder Include="Models\Authentication\" />
     <Folder Include="Models\ComplaintBoard\" />
     <Folder Include="Models\ElectricityReadings\" />
     <Folder Include="Models\Residences\" />

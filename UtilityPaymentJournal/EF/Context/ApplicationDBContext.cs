@@ -9,7 +9,7 @@ using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
 using UtilityPaymentJournal.EF.Entity.Residences;
 using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.EF.Entity.WaterReadings;
-using UtilityPaymentJournal.Interface.Service;
+using UtilityPaymentJournal.Infrastructure.Identity;
 
 namespace UtilityPaymentJournal.EF.Context
 {
