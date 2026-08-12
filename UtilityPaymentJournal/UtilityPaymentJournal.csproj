@@ -30,13 +30,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\Api\" />
+    <Folder Include="Controllers\Mvc\" />
     <Folder Include="DTOs\Account\" />
+    <Folder Include="DTOs\Admin\" />
     <Folder Include="DTOs\ComplaintBoard\" />
     <Folder Include="DTOs\ElectricityReadings\" />
     <Folder Include="DTOs\Residences\" />
     <Folder Include="DTOs\Utilities\" />
     <Folder Include="DTOs\UtilityProviders\" />
     <Folder Include="DTOs\WaterReadings\" />
+    <Folder Include="Interface\Mapping\" />
+    <Folder Include="Interface\Service\" />
+    <Folder Include="Mapping\" />
     <Folder Include="Models\Authentication\" />
     <Folder Include="Models\ComplaintBoard\" />
     <Folder Include="Models\ElectricityReadings\" />
@@ -44,6 +50,7 @@
     <Folder Include="Models\Utilities\" />
     <Folder Include="Models\UtilityProviders\" />
     <Folder Include="Models\WaterReadings\" />
+    <Folder Include="Services\" />
     <Folder Include="wwwroot\lib\dt\css\" />
   </ItemGroup>
 
