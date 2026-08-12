@@ -21,6 +21,9 @@ using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
 using UtilityPaymentJournal.Features.Residences;
 using UtilityPaymentJournal.Features.Residences.Commands;
 using UtilityPaymentJournal.Features.Residences.Queries;
+using UtilityPaymentJournal.Features.Users;
+using UtilityPaymentJournal.Features.Users.Commands;
+using UtilityPaymentJournal.Features.Users.Queries;
 using UtilityPaymentJournal.Features.Utilities;
 using UtilityPaymentJournal.Features.Utilities.Commands;
 using UtilityPaymentJournal.Features.Utilities.Queries;
@@ -34,10 +37,6 @@ using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
 using UtilityPaymentJournal.Infrastructure.Identity;
 using UtilityPaymentJournal.Infrastructure.JsonConverters;
 using UtilityPaymentJournal.Infrastructure.Middlewares;
-using UtilityPaymentJournal.Interface.Mapping;
-using UtilityPaymentJournal.Interface.Service;
-using UtilityPaymentJournal.Mapping;
-using UtilityPaymentJournal.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -90,7 +89,8 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.AddScoped<IAuthenticationCommandService, AuthenticationCommandService>();
 builder.Services.AddScoped<IAuthenticationQueryService, AuthenticationQueryService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserCommandService, UserCommandService>();
+builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
 builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
 builder.Services.AddScoped<IUtilityProviderCommandService, UtilityProviderCommandService>();
