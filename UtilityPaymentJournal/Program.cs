@@ -118,7 +118,7 @@ builder.Services.AddSingleton<IWaterReadingMapper, WaterReadingMapper>();
 builder.Services.AddSingleton<IElectricityReadingMapper, ElectricityReadingMapper>();
 builder.Services.AddSingleton<IComplaintMapper, ComplaintMapper>();
 
-// Позволяет получать HttpContext (и claims пользователя) внутри классов данных
+// Позволяет получать HttpContext и Claims пользователя внутри классов данных (по умолчанию Singleton)
 builder.Services.AddHttpContextAccessor();
 
 
@@ -139,7 +139,7 @@ builder.Services.AddHttpContextAccessor();
 //// ??
 //builder.Services.AddControllersWithViews();
 
-// Регистрируем контекст с провайдером PostgreSQL
+// Регистрируем контекст (по умолчанию Scoped) с провайдером PostgreSQL
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
