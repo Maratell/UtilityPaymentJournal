@@ -17,6 +17,7 @@ namespace UtilityPaymentJournal.EF.Context
     {
         private readonly ICurrentUserService _currentUserService;
 
+        public string? CurrentUserId => _currentUserService.UserId;
         public DbSet<Residence> Residences { get; set; }
         public DbSet<Utility> Utilities { get; set; }
         public DbSet<UtilityProvider> UtilityProviders { get; set; }
@@ -37,7 +38,7 @@ namespace UtilityPaymentJournal.EF.Context
             base.OnModelCreating(builder);
 
             // Настраиваем фильтр запросов по Id пользователя
-            builder.ApplyUserGlobalFilters(() => _currentUserService.UserId);
+            builder.ApplyUserGlobalFilters();
 
             // Задаем схему по умолчанию (опционально, если нужно хранить все в 'public')
             builder.HasDefaultSchema("public");
@@ -74,7 +75,9 @@ namespace UtilityPaymentJournal.EF.Context
 
         private void ApplyInterceptors()
         {
-            ChangeTracker.ApplyUserOwnership(_currentUserService.UserId);
+            // TODO: В будущем вынести эту логику в отдельные классы-интерцепторы (SaveChangesInterceptor)
+            // для соблюдения принципа единственной ответственности (SRP) и разгрузки DbContext.
+            ChangeTracker.ApplyUserOwnership(CurrentUserId);
             ChangeTracker.ApplyAuditDates();
         }
     }
