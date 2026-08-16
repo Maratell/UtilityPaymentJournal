@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using UtilityPaymentJournal.Interface.Entity;
+using UtilityPaymentJournal.Common.Interfaces;
 
-namespace UtilityPaymentJournal.EF.Entity.Utilities
+namespace UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities
 {
     public class Utility : IAuditable/*, IUserOwned*/
     {

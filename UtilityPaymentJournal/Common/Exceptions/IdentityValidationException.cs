@@ -1,4 +1,4 @@
-﻿namespace UtilityPaymentJournal.Exceptions
+﻿namespace UtilityPaymentJournal.Common.Exceptions
 {
     public class IdentityValidationException : Exception
     {

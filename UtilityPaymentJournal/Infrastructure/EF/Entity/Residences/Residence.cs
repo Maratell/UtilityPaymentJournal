@@ -1,10 +1,9 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.Interface.Entity;
+using UtilityPaymentJournal.Common.Interfaces;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 
-namespace UtilityPaymentJournal.EF.Entity.Residences
+namespace UtilityPaymentJournal.Infrastructure.EF.Entity.Residences
 {
     public class Residence : IAuditable, IUserOwned
     {

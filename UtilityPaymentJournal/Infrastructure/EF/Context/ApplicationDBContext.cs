@@ -1,17 +1,15 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using UtilityPaymentJournal.Common.Extensions;
-using UtilityPaymentJournal.EF.Entity;
-using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
-using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
-using UtilityPaymentJournal.EF.Entity.Residences;
-using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.EF.Entity.WaterReadings;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.ElectricityReadings;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings;
 using UtilityPaymentJournal.Infrastructure.Identity;
 
-namespace UtilityPaymentJournal.EF.Context
+namespace UtilityPaymentJournal.Infrastructure.EF.Context
 {
     public class ApplicationDbContext : IdentityDbContext<User, Role, string>
     {

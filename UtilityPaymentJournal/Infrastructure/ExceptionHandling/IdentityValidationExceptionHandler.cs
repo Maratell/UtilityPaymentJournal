@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using UtilityPaymentJournal.Exceptions;
+using UtilityPaymentJournal.Common.Exceptions;
 
 namespace UtilityPaymentJournal.Infrastructure.ExceptionHandling
 {

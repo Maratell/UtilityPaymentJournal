@@ -1,13 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.EF.Entity.Residences;
-using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.Interface.Entity;
+using UtilityPaymentJournal.Common.Interfaces;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
-namespace UtilityPaymentJournal.EF.Entity.WaterReadings
+namespace UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings
 {
     public class WaterReading : IAuditable, IUserOwned
     {

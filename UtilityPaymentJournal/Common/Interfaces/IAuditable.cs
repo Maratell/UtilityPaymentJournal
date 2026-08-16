@@ -1,4 +1,4 @@
-﻿namespace UtilityPaymentJournal.Interface.Entity
+﻿namespace UtilityPaymentJournal.Common.Interfaces
 {
     public interface IAuditable
     {

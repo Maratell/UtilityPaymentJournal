@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using UtilityPaymentJournal.Common.Extensions;
 using UtilityPaymentJournal.Common.Specifications;
-using UtilityPaymentJournal.EF.Entity.Utilities;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.Utilities.Queries
 {

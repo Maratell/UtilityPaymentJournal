@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using UtilityPaymentJournal.Common.Constants;
-using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 
 namespace UtilityPaymentJournal.Infrastructure.Identity
 {

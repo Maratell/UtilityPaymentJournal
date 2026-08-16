@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using UtilityPaymentJournal.Interface.Entity;
+using UtilityPaymentJournal.Common.Interfaces;
 
-namespace UtilityPaymentJournal.EF.Entity.Authentication
+namespace UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication
 {
     public class User : IdentityUser, IAuditable
     {

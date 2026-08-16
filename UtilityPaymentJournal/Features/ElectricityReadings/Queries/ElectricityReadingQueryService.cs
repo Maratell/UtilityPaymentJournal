@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.EF.Context;
-using UtilityPaymentJournal.EF.Entity.ElectricityReadings;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.ElectricityReadings;
 
 namespace UtilityPaymentJournal.Features.ElectricityReadings.Queries
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace UtilityPaymentJournal.Filters
+namespace UtilityPaymentJournal.Infrastructure.Filters
 {
     /// <summary>
     /// Фильтр не нужен, поскольку используется встроенный ApiController для api-контроллеров
