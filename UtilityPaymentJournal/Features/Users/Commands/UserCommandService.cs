@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
+using UtilityPaymentJournal.Common.Exceptions;
 using UtilityPaymentJournal.Common.Extensions;
-using UtilityPaymentJournal.EF.Context;
-using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.Exceptions;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 
 namespace UtilityPaymentJournal.Features.Users.Commands
 {

@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.Interface.Entity;
+using UtilityPaymentJournal.Common.Interfaces;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
-namespace UtilityPaymentJournal.EF.Entity.ComplaintBoard
+namespace UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard
 {
     public class Complaint : IAuditable, IUserOwned
     {

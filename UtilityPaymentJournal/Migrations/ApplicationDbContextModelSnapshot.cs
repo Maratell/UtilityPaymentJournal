@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using UtilityPaymentJournal.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
 
 #nullable disable
 

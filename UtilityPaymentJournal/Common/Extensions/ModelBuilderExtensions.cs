@@ -1,15 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-using System.Diagnostics;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Security.Claims;
-using UtilityPaymentJournal.EF.Context;
-using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.EF.Entity.Residences;
-using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.Infrastructure.Identity;
-using UtilityPaymentJournal.Interface.Entity;
+using UtilityPaymentJournal.Common.Interfaces;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
 
 namespace UtilityPaymentJournal.Common.Extensions
 {

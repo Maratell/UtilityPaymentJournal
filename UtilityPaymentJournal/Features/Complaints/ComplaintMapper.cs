@@ -1,7 +1,7 @@
-﻿using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
-using UtilityPaymentJournal.Features.Complaints.Commands;
+﻿using UtilityPaymentJournal.Features.Complaints.Commands;
 using UtilityPaymentJournal.Features.Complaints.Models;
 using UtilityPaymentJournal.Features.Complaints.Queries;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Features.Complaints
 {

@@ -1,7 +1,7 @@
-﻿using UtilityPaymentJournal.EF.Entity.Residences;
-using UtilityPaymentJournal.Features.Residences.Commands;
+﻿using UtilityPaymentJournal.Features.Residences.Commands;
 using UtilityPaymentJournal.Features.Residences.Models;
 using UtilityPaymentJournal.Features.Residences.Queries;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
 
 namespace UtilityPaymentJournal.Features.Residences
 {

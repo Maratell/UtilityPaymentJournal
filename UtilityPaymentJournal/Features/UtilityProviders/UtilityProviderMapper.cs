@@ -1,7 +1,7 @@
-﻿using UtilityPaymentJournal.EF.Entity.Utilities;
-using UtilityPaymentJournal.Features.UtilityProviders.Commands;
+﻿using UtilityPaymentJournal.Features.UtilityProviders.Commands;
 using UtilityPaymentJournal.Features.UtilityProviders.Models;
 using UtilityPaymentJournal.Features.UtilityProviders.Queries;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.UtilityProviders
 {

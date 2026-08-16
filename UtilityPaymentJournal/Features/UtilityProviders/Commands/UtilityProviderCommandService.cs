@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.EF.Context;
-using UtilityPaymentJournal.EF.Entity.Utilities;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.UtilityProviders.Commands
 {

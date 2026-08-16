@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UtilityPaymentJournal.Common.Specifications;
-using UtilityPaymentJournal.EF.Entity.Utilities;
 using UtilityPaymentJournal.Features.Utilities.Commands;
 using UtilityPaymentJournal.Features.Utilities.Models;
 using UtilityPaymentJournal.Features.Utilities.Queries;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.Utilities
 {

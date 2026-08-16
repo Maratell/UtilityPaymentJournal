@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.EF.Context;
-using UtilityPaymentJournal.EF.Entity.Residences;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
 
 namespace UtilityPaymentJournal.Features.Residences.Queries
 {

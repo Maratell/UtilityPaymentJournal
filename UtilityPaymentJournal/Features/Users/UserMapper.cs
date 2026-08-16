@@ -1,7 +1,7 @@
-﻿using UtilityPaymentJournal.EF.Entity.Authentication;
-using UtilityPaymentJournal.Features.Users.Commands;
+﻿using UtilityPaymentJournal.Features.Users.Commands;
 using UtilityPaymentJournal.Features.Users.Models;
 using UtilityPaymentJournal.Features.Users.Queries;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 
 namespace UtilityPaymentJournal.Features.Users
 {

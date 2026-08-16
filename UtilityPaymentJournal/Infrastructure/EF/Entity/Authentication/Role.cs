@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Security.Principal;
-using UtilityPaymentJournal.Interface.Entity;
+using UtilityPaymentJournal.Common.Interfaces;
 
-namespace UtilityPaymentJournal.EF.Entity.Authentication
+namespace UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication
 {
     public class Role : IdentityRole<string>, IAuditable
     {

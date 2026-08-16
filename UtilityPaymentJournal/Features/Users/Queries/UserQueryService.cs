@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
 
 namespace UtilityPaymentJournal.Features.Users.Queries
 {

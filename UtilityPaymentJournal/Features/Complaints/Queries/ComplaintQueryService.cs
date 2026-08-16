@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.EF.Context;
-using UtilityPaymentJournal.EF.Entity.ComplaintBoard;
 using UtilityPaymentJournal.Features.Complaints.Models;
+using UtilityPaymentJournal.Infrastructure.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Features.Complaints.Queries
 {

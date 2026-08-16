@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 
 namespace UtilityPaymentJournal.Features.Account.Commands
 {

@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using UtilityPaymentJournal.EF.Entity.Authentication;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 using UtilityPaymentJournal.Infrastructure.Identity;
 
 namespace UtilityPaymentJournal.Features.Account.Queries
