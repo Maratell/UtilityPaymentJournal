@@ -16,9 +16,6 @@ using UtilityPaymentJournal.Features.Complaints.Queries;
 using UtilityPaymentJournal.Features.ElectricityReadings;
 using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
 using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
-using UtilityPaymentJournal.Features.Residences;
-using UtilityPaymentJournal.Features.Residences.Commands;
-using UtilityPaymentJournal.Features.Residences.Queries;
 using UtilityPaymentJournal.Features.Users;
 using UtilityPaymentJournal.Features.Users.Commands;
 using UtilityPaymentJournal.Features.Users.Queries;
@@ -87,12 +84,20 @@ builder.Services.AddControllersWithViews(options =>
 //    options.Filters.Add<ValidateModelAttribute>();
 //});
 
+// .NET 8 / 9+ стиль
+builder.Services.AddMediatR(cfg =>
+{
+    // Говорим MediatR отсканировать сборку (assembly), в которой находится класс Program.
+    // Он автоматически найдет ВСЕ хэндлеры в любых подпапках!
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
+
 builder.Services.AddScoped<IAuthenticationCommandService, AuthenticationCommandService>();
 builder.Services.AddScoped<IAuthenticationQueryService, AuthenticationQueryService>();
 builder.Services.AddScoped<IUserCommandService, UserCommandService>();
 builder.Services.AddScoped<IUserQueryService, UserQueryService>();
-builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
-builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
+//builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
+//builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
 builder.Services.AddScoped<IUtilityProviderCommandService, UtilityProviderCommandService>();
 builder.Services.AddScoped<IUtilityProviderQueryService, UtilityProviderQueryService>();
 builder.Services.AddScoped<IUtilityCommandService, UtilityCommandService>();
@@ -111,7 +116,7 @@ builder.Services.AddScoped<UserLoggingMiddleware>();
 // Регистрируем маппер как Singleton (так как в нем нет состояния)
 builder.Services.AddScoped<IAccountMapper, AccountMapper>();
 builder.Services.AddScoped<IUserMapper, UserMapper>();
-builder.Services.AddSingleton<IResidenceMapper, ResidenceMapper>();
+//builder.Services.AddSingleton<IResidenceMapper, ResidenceMapper>();
 builder.Services.AddSingleton<IUtilityProviderMapper, UtilityProviderMapper>();
 builder.Services.AddSingleton<IUtilityMapper, UtilityMapper>();
 builder.Services.AddSingleton<IWaterReadingMapper, WaterReadingMapper>();

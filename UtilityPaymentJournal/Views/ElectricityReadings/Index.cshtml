@@ -62,7 +62,7 @@
 @section Scripts {
     <script>
         var table;
-        var residences = []; // Сюда загрузятся данные из UtilityController
+        var residences = []; // Сюда загрузятся данные из ResidencesController
         var utilities = [];  // Сюда загрузятся данные из UtilityProviderController
 
         $(document).ready(function () {
@@ -76,7 +76,7 @@
                 $.ajax({ url: utilUrl, type: "GET" })
             ])
             .then(function (results) {
-                residences = results[0];
+                residences = results[0].items || results[0];
                 utilities = results[1];
 
                 // 2. Старт DataTables только после наполнения массивов справочников
