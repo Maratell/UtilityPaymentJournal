@@ -1,93 +1,94 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.Features.Residences.Commands;
-using UtilityPaymentJournal.Features.Residences.Models;
-using UtilityPaymentJournal.Features.Residences.Queries;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using UtilityPaymentJournal.Features.Residences.Create;
+using UtilityPaymentJournal.Features.Residences.Delete;
+using UtilityPaymentJournal.Features.Residences.Edit;
+using UtilityPaymentJournal.Features.Residences.GetById;
+using UtilityPaymentJournal.Features.Residences.GetList;
 
 
 namespace UtilityPaymentJournal.Features.Residences
 {
     /// <summary>
-    /// АПИ-контроллер для управления показаниями счетчиков электроэнергии.
+    /// Api-контроллер для управления списом жилых объектов.
     /// </summary>
     [ApiController]
     [Route("api/residences")]
-    public class ResidencesApiController : ControllerBase
+    public class ResidencesApiController(ISender mediator) : ControllerBase
     {
-        private readonly IResidenceQueryService _queryService;
-        private readonly IResidenceCommandService _commandService;
-        private readonly IResidenceMapper _residenceMapper;
+        private readonly ISender _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
 
-        public ResidencesApiController(
-            IResidenceQueryService queryService,
-            IResidenceCommandService commandService,
-            IResidenceMapper residenceMapper)
-        {
-            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            _residenceMapper = residenceMapper ?? throw new ArgumentNullException(nameof(residenceMapper));
-        }
-
+        /// <summary>
+        /// Получить список жилых объектов
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<ResidenceDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<GetResidencesListResponse>> GetAll(CancellationToken cancellationToken)
         {
-            IReadOnlyCollection<ResidenceQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
-            ResidenceDetailsViewModel[] viewModels = dtos
-                .Select(r => _residenceMapper.ToViewModel(r))
-                .ToArray();
-
-            return Ok(viewModels);
+            GetResidencesListResponse response = await _mediator.Send(new GetResidencesListQuery(), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Получить развернутые детали показания счетчика электроэнергии по его уникальному идентификатору.
+        /// Получить развернутые детали жилого объекта по его уникальному идентификатору.
         /// </summary>
+        /// <param name="id">ID жилого объекта.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<ResidenceDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetResidenceByIdResponse>> GetById(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ResidenceQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
-            ResidenceDetailsViewModel viewModel = _residenceMapper.ToViewModel(dto);
-
-            return Ok(viewModel);
+            GetResidenceByIdResponse response = await _mediator.Send(new GetResidenceByIdQuery(id), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Создать новую запись показания счетчика электроэнергии.
+        /// Создать новую запись жилого объекта.
         /// </summary>
+        /// <param name="request">Данные формы с фронтенда.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult<ResidenceCreatedViewModel>> Create([FromBody] CreateResidenceViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<CreateResidenceResponse>> Create(
+            [FromBody] CreateResidenceRequest request,
+            CancellationToken cancellationToken)
         {
-            CreateResidenceDto createDto = _residenceMapper.ToDto(createViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ResidenceCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
-            ResidenceCreatedViewModel resultViewModel = _residenceMapper.ToCreatedViewModel(createdDto);
-
-            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
+            CreateResidenceResponse response = await _mediator.Send(request.ToCommand(), cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
         /// <summary>
-        /// Отредактировать существующие данные показания счетчика электроэнергии.
+        /// Отредактировать существующие данные жилого объекта.
         /// </summary>
+        /// <param name="id">ID жилого объекта.</param>
+        /// <param name="request">Данные формы с фронтенда.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<ResidenceUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditResidenceViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<EditResidenceResponse>> Edit(
+            [FromRoute] long id,
+            [FromBody] EditResidenceRequest request,
+            CancellationToken cancellationToken)
         {
-            EditResidenceDto editDto = _residenceMapper.ToDto(editViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ResidenceCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
-            ResidenceUpdatedViewModel resultViewModel = _residenceMapper.ToUpdatedViewModel(updatedDto);
-
-            return Ok(resultViewModel);
+            EditResidenceResponse response = await _mediator.Send(request.ToCommand(id), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Удалить запись показания счетчика электроэнергии из системы.
+        /// Удалить запись жилого объекта.
         /// </summary>
+        /// <param name="id">ID жилого объекта</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            await _commandService.DeleteAsync(id, cancellationToken);
-
+            await _mediator.Send(new DeleteResidenceCommand(id), cancellationToken);
             return NoContent();
         }
     }

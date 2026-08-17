@@ -91,7 +91,7 @@
                 $.ajax({ url: utilUrl, type: "GET" })
             ])
             .then(function (results) {
-                residences = results[0];
+                residences = results[0].items || results[0];
                 utilities = results[1];
 
                 // 2. Старт DataTables только после наполнения массивов справочников

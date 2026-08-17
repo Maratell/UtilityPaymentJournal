@@ -48,13 +48,17 @@
                     success: function (data) {
                         $('#residenceList').empty();
 
-                        if (data.length === 0) {
+                        // Достаем массив из свойства items нашего нового GetResidencesListResponse
+                        const list = data.items;
+
+                        if (!list || list.length === 0) {
                             // Спокойная матовая заглушка для пустого списка
                             $('#residenceList').append('<li class="list-group-item text-center py-4 notebook-style-empty-item">Список жилых объектов пуст</li>');
                             return;
                         }
 
-                        data.forEach(residence => {
+                        // Перебираем элементы из извлеченного списка list
+                        list.forEach(residence => {
                             // Интеграция кастомных стилей блокнота с сохранением JS-классов управления
                             $('#residenceList').append(`
                                 <li class="list-group-item notebook-style-item" data-id="${residence.id}">
