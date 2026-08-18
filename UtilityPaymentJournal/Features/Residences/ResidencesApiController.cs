@@ -16,17 +16,15 @@ namespace UtilityPaymentJournal.Features.Residences
     [Route("api/residences")]
     public class ResidencesApiController(ISender mediator) : ControllerBase
     {
-        private readonly ISender _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
-
         /// <summary>
         /// Получить список жилых объектов
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект-обёртку, содержащий коллекцию жилых объектов.</returns>
         [HttpGet]
         public async Task<ActionResult<GetResidencesListResponse>> GetAll(CancellationToken cancellationToken)
         {
-            GetResidencesListResponse response = await _mediator.Send(new GetResidencesListQuery(), cancellationToken);
+            GetResidencesListResponse response = await mediator.Send(new GetResidencesListQuery(), cancellationToken);
             return Ok(response);
         }
 
@@ -34,14 +32,14 @@ namespace UtilityPaymentJournal.Features.Residences
         /// Получить развернутые детали жилого объекта по его уникальному идентификатору.
         /// </summary>
         /// <param name="id">ID жилого объекта.</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект с подробной информацией о жилом объекте.</returns>
         [HttpGet("{id:long}")]
         public async Task<ActionResult<GetResidenceByIdResponse>> GetById(
             [FromRoute] long id,
             CancellationToken cancellationToken)
         {
-            GetResidenceByIdResponse response = await _mediator.Send(new GetResidenceByIdQuery(id), cancellationToken);
+            GetResidenceByIdResponse response = await mediator.Send(new GetResidenceByIdQuery(id), cancellationToken);
             return Ok(response);
         }
 
@@ -49,31 +47,34 @@ namespace UtilityPaymentJournal.Features.Residences
         /// Создать новую запись жилого объекта.
         /// </summary>
         /// <param name="request">Данные формы с фронтенда.</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>
+        /// Статус 201 Created и данные созданного жилого объекта. 
+        /// В заголовке Location ответа возвращается URL для получения деталей созданного объекта.
+        /// </returns>
         [HttpPost]
         public async Task<ActionResult<CreateResidenceResponse>> Create(
             [FromBody] CreateResidenceRequest request,
             CancellationToken cancellationToken)
         {
-            CreateResidenceResponse response = await _mediator.Send(request.ToCommand(), cancellationToken);
+            CreateResidenceResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
         /// <summary>
         /// Отредактировать существующие данные жилого объекта.
         /// </summary>
-        /// <param name="id">ID жилого объекта.</param>
-        /// <param name="request">Данные формы с фронтенда.</param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <param name="id">Уникальный идентификатор жилого объекта (передается в URL маршрута).</param>
+        /// <param name="request">Данные формы обновления. Не содержит ID объекта, так как идентификатор извлекается из маршрута.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Данные обновленного жилого объекта со статусом 200 OK.</returns>
         [HttpPut("{id:long}")]
         public async Task<ActionResult<EditResidenceResponse>> Edit(
             [FromRoute] long id,
             [FromBody] EditResidenceRequest request,
             CancellationToken cancellationToken)
         {
-            EditResidenceResponse response = await _mediator.Send(request.ToCommand(id), cancellationToken);
+            EditResidenceResponse response = await mediator.Send(request.ToCommand(id), cancellationToken);
             return Ok(response);
         }
 
@@ -82,13 +83,13 @@ namespace UtilityPaymentJournal.Features.Residences
         /// </summary>
         /// <param name="id">ID жилого объекта</param>
         /// <param name="cancellationToken"></param>
-        /// <returns></returns>
+        /// <returns>Статус 204 No Content в случае успешного удаления (тело ответа отсутствует).</returns>
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> Delete(
             [FromRoute] long id,
             CancellationToken cancellationToken)
         {
-            await _mediator.Send(new DeleteResidenceCommand(id), cancellationToken);
+            await mediator.Send(new DeleteResidenceCommand(id), cancellationToken);
             return NoContent();
         }
     }
