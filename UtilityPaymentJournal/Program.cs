@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Globalization;
 using System.Security.Claims;
+using UtilityPaymentJournal.Common.Behaviours;
 using UtilityPaymentJournal.Common.Constants;
 using UtilityPaymentJournal.Features.Account;
 using UtilityPaymentJournal.Features.Account.Commands;
@@ -64,6 +66,7 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<IdentityValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
 builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 // -------------------------------------------------
 
@@ -84,12 +87,17 @@ builder.Services.AddControllersWithViews(options =>
 //    options.Filters.Add<ValidateModelAttribute>();
 //});
 
-// .NET 8 / 9+ стиль
+// Автоматически находим и регистрируем ВСЕ валидаторы (AbstractValidator) во всей сборке
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
+
 builder.Services.AddMediatR(cfg =>
 {
     // Говорим MediatR отсканировать сборку (assembly), в которой находится класс Program.
     // Он автоматически найдет ВСЕ хэндлеры в любых подпапках!
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+
+    // Подключаем валидацию в пайплайн MediatR (выполнится до хэндлера)
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
 });
 
 builder.Services.AddScoped<IAuthenticationCommandService, AuthenticationCommandService>();

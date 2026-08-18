@@ -96,13 +96,7 @@ function tryShowServerError(xhr) {
         return false;
     }
 
-    // 1. Обработка кастомных ошибок (объект detail)
-    if (xhr.responseJSON.detail) {
-        showAlert(xhr.responseJSON.detail);
-        return true;
-    }
-
-    // 2. Обработка ошибок валидации (объект errors)
+    // 1. ПЕРВЫМ ДЕЛОМ проверяем специфичные ошибки валидации (объект errors)
     if (xhr.status === 400 && xhr.responseJSON.errors) {
         const errors = xhr.responseJSON.errors;
         const keys = Object.keys(errors);
@@ -117,6 +111,12 @@ function tryShowServerError(xhr) {
                 return true;
             }
         }
+    }
+
+    // 2. ЕСЛИ ошибок валидации нет, выводим общую кастомную ошибку (объект detail)
+    if (xhr.responseJSON.detail) {
+        showAlert(xhr.responseJSON.detail);
+        return true;
     }
 
     return false;
