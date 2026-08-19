@@ -313,5 +313,12 @@ if (app.Environment.EnvironmentName != "IntegrationTesting")
 
 app.Run();
 
+// Эта строчка делает автоматически сгенерированный класс public, 
+// позволяя тестовому проекту увидеть его.
+namespace UtilityPaymentJournal
+{
+    public partial class Program { }
+}
+
 
 
