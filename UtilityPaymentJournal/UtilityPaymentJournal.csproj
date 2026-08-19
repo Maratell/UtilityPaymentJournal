@@ -7,6 +7,10 @@
     <UserSecretsId>f29d78f5-96c1-45ec-8191-f08fe3b1903c</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+
+	<!-- Принудительно генерируем контекст для WebApplicationFactory -->
+	<PreserveCompilationContext>true</PreserveCompilationContext>
+	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
   <ItemGroup>

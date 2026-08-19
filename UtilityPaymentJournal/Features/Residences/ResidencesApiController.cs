@@ -58,7 +58,7 @@ namespace UtilityPaymentJournal.Features.Residences
             CancellationToken cancellationToken)
         {
             CreateResidenceResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
+            return CreatedAtAction(nameof(GetById), "Residences", new { id = response.Id }, response);
         }
 
         /// <summary>

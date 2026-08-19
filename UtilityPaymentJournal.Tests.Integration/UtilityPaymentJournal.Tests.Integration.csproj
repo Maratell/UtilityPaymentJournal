@@ -4,16 +4,20 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+	<PreserveCompilationContext>true</PreserveCompilationContext>
+
+	<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+	<CopyRefAssembliesToPublishDirectory>true</CopyRefAssembliesToPublishDirectory>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="FluentAssertions" Version="8.10.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.30" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+	<!-- Синхронизируем версию с основным проектом (8.0.10) -->
+	<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.10" />
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Respawn" Version="7.0.0" />
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.14.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
@@ -27,5 +31,17 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="xunit.runner.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+    <!-- ЖЕЛЕЗНЫЙ ХУК: Если .NET капризничает при запуске тестов (не находит файл .deps.json), 
+	мы заставляем его скопировать файл вручную при сборке -->
+    <Target Name="CopyDepsFile" AfterTargets="Build">
+	    <Copy SourceFiles="$(TargetDir)UtilityPaymentJournal.deps.json" DestinationFiles="$(TargetDir)testhost.deps.json" Condition="Exists('$(TargetDir)UtilityPaymentJournal.deps.json')" />
+    </Target>
 
 </Project>
