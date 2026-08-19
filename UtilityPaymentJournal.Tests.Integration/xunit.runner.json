@@ -1,0 +1,6 @@
+{
+  "$schema": "https://xunit.net",
+  "parallelizeAssembly": false,
+  "parallelizeTestCollections": false,
+  "maxParallelThreads": 1
+}

@@ -288,24 +288,30 @@ app.MapControllerRoute(
 //        Console.WriteLine($"Ошибка при применении миграций: {ex.Message}");
 //    }
 //}
-_ = Task.Run(async () =>
-{
-    // Небольшая пауза, чтобы Kestrel и Seq успели занять порты на старте
-    await Task.Delay(TimeSpan.FromSeconds(2));
 
-    using var scope = app.Services.CreateScope();
-    try
+// Проверяем: если приложение запущено НЕ внутри интеграционных тестов
+if (app.Environment.EnvironmentName != "IntegrationTesting")
+{
+    _ = Task.Run(async () =>
     {
-        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await db.Database.MigrateAsync();
-        Console.WriteLine("=== База данных успешно проверена, миграции применены ===");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"=== КРИТИЧЕСКАЯ ОШИБКА МИГРАЦИИ БД: {ex.Message} ===");
-    }
-});
+        // Небольшая пауза, чтобы Kestrel и Seq успели занять порты на старте
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        using var scope = app.Services.CreateScope();
+        try
+        {
+            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await db.Database.MigrateAsync();
+            Console.WriteLine("=== База данных успешно проверена, миграции применены ===");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"=== КРИТИЧЕСКАЯ ОШИБКА МИГРАЦИИ БД: {ex.Message} ===");
+        }
+    });
+}
 
 app.Run();
+
 
 
