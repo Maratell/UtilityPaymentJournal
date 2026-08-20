@@ -12,15 +12,16 @@ namespace UtilityPaymentJournal.Features.Residences.GetList
         /// </summary>
         /// <param name="entities">Коллекция доменных сущностей <see cref="Residence"/>, загруженных из БД.</param>
         /// <returns>Заполненный объект ответа <see cref="GetResidencesListResponse"/>.</returns>
+        /// <exception cref="ArgumentNullException">Выбрасывается, если коллекция доменных сущностей равна null.</exception>
         public static GetResidencesListResponse ToResponse(this IEnumerable<Residence> entities)
         {
             ArgumentNullException.ThrowIfNull(entities);
 
             // Трансформируем сущности во вложенные рекорды Item
             GetResidencesListResponse.Item[] items = entities
-                .Select(w => new GetResidencesListResponse.Item(
-                    Id: w.Id,
-                    Address: w.Address
+                .Select(e => new GetResidencesListResponse.Item(
+                    Id: e.Id,
+                    Address: e.Address
                 ))
                 .ToArray();
 

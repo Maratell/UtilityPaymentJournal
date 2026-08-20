@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
-using UtilityPaymentJournal.Features.Residences.Create;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
 
@@ -10,30 +9,21 @@ namespace UtilityPaymentJournal.Features.Residences.GetById
     /// Обработчик запроса на получение деталей объекта недвижимости.
     /// Инкапсулирует логику эффективного чтения из PostgreSQL.
     /// </summary>
-    public partial class GetResidenceByIdHandler : IRequestHandler<GetResidenceByIdQuery, GetResidenceByIdResponse>
-    {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<GetResidenceByIdHandler> _logger;
-
-        public GetResidenceByIdHandler(
+    public partial class GetResidenceByIdHandler(
             ApplicationDbContext context,
-            ILogger<GetResidenceByIdHandler> logger)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
+            ILogger<GetResidenceByIdHandler> logger) : IRequestHandler<GetResidenceByIdQuery, GetResidenceByIdResponse>
+    {
         public async Task<GetResidenceByIdResponse> Handle(GetResidenceByIdQuery query, CancellationToken cancellationToken)
         {
-            LogFetchingResidenceByIdFromDb(_logger, query.Id);
+            LogFetchingResidenceByIdFromDb(logger, query.Id);
 
-            Residence? entity = await _context.Residences
+            Residence? entity = await context.Residences
                 .AsNoTracking()
                 .SingleOrDefaultAsync(r => r.Id == query.Id, cancellationToken);
 
             if (entity is null)
             {
-                LogResidenceNotFoundInDb(_logger, query.Id);
+                LogResidenceNotFoundInDb(logger, query.Id);
                 throw new KeyNotFoundException($"Показание счетчика электроэнергии с ID {query.Id} не найдено.");
             }
 
