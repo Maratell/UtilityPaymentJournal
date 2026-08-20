@@ -10,7 +10,7 @@ using UtilityPaymentJournal.Features.Residences.GetList;
 namespace UtilityPaymentJournal.Features.Residences
 {
     /// <summary>
-    /// Api-контроллер для управления списом жилых объектов.
+    /// Api-контроллер для управления списком жилых объектов.
     /// </summary>
     [ApiController]
     [Route("api/residences")]
@@ -58,7 +58,7 @@ namespace UtilityPaymentJournal.Features.Residences
             CancellationToken cancellationToken)
         {
             CreateResidenceResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
-            return CreatedAtAction(nameof(GetById), "Residences", new { id = response.Id }, response);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
         /// <summary>

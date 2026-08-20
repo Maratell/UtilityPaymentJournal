@@ -8,28 +8,19 @@ namespace UtilityPaymentJournal.Features.Residences.GetList
     /// <summary>
     /// Обработчик запроса на получение списка объектов недвижимости.
     /// </summary>
-    public partial class GetResidencesListHandler : IRequestHandler<GetResidencesListQuery, GetResidencesListResponse>
-    {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<GetResidencesListHandler> _logger;
-
-        public GetResidencesListHandler(
+    public partial class GetResidencesListHandler(
             ApplicationDbContext context,
-            ILogger<GetResidencesListHandler> logger)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
+            ILogger<GetResidencesListHandler> logger) : IRequestHandler<GetResidencesListQuery, GetResidencesListResponse>
+    {
         public async Task<GetResidencesListResponse> Handle(GetResidencesListQuery query, CancellationToken cancellationToken)
         {
-            LogFetchingAllResidencesFromDb(_logger);
+            LogFetchingAllResidencesFromDb(logger);
 
-            List<Residence> entities = await _context.Residences
+            List<Residence> entities = await context.Residences
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            LogFetchedAllResidencesFromDbCount(_logger, entities.Count);
+            LogFetchedAllResidencesFromDbCount(logger, entities.Count);
 
             return entities.ToResponse();
         }

@@ -8,35 +8,26 @@ namespace UtilityPaymentJournal.Features.Residences.Delete
     /// Обработчик команды удаления объекта недвижимости.
     /// Напрямую удаляет запись из PostgreSQL без предварительной загрузки в память.
     /// </summary>
-    public partial class DeleteResidenceHandler : IRequestHandler<DeleteResidenceCommand>
-    {
-        private readonly ApplicationDbContext _context;
-        private readonly ILogger<DeleteResidenceHandler> _logger;
-
-        public DeleteResidenceHandler(
+    public partial class DeleteResidenceHandler(
             ApplicationDbContext context,
-            ILogger<DeleteResidenceHandler> logger)
-        {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
+            ILogger<DeleteResidenceHandler> logger) : IRequestHandler<DeleteResidenceCommand>
+    {
         public async Task Handle(DeleteResidenceCommand command, CancellationToken cancellationToken)
         {
-            LogResidenceDeletionRequested(_logger, command.Id);
+            LogResidenceDeletionRequested(logger, command.Id);
 
-            // EF Core сразу генерирует SQL-запрос: DELETE FROM ElectricityReadings WHERE Id = @id
-            int deletedRowsCount = await _context.Residences
+            // EF Core сразу генерирует SQL-запрос: DELETE FROM Residences WHERE Id = @id
+            int deletedRowsCount = await context.Residences
                 .Where(w => w.Id == command.Id)
                 .ExecuteDeleteAsync(cancellationToken);
 
             if (deletedRowsCount == 0)
             {
-                LogResidenceNotFoundInDb(_logger, command.Id);
-                throw new KeyNotFoundException($"Не удалось удалить. Показание счетчика электроэнергии с ID {command.Id} не найдено.");
+                LogResidenceNotFoundInDb(logger, command.Id);
+                throw new KeyNotFoundException($"Не удалось удалить. Жилой объект с ID {command.Id} не найден.");
             }
 
-            LogResidenceDeletedFromDb(_logger, command.Id);
+            LogResidenceDeletedFromDb(logger, command.Id);
         }
     }
 }

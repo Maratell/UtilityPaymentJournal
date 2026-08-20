@@ -49,13 +49,16 @@
                     success: function (data) {
                         $('#utilityList').empty();
 
-                        if (data.length === 0) {
+                        if (!data || !data.items || data.items.length === 0) {
                             // Спокойная матовая заглушка для пустого списка
                             $('#utilityList').append('<li class="list-group-item text-center py-4 notebook-style-empty-item">Список поставщиков услуг пуст</li>');
                             return;
                         }
 
-                        data.forEach(utility => {
+                        // Достаем массив из свойства items
+                        const list = data.items;
+
+                        list.forEach(utility => {
                             // Интеграция кастомных стилей блокнота с сохранением JS-классов управления
                             $('#utilityList').append(`
                                 <li class="list-group-item notebook-style-item" data-id="${utility.id}">
