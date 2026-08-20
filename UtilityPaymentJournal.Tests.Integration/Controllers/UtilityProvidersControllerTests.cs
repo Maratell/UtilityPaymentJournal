@@ -2,28 +2,29 @@
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Http.Json;
-using UtilityPaymentJournal.Features.Residences.Create;
-using UtilityPaymentJournal.Features.Residences.Edit;
-using UtilityPaymentJournal.Features.Residences.GetById;
-using UtilityPaymentJournal.Features.Residences.GetList;
+using UtilityPaymentJournal.Features.UtilityProviders.Create;
+using UtilityPaymentJournal.Features.UtilityProviders.Edit;
+using UtilityPaymentJournal.Features.UtilityProviders.GetById;
+using UtilityPaymentJournal.Features.UtilityProviders.GetList;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
-using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
+using UtilityPaymentJournal.Tests.Integration.Infrastructure;
 
-namespace UtilityPaymentJournal.Tests.Integration
+namespace UtilityPaymentJournal.Tests.Integration.Controllers
 {
-    [Collection("Integration Tests Collection")]
-    public class ResidencesControllerTests : BaseIntegrationTest
+    [Collection(nameof(IntegrationTestCollection))]
+    public class UtilityProvidersControllerTests : BaseIntegrationTest
     {
-        public ResidencesControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
+        public UtilityProvidersControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
         {
         }
 
         /// <summary>
-        /// Проверяет, что при отправке валидных данных контроллер успешно создает запись жилого объекта, 
+        /// Проверяет, что при отправке валидных данных контроллер успешно создает запись поставщика услуг, 
         /// сохраняет её в PostgreSQL, автоматически привязывает UserId автора и возвращает статус 201 Created.
         /// </summary>
         [Fact]
-        public async Task Create_Should_SaveResidenceInDatabase_And_ReturnCreatedStatus()
+        public async Task Create_Should_SaveUtilityProviderInDatabase_And_ReturnCreatedStatus()
         {
             // ==========================================
             // ARRANGE (Подготовка данных и окружения)
@@ -32,8 +33,8 @@ namespace UtilityPaymentJournal.Tests.Integration
             // 1. Идентификатор пользователя, зашитый в наш TestAuthHandler
             const string testUserId = "test-admin-id-123";
 
-            // 2. Генерируем уникальный адрес для предотвращения конфликтов уникальности (Unique Constraints) в БД
-            string uniqueAddress = $"Тестовый адрес {Guid.NewGuid().ToString("N")[..6]}";
+            // 2. Генерируем уникальное наименование для предотвращения конфликтов уникальности (Unique Constraints) в БД
+            string uniqueUtilityProviderName = $"Тестовый поставщик услуг {Guid.NewGuid().ToString("N")[..6]}";
 
             // 3. Гарантируем наличие пользователя в Docker-базе, чтобы не нарушить Foreign Key в PostgreSQL
             // IgnoreQueryFilters() здесь для подстраховки от скрытых фильтраций
@@ -53,14 +54,14 @@ namespace UtilityPaymentJournal.Tests.Integration
             }
 
             // 4. Формируем тело запроса (DTO)
-            CreateResidenceRequest request = new CreateResidenceRequest(uniqueAddress);
+            CreateUtilityProviderRequest request = new CreateUtilityProviderRequest(uniqueUtilityProviderName);
 
             // ==========================================
             // ACT (Выполнение целевого действия)
             // ==========================================
 
             // Отправляем запрос на создание. Метод расширения сам сериализует DTO в JSON.
-            HttpResponseMessage response = await Client.PostAsJsonAsync("api/residences", request);
+            HttpResponseMessage response = await Client.PostAsJsonAsync("api/utility-providers", request);
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -77,7 +78,7 @@ namespace UtilityPaymentJournal.Tests.Integration
             response.StatusCode.Should().Be(HttpStatusCode.Created);
 
             // Быстро десериализуем JSON-ответ прямо через ReadFromJsonAsync
-            CreateResidenceResponse? responseContent = await response.Content.ReadFromJsonAsync<CreateResidenceResponse>();
+            CreateUtilityProviderResponse? responseContent = await response.Content.ReadFromJsonAsync<CreateUtilityProviderResponse>();
             responseContent.Should().NotBeNull();
             responseContent!.Id.Should().BeGreaterThan(0);
 
@@ -101,13 +102,13 @@ namespace UtilityPaymentJournal.Tests.Integration
             //
             // Метод .IgnoreQueryFilters() принудительно отключает скрытую фильтрацию EF Core, делая 
             // честный прямой запрос в базу, чтобы мы могли вытащить запись и проверить ее реальное содержимое.
-            Residence? residenceInDb = await DbContext.Residences
+            UtilityProvider? utilityProviderInDb = await DbContext.UtilityProviders
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(r => r.Id == responseContent.Id);
 
             // Проверяем, что запись физически создана в Docker-контейнере и ее поля заполнены корректно
-            residenceInDb.Should().NotBeNull();
-            residenceInDb!.Address.Should().Be(uniqueAddress);
+            utilityProviderInDb.Should().NotBeNull();
+            utilityProviderInDb!.Name.Should().Be(uniqueUtilityProviderName);
 
             // КРИТИЧЕСКИ ВАЖНАЯ ПРОВЕРКА: Доказываем, что логика автоматической привязки владельца 
             // (ApplyUserOwnership) сработала корректно и привязала запись именно к нашему текущему 
@@ -119,15 +120,15 @@ namespace UtilityPaymentJournal.Tests.Integration
             // проигнорировав системный пустой контекст теста на этапе ПОИСКА записи.
             // EF Core взял эти сырые данные из Postgres и честно заполнил ими свойства C#-объекта. 
             // Поэтому в самом объекте residenceInDb поле UserId теперь заполнено и готово к проверке!
-            residenceInDb.UserId.Should().Be(testUserId);
+            utilityProviderInDb.UserId.Should().Be(testUserId);
         }
 
         /// <summary>
-        /// Проверяет, что существующая в базе данных запись жилого объекта успешно возвращается по её идентификатору (ID)
+        /// Проверяет, что существующая в базе данных запись поставщика услуг успешно возвращается по её идентификатору (ID)
         /// со статусом 200 OK, при условии, что запись принадлежит текущему авторизованному пользователю.
         /// </summary>
         [Fact]
-        public async Task GetById_Should_ReturnResidence_When_ItExistsInDatabase()
+        public async Task GetById_Should_ReturnUtilityProvider_When_ItExistsInDatabase()
         {
             // ==========================================
             // ARRANGE (Подготовка данных)
@@ -136,8 +137,8 @@ namespace UtilityPaymentJournal.Tests.Integration
             // 1. Указываем ID пользователя из нашего TestAuthHandler
             const string testUserId = "test-admin-id-123";
 
-            // 2. Генерируем уникальный адрес в едином стиле для исключения конфликтов уникальности
-            string uniqueAddress = $"Тестовый адрес {Guid.NewGuid().ToString("N")[..6]}";
+            // 2. Генерируем уникальное наименование в едином стиле для исключения конфликтов уникальности
+            string uniqueUtilityProviderName = $"Тестовый поставщик услуг {Guid.NewGuid().ToString("N")[..6]}";
 
             // 3. Гарантируем, что пользователь существует в Docker-базе для соблюдения Foreign Key
             if (!await DbContext.Users.IgnoreQueryFilters().AnyAsync(u => u.Id == testUserId))
@@ -150,13 +151,13 @@ namespace UtilityPaymentJournal.Tests.Integration
             // 4. Физически создаем дом и ЯВНО привязываем его к нашему тест-пользователю.
             // Это критически важно: если не прописать UserId, глобальный фильтр (Query Filter) 
             // на стороне веб-сервера просто скроет эту запись, и API вернет 404 Not Found!
-            Residence residence = new Residence
+            UtilityProvider utilityProvider = new UtilityProvider
             {
-                Address = uniqueAddress,
+                Name = uniqueUtilityProviderName,
                 UserId = testUserId // Жестко связываем запись с текущим авторизованным контекстом
             };
 
-            await DbContext.Residences.AddAsync(residence);
+            await DbContext.UtilityProviders.AddAsync(utilityProvider);
             await DbContext.SaveChangesAsync();
 
             // Сбрасываем кэш EF Core, чтобы тестовый сервер делал честный запрос к дисковой СУБД, а не к памяти
@@ -167,7 +168,7 @@ namespace UtilityPaymentJournal.Tests.Integration
             // ==========================================
 
             // Отправляем GET-запрос по сгенерированному базой ID
-            HttpResponseMessage response = await Client.GetAsync($"api/residences/{residence.Id}");
+            HttpResponseMessage response = await Client.GetAsync($"api/utility-providers/{utilityProvider.Id}");
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -177,19 +178,19 @@ namespace UtilityPaymentJournal.Tests.Integration
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
             // Десериализуем ответ (убедитесь, что имя вашего DTO совпадает)
-            GetResidenceByIdResponse? content = await response.Content.ReadFromJsonAsync<GetResidenceByIdResponse>();
+            GetUtilityProviderByIdResponse? content = await response.Content.ReadFromJsonAsync<GetUtilityProviderByIdResponse>();
 
             content.Should().NotBeNull();
-            content!.Id.Should().Be(residence.Id);
-            content.Address.Should().Be(uniqueAddress);
+            content!.Id.Should().Be(utilityProvider.Id);
+            content.Name.Should().Be(uniqueUtilityProviderName);
         }
 
         /// <summary>
-        /// Проверяет, что при попытке получить дом по идентификатору, которого гарантированно 
+        /// Проверяет, что при попытке получить gставщика услуг по идентификатору, которого гарантированно 
         /// нет в базе данных, контроллер корректно обрабатывает ситуацию и возвращает статус 404 Not Found.
         /// </summary>
         [Fact]
-        public async Task GetById_Should_ReturnNotFound_When_ResidenceDoesNotExist()
+        public async Task GetById_Should_ReturnNotFound_When_UtilityProviderDoesNotExist()
         {
             // ==========================================
             // ARRANGE (Подготовка данных)
@@ -198,14 +199,14 @@ namespace UtilityPaymentJournal.Tests.Integration
             // Поскольку перед каждым тестом Respawn полностью очищает все таблицы,
             // идентификатор '1' гарантированно отсутствует в базе данных PostgreSQL.
             // Это гораздо надежнее, чем зашивать случайные числа вроде 99999.
-            const int nonExistentResidenceId = 1;
+            const int nonExistentUtilityProviderId = 1;
 
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
 
             // Пытаемся получить несуществующий объект через HttpClient
-            HttpResponseMessage response = await Client.GetAsync($"api/residences/{nonExistentResidenceId}");
+            HttpResponseMessage response = await Client.GetAsync($"api/utility-providers/{nonExistentUtilityProviderId}");
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -216,11 +217,11 @@ namespace UtilityPaymentJournal.Tests.Integration
         }
 
         /// <summary>
-        /// Проверяет, что метод получения списка успешно возвращает коллекцию жилых объектов со статусом 200 OK,
+        /// Проверяет, что метод получения списка успешно возвращает коллекцию поставщиков услуг со статусом 200 OK,
         /// причем в список попадают только те объекты, которые принадлежат текущему авторизованному пользователю.
         /// </summary>
         [Fact]
-        public async Task GetAll_Should_ReturnResidencesList_OwnedByCurrentUser()
+        public async Task GetAll_Should_ReturnUtilityProvidersList_OwnedByCurrentUser()
         {
             // ==========================================
             // ARRANGE (Подготовка данных)
@@ -239,48 +240,48 @@ namespace UtilityPaymentJournal.Tests.Integration
             }
             await DbContext.SaveChangesAsync();
 
-            string myAddress = $"Тестовый адрес мой {Guid.NewGuid().ToString("N")[..6]}";
-            string otherAddress = $"Тестовый адрес чужой {Guid.NewGuid().ToString("N")[..6]}";
+            string myUtilityProviderName = $"Тестовый поставщик услуг мой {Guid.NewGuid().ToString("N")[..6]}";
+            string otherUtilityProviderName = $"Тестовый поставщик улсуг чужой {Guid.NewGuid().ToString("N")[..6]}";
 
-            Residence myResidence = new Residence { Address = myAddress, UserId = currentUserId };
-            Residence otherResidence = new Residence { Address = otherAddress, UserId = otherUserId };
+            UtilityProvider myUtilityProvider = new UtilityProvider { Name = myUtilityProviderName, UserId = currentUserId };
+            UtilityProvider otherUtilityProvider = new UtilityProvider { Name = otherUtilityProviderName, UserId = otherUserId };
 
-            await DbContext.Residences.AddRangeAsync(myResidence, otherResidence);
+            await DbContext.UtilityProviders.AddRangeAsync(myUtilityProvider, otherUtilityProvider);
             await DbContext.SaveChangesAsync();
             DbContext.ChangeTracker.Clear();
 
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.GetAsync("api/residences");
+            HttpResponseMessage response = await Client.GetAsync("api/utility-providers");
 
             // ==========================================
             // ASSERT (Проверка результатов)
             // ==========================================
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            GetResidencesListResponse? content = await response.Content.ReadFromJsonAsync<GetResidencesListResponse>();
+            GetUtilityProvidersListResponse? content = await response.Content.ReadFromJsonAsync<GetUtilityProvidersListResponse>();
             content.Should().NotBeNull();
             content!.Items.Should().NotBeNull();
 
             // Проверяем, что глобальный фильтр на стороне сервера отдал НАШУ запись, но скрыл ЧУЖУЮ
-            content.Items.Should().ContainSingle(r => r.Address == myAddress);
-            content.Items.Should().NotContain(r => r.Address == otherAddress);
+            content.Items.Should().ContainSingle(r => r.Name == myUtilityProviderName);
+            content.Items.Should().NotContain(r => r.Name == otherUtilityProviderName);
         }
 
         /// <summary>
         /// Проверяет, что при отправке валидных данных для редактирования, контроллер успешно обновляет 
-        /// адрес жилого объекта в PostgreSQL и возвращает статус 200 OK с обновленными данными.
+        /// наименование поставщика услуг в PostgreSQL и возвращает статус 200 OK с обновленными данными.
         /// </summary>
         [Fact]
-        public async Task Edit_Should_UpdateResidenceInDatabase_And_ReturnOkStatus()
+        public async Task Edit_Should_UpdateUtilityProviderInDatabase_And_ReturnOkStatus()
         {
             // ==========================================
             // ARRANGE (Подготовка данных)
             // ==========================================
             const string testUserId = "test-admin-id-123";
-            string initialAddress = $"Старый адрес {Guid.NewGuid().ToString("N")[..6]}";
-            string updatedAddress = $"Новый адрес {Guid.NewGuid().ToString("N")[..6]}";
+            string initialUtilityProviderName = $"Старый поставщик услуг {Guid.NewGuid().ToString("N")[..6]}";
+            string updatedUtilityProviderName = $"Новый поставщик услуг {Guid.NewGuid().ToString("N")[..6]}";
 
             if (!await DbContext.Users.IgnoreQueryFilters().AnyAsync(u => u.Id == testUserId))
             {
@@ -288,67 +289,67 @@ namespace UtilityPaymentJournal.Tests.Integration
             }
 
             // Создаем исходную запись в БД
-            Residence residence = new Residence { Address = initialAddress, UserId = testUserId };
-            await DbContext.Residences.AddAsync(residence);
+            UtilityProvider utilityProvider = new UtilityProvider { Name = initialUtilityProviderName, UserId = testUserId };
+            await DbContext.UtilityProviders.AddAsync(utilityProvider);
             await DbContext.SaveChangesAsync();
             DbContext.ChangeTracker.Clear();
 
             // Формируем DTO запроса на редактирование (без ID, так как ID передается в URL)
-            EditResidenceRequest request = new EditResidenceRequest(updatedAddress);
+            EditUtilityProviderRequest request = new EditUtilityProviderRequest(updatedUtilityProviderName);
 
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.PutAsJsonAsync($"api/residences/{residence.Id}", request);
+            HttpResponseMessage response = await Client.PutAsJsonAsync($"api/utility-providers/{utilityProvider.Id}", request);
 
             // ==========================================
             // ASSERT (Проверка результатов)
             // ==========================================
             response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-            EditResidenceResponse? responseContent = await response.Content.ReadFromJsonAsync<EditResidenceResponse>();
+            EditUtilityProviderResponse? responseContent = await response.Content.ReadFromJsonAsync<EditUtilityProviderResponse>();
             responseContent.Should().NotBeNull();
-            responseContent!.Id.Should().Be(residence.Id);
-            responseContent.Address.Should().Be(updatedAddress);
+            responseContent!.Id.Should().Be(utilityProvider.Id);
+            responseContent.Name.Should().Be(updatedUtilityProviderName);
 
             // Проверяем физическое изменение данных прямо в базе PostgreSQL
             DbContext.ChangeTracker.Clear();
-            Residence? residenceInDb = await DbContext.Residences
+            UtilityProvider? residenceInDb = await DbContext.UtilityProviders
                 .IgnoreQueryFilters() // Используем страховку поиска
-                .FirstOrDefaultAsync(r => r.Id == residence.Id);
+                .FirstOrDefaultAsync(r => r.Id == utilityProvider.Id);
 
             residenceInDb.Should().NotBeNull();
-            residenceInDb!.Address.Should().Be(updatedAddress); // Доказываем, что адрес перезаписался
-            residenceInDb.UserId.Should().Be(testUserId);       // Проверяем, что владелец не изменился
+            residenceInDb!.Name.Should().Be(updatedUtilityProviderName); // Доказываем, что адрес перезаписался
+            residenceInDb.UserId.Should().Be(testUserId); // Проверяем, что владелец не изменился
         }
 
         /// <summary>
-        /// Проверяет, что метод удаления успешно удаляет запись жилого объекта из базы данных 
+        /// Проверяет, что метод удаления успешно удаляет запись поставщика услуг из базы данных 
         /// и возвращает каноничный REST-статус 204 No Content без тела ответа.
         /// </summary>
         [Fact]
-        public async Task Delete_Should_RemoveResidenceFromDatabase_And_ReturnNoContentStatus()
+        public async Task Delete_Should_RemoveUtilityProviderFromDatabase_And_ReturnNoContentStatus()
         {
             // ==========================================
             // ARRANGE (Подготовка данных)
             // ==========================================
             const string testUserId = "test-admin-id-123";
-            string addressToDelete = $"Адрес для удаления {Guid.NewGuid().ToString("N")[..6]}";
+            string utilityProviderNameToDelete = $"Поставщик услуг для удаления {Guid.NewGuid().ToString("N")[..6]}";
 
             if (!await DbContext.Users.IgnoreQueryFilters().AnyAsync(u => u.Id == testUserId))
             {
                 await DbContext.Users.AddAsync(new User { Id = testUserId, UserName = "testadmin", FirstName = "Тест", LastName = "Админ" });
             }
 
-            Residence residence = new Residence { Address = addressToDelete, UserId = testUserId };
-            await DbContext.Residences.AddAsync(residence);
+            UtilityProvider utilityProvider = new UtilityProvider { Name = utilityProviderNameToDelete, UserId = testUserId };
+            await DbContext.UtilityProviders.AddAsync(utilityProvider);
             await DbContext.SaveChangesAsync();
             DbContext.ChangeTracker.Clear();
 
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.DeleteAsync($"api/residences/{residence.Id}");
+            HttpResponseMessage response = await Client.DeleteAsync($"api/utility-providers/{utilityProvider.Id}");
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -357,9 +358,9 @@ namespace UtilityPaymentJournal.Tests.Integration
 
             // Проверяем отсутствие записи в базе данных PostgreSQL
             DbContext.ChangeTracker.Clear();
-            Residence? residenceInDb = await DbContext.Residences
+            UtilityProvider? residenceInDb = await DbContext.UtilityProviders
                 .IgnoreQueryFilters() // Отключаем фильтры, чтобы убедиться, что записи нет совсем (а не она просто скрыта)
-                .FirstOrDefaultAsync(r => r.Id == residence.Id);
+                .FirstOrDefaultAsync(r => r.Id == utilityProvider.Id);
 
             residenceInDb.Should().BeNull(); // Запись должна полностью исчезнуть (или быть помечена как удаленная, если у вас Soft Delete)
         }

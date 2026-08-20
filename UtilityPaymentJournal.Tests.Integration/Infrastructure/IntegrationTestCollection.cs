@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UtilityPaymentJournal.Tests.Integration
+namespace UtilityPaymentJournal.Tests.Integration.Infrastructure
 {
     /// <summary>
     /// Класс-маркер (Test Collection), управляющий общим жизненным циклом и синхронизацией тестов.
     /// Этот класс физически не выполняет код, он служит исключительно конфигурационным контрактом для xUnit.
     /// </summary>
-    [CollectionDefinition("Integration Tests Collection", DisableParallelization = true)]
+    [CollectionDefinition(nameof(IntegrationTestCollection), DisableParallelization = true)]
     public class IntegrationTestCollection : ICollectionFixture<IntegrationTestWebAppFactory>
     {
         // Класс намеренно оставляется пустым.

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 
-namespace UtilityPaymentJournal.Tests.Integration
+namespace UtilityPaymentJournal.Tests.Integration.Infrastructure
 {
     /// <summary>
     /// Базовый класс для всех интеграционных тестов.
