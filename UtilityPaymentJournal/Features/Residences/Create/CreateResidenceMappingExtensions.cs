@@ -11,7 +11,7 @@ namespace UtilityPaymentJournal.Features.Residences.Create
         /// <summary>
         /// Преобразует доменную сущность недвижимости в объект ответа API.
         /// </summary>
-        /// Доменная сущность <see cref="Residence"/>.</param>
+        /// <param name="entity">Доменная сущность <see cref="Residence"/>.</param>
         /// <returns>Заполненный DTO ответа <see cref="CreateResidenceResponse"/>.</returns>
         /// <exception cref="ArgumentNullException">Выбрасывается, если сущность равна null.</exception>
         public static CreateResidenceResponse ToResponse(this Residence entity)

@@ -1,11 +1,11 @@
 ﻿using UtilityPaymentJournal.Common.Enumerations;
 
-namespace UtilityPaymentJournal.Features.WaterReadings.Commands
+namespace UtilityPaymentJournal.Features.WaterReadings.Create
 {
     /// <summary>
-    /// ДТО для возврата данных о показаниях счетчика воды (ответ API на команды записи).
+    /// ДТО ответа API, возвращающий данные созданного объекта показаня счетчика воды с присвоенным идентификатором.
     /// </summary>
-    /// <param name="Id">Уникальный идентификатор записи показания в БД</param>
+    /// <param name="Id">Уникальный идентификатор показаня счетчика воды, сгенерированный базой данных.</param>
     /// <param name="ResidenceId">Идентификатор жилого объекта</param>
     /// <param name="UtilityProviderId">Идентификатор поставщика услуг</param>
     /// <param name="WaterType">Тип воды (холодная/горячая)</param>
@@ -15,7 +15,7 @@ namespace UtilityPaymentJournal.Features.WaterReadings.Commands
     /// <param name="PreviousValue">Предыдущее показание счетчика</param>
     /// <param name="ResultValue">Разница показаний (расход за текущий период)</param>
     /// <param name="PaymentAmount">Сумма платежа за расчетный объем</param>
-    public record WaterReadingCommandResultDto(
+    public record CreateWaterReadingResponse(
         long Id,
         long? ResidenceId,
         long? UtilityProviderId,

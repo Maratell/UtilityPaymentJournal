@@ -1,12 +1,11 @@
 ﻿using UtilityPaymentJournal.Common.Enumerations;
 
-namespace UtilityPaymentJournal.Features.WaterReadings.Queries
+namespace UtilityPaymentJournal.Features.WaterReadings.GetById
 {
     /// <summary>
-    /// ДТО результата запроса данных показаний счетчика воды.
-    /// Используется для передачи полной информации клиенту в UI (GetById/GetAll).
+    /// Ответ API, содержащий детальную информацию об одном показании счетчика воды.
     /// </summary>
-    /// <param name="Id">Идентификатор записи показания счетчика воды</param>
+    /// <param name="Id">Уникальный идентификатор показания счетчика воды, подтянутый из базы данных.</param>
     /// <param name="ResidenceId">Идентификатор связанного жилого помещения (дома/квартиры)</param>
     /// <param name="UtilityProviderId">Идентификатор связанного поставщика коммунальной услуги</param>
     /// <param name="WaterType">Тип воды (холодная/горячая)</param>
@@ -18,13 +17,13 @@ namespace UtilityPaymentJournal.Features.WaterReadings.Queries
     /// <param name="PreviousValue">Предыдущее зафиксированное значение на счетчике для расчета разницы</param>
     /// <param name="ResultValue">Итоговый расход воды за расчетный период (CurrentValue - PreviousValue)</param>
     /// <param name="PaymentAmount">Сумма к оплате, рассчитанная на основе итогового расхода и тарифа</param>
-    public record WaterReadingQueryResultDto(
+    public record GetWaterReadingByIdResponse(
         long Id,
         long? ResidenceId,
         long? UtilityProviderId,
         WaterType WaterType,
         string? ResidenceAddress,     // Подтягивается из сущности Residence
-        string? UtilityProviderName,   // Подтягивается из сущности UtilityProvider
+        string? UtilityProviderName,  // Подтягивается из сущности UtilityProvider
         DateTime? SubmissionDate,
         DateTime? PaymentDate,
         long CurrentValue,

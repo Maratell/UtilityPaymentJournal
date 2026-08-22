@@ -10,7 +10,7 @@ using UtilityPaymentJournal.Features.UtilityProviders.GetList;
 namespace UtilityPaymentJournal.Features.UtilityProviders
 {
     /// <summary>
-    /// Api-контроллер для управления списком поставщиков услуг.
+    /// Api-контроллер для управления поставщиками услуг.
     /// </summary>
     [ApiController]
     [Route("api/utility-providers")]
