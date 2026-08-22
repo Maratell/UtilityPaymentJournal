@@ -118,7 +118,7 @@
                     "ajax": {
                         "url": ajaxUrl,
                         "type": "GET",
-                        "dataSrc": ""
+                        "dataSrc": "items" // Переключаем DataTables на чтение вложенного списка items
                     },
                     "columnDefs": [
                         {
@@ -132,9 +132,17 @@
                             // 1. Кнопки управления (слева)
                             "data": null,
                             "defaultContent": "",
-                            "orderable": false,
+                            "orderable": false,   // Отключаем сортировку стрелочками в шапке
+                            "searchable": false,  // Полностью исключаем колонку из глобального поиска по таблице!
                             "className": "text-center align-middle",
                             "render": function (data, type, row) {
+
+                                // Если DataTables ищет, сортирует или проверяет тип — отдаем пустоту.
+                                // Никакие буквы из кнопок "Редактировать"/"Сохранить" не попадут в поисковый движок!
+                                if (type === 'filter' || type === 'sort' || type === 'type') {
+                                    return '';
+                                }
+
                                 // Проверяем, является ли строка абсолютно новой (id равен 0 или отсутствует)
                                 var isNewRow = (!row.id || row.id === 0);
 
@@ -183,7 +191,7 @@
                                 var addressText = currentResidence ? currentResidence.address : "";
 
                                 // 2. ДЛЯ ПОИСКА И СОРТИРОВКИ:
-                                if (type === 'filter' || type === 'sort') {
+                                if (type === 'filter' || type === 'sort' || type === 'type') {
                                     return addressText;
                                 }
 
@@ -221,7 +229,7 @@
                                 var utilityName = currentUtility ? currentUtility.name : "";
 
                                 // 2. НАСТРОЙКА ПОИСКА И СОРТИРОВКИ:
-                                if (type === 'filter' || type === 'sort') {
+                                if (type === 'filter' || type === 'sort' || type === 'type') {
                                     return utilityName;
                                 }
 
@@ -273,20 +281,24 @@
                             "className": "text-center align-middle",
                             "defaultContent": 0, // Защита от пустых значений
                             "render": function (data, type, row, meta) {
-                                // 1. Для фильтрации и сортировки используем готовый текст с сервера
-                                if (type === 'filter' || type === 'sort') {
-                                    return row.waterTypeName || row.WaterTypeName || "";
-                                }
 
-                                // Safe-check: приводим значение к нижнему регистру для точного сравнения
-                                var value = (data !== null && data !== undefined) ? data.toString().toLowerCase() : '0';
+                                // Приводим к числу на случай, если с сервера пришла строка "0" вместо 0
+                                var value = (data !== null && data !== undefined) ? Number(data) : 0;
+
+                                // 1. Фильр для поиска по типу воды
+                                if (type === 'filter' || type === 'sort') {
+                                    if (value === 0) return "холодная";
+                                    if (value === 1) return "горячая";
+                                    if (value === 2) return "водоотведение";
+                                    return "";
+                                }
 
                                 var uniquePrefix = 'water_' + meta.row + '_' + (row.id || 0);
 
-                                // 2. Проверяем выбранный тип (работает и с числами "0", и со строками "cold")
-                                var isCold = (value === '0' || value === 'cold') ? 'checked' : '';
-                                var isHot = (value === '1' || value === 'hot') ? 'checked' : '';
-                                var isDrain = (value === '2' || value === 'drainage') ? 'checked' : '';
+                                // 2. Проверка только по числам 0, 1, 2
+                                var isCold = (value === 0) ? 'checked' : '';
+                                var isHot  = (value === 1) ? 'checked' : '';
+                                var isDrain = (value === 2) ? 'checked' : '';
 
                                 // Блокируем переключатель для режима "только чтение"
                                 var isDisabled = 'disabled';
@@ -317,7 +329,7 @@
                                 //return `<input type="date" class="form-control form-control-sm submission-date-input" value="${value}" disabled style="font-size: inherit; font-weight: inherit;">`;
 
                                 // 1. НАСТРОЙКА ФИЛЬТРАЦИИ И ПОИСКА:
-                                if (type === 'filter') {
+                                if (type === 'filter' || type === 'type') {
                                     if (!value) return "";
 
                                     // Превращаем "2026-06-02" в локальный формат "02.06.2026"
@@ -350,7 +362,7 @@
                                 //return `<input type="date" class="form-control form-control-sm payment-date-input" value="${value}" disabled style="font-size: inherit; font-weight: inherit;">`;
 
                                 // 1. НАСТРОЙКА ФИЛЬТРАЦИИ И ПОИСКА:
-                                if (type === 'filter') {
+                                if (type === 'filter' || type === 'type') {
                                     if (!value) return "";
 
                                     // Превращаем "2026-06-02" в локальный формат "02.06.2026"
@@ -380,8 +392,14 @@
                             "defaultContent": "0",
                             "className": "text-end align-middle",
                             "render": function (data, type, row) {
-                                var formatted = data ? parseInt(data, 10) : "0";
-                                return `<span class="content-editable-box previous-value-box">${formatted}</span>`;
+                                var num = data ? parseInt(data, 10) : 0;
+
+                                // Для поиска, сортировки и типа отдаем чистое число
+                                if (type === 'filter' || type === 'sort' || type === 'type') {
+                                    return num;
+                                }
+
+                                return `<span class="content-editable-box previous-value-box">${num}</span>`;
                             }
                         },
                         {
@@ -390,8 +408,14 @@
                             "defaultContent": "0",
                             "className": "text-end align-middle",
                             "render": function (data, type, row) {
-                                var formatted = data ? parseInt(data, 10) : "0";
-                                return `<span class="content-editable-box current-value-box">${formatted}</span>`;
+                                var num = data ? parseInt(data, 10) : 0;
+
+                                // Для поиска, сортировки и типа отдаем чистое число
+                                if (type === 'filter' || type === 'sort' || type === 'type') {
+                                    return num;
+                                }
+
+                                return `<span class="content-editable-box current-value-box">${num}</span>`;
                             }
                         },
                         {
@@ -400,8 +424,14 @@
                             "defaultContent": "0",
                             "className": "text-end align-middle",
                             "render": function (data, type, row) {
-                                var formatted = data ? parseInt(data, 10) : "0";
-                                return `<span class="content-editable-box result-value-box">${formatted}</span>`;
+                                var num = data ? parseInt(data, 10) : 0;
+
+                                // Для поиска, сортировки и типа отдаем чистое число
+                                if (type === 'filter' || type === 'sort' || type === 'type') {
+                                    return num;
+                                }
+
+                                return `<span class="content-editable-box result-value-box">${num}</span>`;
                             }
                         },
                         {
@@ -410,11 +440,14 @@
                             "defaultContent": "0.00",
                             "className": "text-end align-middle",
                             "render": function (data, type, row) {
-                                // Преобразуем в число с плавающей точкой, если пусто — выводим 0
                                 var num = data ? parseFloat(data) : 0;
-                                // Форматируем строго с двумя знаками после запятой (копейки)
-                                var formatted = num.toFixed(2);
 
+                                // Для поиска, сортировки и типа отдаем чистое число (или строку с точкой)
+                                if (type === 'filter' || type === 'sort' || type === 'type') {
+                                    return num;
+                                }
+                                // Формируем число с 2мя знаками после разделителя
+                                var formatted = num.toFixed(2);
                                 return `<span class="content-editable-box payment-amount-box">${formatted}</span>`;
                             }
                         }

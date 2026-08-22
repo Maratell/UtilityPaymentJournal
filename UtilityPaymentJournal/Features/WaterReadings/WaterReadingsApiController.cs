@@ -1,93 +1,94 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.Features.WaterReadings.Commands;
-using UtilityPaymentJournal.Features.WaterReadings.Models;
-using UtilityPaymentJournal.Features.WaterReadings.Queries;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using UtilityPaymentJournal.Features.WaterReadings.Create;
+using UtilityPaymentJournal.Features.WaterReadings.Delete;
+using UtilityPaymentJournal.Features.WaterReadings.Edit;
+using UtilityPaymentJournal.Features.WaterReadings.GetById;
+using UtilityPaymentJournal.Features.WaterReadings.GetList;
 
 namespace UtilityPaymentJournal.Features.WaterReadings
 {
     /// <summary>
-    /// АПИ-контроллер для управления показаниями счетчиков воды.
+    /// Api-контроллер для управления показаниями счетчиков воды.
     /// </summary>
     [ApiController]
     [Route("api/water-readings")]
-    public partial class WaterReadingsApiController : ControllerBase
+    public partial class WaterReadingsApiController(ISender mediator) : ControllerBase
     {
-        private readonly IWaterReadingQueryService _queryService;
-        private readonly IWaterReadingCommandService _commandService;
-        private readonly IWaterReadingMapper _waterReadingMapper;
-
-        public WaterReadingsApiController(
-            IWaterReadingQueryService queryService,
-            IWaterReadingCommandService commandService,
-            IWaterReadingMapper waterReadingMapper)
-        {
-            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            _waterReadingMapper = waterReadingMapper ?? throw new ArgumentNullException(nameof(waterReadingMapper));
-        }
-
+        /// <summary>
+        /// Получить список показаний счетчиков воды
+        /// </summary>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект-обёртку, содержащий коллекцию показаний счетчиков воды.</returns>
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<WaterReadingDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<GetWaterReadingsListResponse>> GetAll(CancellationToken cancellationToken)
         {
-            // Используем сервис запросов (Queries) для получения полного списка со всеми Include
-            IReadOnlyCollection<WaterReadingQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
-            WaterReadingDetailsViewModel[] viewModels = dtos
-                .Select(r => _waterReadingMapper.ToViewModel(r))
-                .ToArray();
-
-            return Ok(viewModels);
+            GetWaterReadingsListResponse response = await mediator.Send(new GetWaterReadingsListQuery(), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Получить развернутые детали показания счетчика воды по его уникальному идентификатору.
+        /// Получить развернутые детали показания счетчиков воды по его уникальному идентификатору.
         /// </summary>
+        /// <param name="id">ID показания счетчиков воды.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект с подробной информацией о показании счетчика воды.</returns>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<WaterReadingDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetWaterReadingByIdResponse>> GetById(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            WaterReadingQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
-            WaterReadingDetailsViewModel viewModel = _waterReadingMapper.ToViewModel(dto);
-
-            return Ok(viewModel);
+            GetWaterReadingByIdResponse response = await mediator.Send(new GetWaterReadingByIdQuery(id), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Создать новую запись показания счетчика воды.
+        /// Создать новую запись показания счетчиков воды.
         /// </summary>
+        /// <param name="request">Данные формы с фронтенда.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>
+        /// Статус 201 Created и данные созданного показания счетчиков воды. 
+        /// В заголовке Location ответа возвращается URL для получения деталей созданного объекта.
+        /// </returns>
         [HttpPost]
-        public async Task<ActionResult<WaterReadingCreatedViewModel>> Create([FromBody] CreateWaterReadingViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<CreateWaterReadingResponse>> Create(
+            [FromBody] CreateWaterReadingRequest request,
+            CancellationToken cancellationToken)
         {
-            CreateWaterReadingDto createDto = _waterReadingMapper.ToDto(createViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            WaterReadingCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
-            WaterReadingCreatedViewModel resultViewModel = _waterReadingMapper.ToCreatedViewModel(createdDto);
-
-            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
+            CreateWaterReadingResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
         /// <summary>
-        /// Отредактировать существующие данные показания счетчика воды.
+        /// Отредактировать существующие данные показания счетчиков воды.
         /// </summary>
+        /// <param name="id">Уникальный идентификатор показания счетчиков воды (передается в URL маршрута).</param>
+        /// <param name="request">Данные формы обновления. Не содержит ID объекта, так как идентификатор извлекается из маршрута.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Данные обновленного показания счетчика воды со статусом 200 OK.</returns>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<WaterReadingUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditWaterReadingViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<EditWaterReadingResponse>> Edit(
+            [FromRoute] long id,
+            [FromBody] EditWaterReadingRequest request,
+            CancellationToken cancellationToken)
         {
-            EditWaterReadingDto editDto = _waterReadingMapper.ToDto(editViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            WaterReadingCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
-            WaterReadingUpdatedViewModel resultViewModel = _waterReadingMapper.ToUpdatedViewModel(updatedDto);
-
-            return Ok(resultViewModel);
+            EditWaterReadingResponse response = await mediator.Send(request.ToCommand(id), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Удалить запись показания счетчика воды из системы.
+        /// Удалить запись показания счетчиков воды.
         /// </summary>
+        /// <param name="id">ID показания счетчиков воды</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Статус 204 No Content в случае успешного удаления (тело ответа отсутствует).</returns>
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            await _commandService.DeleteAsync(id, cancellationToken);
-
+            await mediator.Send(new DeleteWaterReadingCommand(id), cancellationToken);
             return NoContent();
         }
     }

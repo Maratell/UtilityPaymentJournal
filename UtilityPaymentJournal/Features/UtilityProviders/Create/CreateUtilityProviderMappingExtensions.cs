@@ -11,7 +11,7 @@ namespace UtilityPaymentJournal.Features.UtilityProviders.Create
         /// <summary>
         /// Преобразует доменную сущность поставщика услуг в объект ответа API.
         /// </summary>
-        /// Доменная сущность <see cref="UtilityProvider"/>.</param>
+        /// <param name="entity">Доменная сущность <see cref="UtilityProvider"/>.</param>
         /// <returns>Заполненный DTO ответа <see cref="CreateUtilityProviderResponse"/>.</returns>
         /// <exception cref="ArgumentNullException">Выбрасывается, если сущность равна null.</exception>
         public static CreateUtilityProviderResponse ToResponse(this UtilityProvider entity)

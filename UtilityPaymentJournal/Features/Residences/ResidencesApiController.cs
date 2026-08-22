@@ -10,7 +10,7 @@ using UtilityPaymentJournal.Features.Residences.GetList;
 namespace UtilityPaymentJournal.Features.Residences
 {
     /// <summary>
-    /// Api-контроллер для управления списком жилых объектов.
+    /// Api-контроллер для управления жилыми объектами.
     /// </summary>
     [ApiController]
     [Route("api/residences")]
