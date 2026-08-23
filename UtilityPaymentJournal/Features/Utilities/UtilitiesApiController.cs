@@ -1,82 +1,96 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.Common.Specifications;
-using UtilityPaymentJournal.Features.Utilities.Commands;
-using UtilityPaymentJournal.Features.Utilities.Models;
-using UtilityPaymentJournal.Features.Utilities.Queries;
-using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using UtilityPaymentJournal.Features.Utilities.Create;
+using UtilityPaymentJournal.Features.Utilities.Delete;
+using UtilityPaymentJournal.Features.Utilities.Edit;
+using UtilityPaymentJournal.Features.Utilities.GetById;
+using UtilityPaymentJournal.Features.Utilities.GetList;
 
 namespace UtilityPaymentJournal.Features.Utilities
 {
     /// <summary>
-    /// АПИ-контроллер для управления коммунальными услугами.
+    /// Api-контроллер для управления коммунальными услугами.
     /// </summary>
     [ApiController]
     [Route("api/utilities")]
-    public class UtilitiesApiController : ControllerBase
+    public class UtilitiesApiController(ISender mediator) : ControllerBase
     {
-        private readonly IUtilityQueryService _queryService;
-        private readonly IUtilityCommandService _commandService;
-        private readonly IUtilityMapper _utilityMapper;
-
-        public UtilitiesApiController(
-            IUtilityQueryService queryService,
-            IUtilityCommandService commandService,
-            IUtilityMapper utilityMapper)
-        {
-            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            _utilityMapper = utilityMapper ?? throw new ArgumentNullException(nameof(utilityMapper));
-        }
-
+        /// <summary>
+        /// Получить список услуг
+        /// </summary>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект-обёртку, содержащий коллекцию услуг.</returns>
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<UtilityDetailsViewModel>>> GetAll([FromQuery] UtilityQueryFilter filter, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetUtilitiesListResponse>> GetAll(
+            [FromQuery] GetUtilitiesListQuery query, 
+            CancellationToken cancellationToken)
         {
-            // Создаем спецификацию на основе параметров, которые прислал UI 
-            ICriteriaSpecification<Utility> criteria = new UtilityFilterSpecification(filter);
-
-            IReadOnlyCollection<UtilityQueryResultDto> dtos = await _queryService.GetAllAsync(criteria, cancellationToken);
-            UtilityDetailsViewModel[] viewModels = dtos.Select(_utilityMapper.ToViewModel).ToArray();
-
-            return Ok(viewModels);
+            GetUtilitiesListResponse response = await mediator.Send(query, cancellationToken);
+            return Ok(response);
         }
 
+        /// <summary>
+        /// Получить развернутые детали услуги по его уникальному идентификатору.
+        /// </summary>
+        /// <param name="id">ID услуги.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект с подробной информацией об услуги.</returns>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<UtilityDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetUtilityByIdResponse>> GetById(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            UtilityQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
-            UtilityDetailsViewModel viewModel = _utilityMapper.ToViewModel(dto);
-
-            return Ok(viewModel);
+            GetUtilityByIdResponse response = await mediator.Send(new GetUtilityByIdQuery(id), cancellationToken);
+            return Ok(response);
         }
 
+        /// <summary>
+        /// Создать новую запись услуги.
+        /// </summary>
+        /// <param name="request">Данные формы с фронтенда.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>
+        /// Статус 201 Created и данные созданноой услуге. 
+        /// В заголовке Location ответа возвращается URL для получения деталей созданного объекта.
+        /// </returns>
         [HttpPost]
-        public async Task<ActionResult<UtilityCreatedViewModel>> Create([FromBody] CreateUtilityViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<CreateUtilityResponse>> Create(
+            [FromBody] CreateUtilityRequest request,
+            CancellationToken cancellationToken)
         {
-            CreateUtilityDto createDto = _utilityMapper.ToDto(createViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            UtilityCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
-            UtilityCreatedViewModel resultViewModel = _utilityMapper.ToCreatedViewModel(createdDto);
-
-            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
+            CreateUtilityResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
+        /// <summary>
+        /// Отредактировать существующие данные услуги.
+        /// </summary>
+        /// <param name="id">Уникальный идентификатор услуги (передается в URL маршрута).</param>
+        /// <param name="request">Данные формы обновления. Не содержит ID объекта, так как идентификатор извлекается из маршрута.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Данные обновленной услуги со статусом 200 OK.</returns>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<UtilityUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditUtilityViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<EditUtilityResponse>> Edit(
+            [FromRoute] long id,
+            [FromBody] EditUtilityRequest request,
+            CancellationToken cancellationToken)
         {
-            EditUtilityDto editDto = _utilityMapper.ToDto(editViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            UtilityCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
-            UtilityUpdatedViewModel resultViewModel = _utilityMapper.ToUpdatedViewModel(updatedDto);
-
-            return Ok(resultViewModel);
+            EditUtilityResponse response = await mediator.Send(request.ToCommand(id), cancellationToken);
+            return Ok(response);
         }
 
+        /// <summary>
+        /// Удалить запись услуги.
+        /// </summary>
+        /// <param name="id">ID услуги</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Статус 204 No Content в случае успешного удаления (тело ответа отсутствует).</returns>
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            await _commandService.DeleteAsync(id, cancellationToken);
-
+            await mediator.Send(new DeleteUtilityCommand(id), cancellationToken);
             return NoContent();
         }
     }

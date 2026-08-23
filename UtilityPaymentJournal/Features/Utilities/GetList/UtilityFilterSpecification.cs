@@ -3,7 +3,7 @@ using UtilityPaymentJournal.Common.Extensions;
 using UtilityPaymentJournal.Common.Specifications;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
-namespace UtilityPaymentJournal.Features.Utilities.Queries
+namespace UtilityPaymentJournal.Features.Utilities.GetList
 {
     /// <summary>
     /// Динамическая спецификация критериев фильтрации коммунальных услуг, строящая SQL-условие WHERE на основе параметров из UI.

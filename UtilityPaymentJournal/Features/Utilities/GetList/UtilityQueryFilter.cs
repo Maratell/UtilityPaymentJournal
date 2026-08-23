@@ -1,4 +1,4 @@
-﻿namespace UtilityPaymentJournal.Features.Utilities.Queries
+﻿namespace UtilityPaymentJournal.Features.Utilities.GetList
 {
     /// <summary>
     /// Объект параметров фильтрации, сортировки и поиска коммунальных услуг, прилетающий из пользовательского интерфейса (UI).
