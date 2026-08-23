@@ -6,7 +6,7 @@ using UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings;
 namespace UtilityPaymentJournal.Features.WaterReadings.GetById
 {
     /// <summary>
-    /// Обработчик запроса на получение деталей показания счетчика услуг.
+    /// Обработчик запроса на получение деталей показания счетчика воды.
     /// Инкапсулирует логику эффективного чтения из PostgreSQL.
     /// </summary>
     public partial class GetWaterReadingByIdHandler(

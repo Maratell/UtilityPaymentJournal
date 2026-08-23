@@ -3,12 +3,12 @@
 namespace UtilityPaymentJournal.Features.WaterReadings.GetById
 {
     /// <summary>
-    /// Методы расширения для маппинга данных фичи получения деталей объекта недвижимости.
+    /// Методы расширения для маппинга данных фичи получения деталей счетчика воды.
     /// </summary>
     public static class GetWaterReadingByIdMappingExtensions
     {
         /// <summary>
-        /// Преобразует доменную сущность недвижимости в объект ответа API в памяти приложения.
+        /// Преобразует доменную сущность счетчика воды в объект ответа API в памяти приложения.
         /// </summary>
         /// <param name="entity">Доменная сущеость <see cref="WaterReading"/>.</param>
         /// <returns>Заполненный ДТО ответа <see cref="GetWaterReadingByIdResponse"/>.</returns>

@@ -1,7 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.Features.ElectricityReadings.Commands;
-using UtilityPaymentJournal.Features.ElectricityReadings.Models;
-using UtilityPaymentJournal.Features.ElectricityReadings.Queries;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using UtilityPaymentJournal.Features.ElectricityReadings.Create;
+using UtilityPaymentJournal.Features.ElectricityReadings.Delete;
+using UtilityPaymentJournal.Features.ElectricityReadings.Edit;
+using UtilityPaymentJournal.Features.ElectricityReadings.GetById;
+using UtilityPaymentJournal.Features.ElectricityReadings.GetList;
 
 namespace UtilityPaymentJournal.Features.ElectricityReadings
 {
@@ -10,84 +13,82 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings
     /// </summary>
     [ApiController]
     [Route("api/electricity-readings")]
-    public class ElectricityReadingsApiController : ControllerBase
+    public class ElectricityReadingsApiController(ISender mediator) : ControllerBase
     {
-        private readonly IElectricityReadingQueryService _queryService;
-        private readonly IElectricityReadingCommandService _commandService;
-        private readonly IElectricityReadingMapper _electricityReadingMapper;
-
-        public ElectricityReadingsApiController(
-            IElectricityReadingQueryService queryService,
-            IElectricityReadingCommandService commandService,
-            IElectricityReadingMapper electricityReadingMapper)
-        {
-            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            _electricityReadingMapper = electricityReadingMapper ?? throw new ArgumentNullException(nameof(electricityReadingMapper));
-        }
-
+        /// <summary>
+        /// Получить список показаний счетчиков электроэнергии
+        /// </summary>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект-обёртку, содержащий коллекцию показаний счетчиков электроэнергии.</returns>
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<ElectricityReadingDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<GetElectricityReadingsListResponse>> GetAll(CancellationToken cancellationToken)
         {
-            // Используем сервис запросов (Queries) для получения полного списка со всеми Include
-            IReadOnlyCollection<ElectricityReadingQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
-            ElectricityReadingDetailsViewModel[] viewModels = dtos
-                .Select(r => _electricityReadingMapper.ToViewModel(r))
-                .ToArray();
-
-            return Ok(viewModels);
+            GetElectricityReadingsListResponse response = await mediator.Send(new GetElectricityReadingsListQuery(), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Получить развернутые детали показания счетчика электроэнергии по его уникальному идентификатору.
+        /// Получить развернутые детали показания счетчиков электроэнергии по его уникальному идентификатору.
         /// </summary>
+        /// <param name="id">ID показания счетчиков электроэнергии.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект с подробной информацией о показании счетчика электроэнергии.</returns>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<ElectricityReadingDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetElectricityReadingByIdResponse>> GetById(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ElectricityReadingQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
-            ElectricityReadingDetailsViewModel viewModel = _electricityReadingMapper.ToViewModel(dto);
-
-            return Ok(viewModel);
+            GetElectricityReadingByIdResponse response = await mediator.Send(new GetElectricityReadingByIdQuery(id), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Создать новую запись показания счетчика электроэнергии.
+        /// Создать новую запись показания счетчиков электроэнергии.
         /// </summary>
+        /// <param name="request">Данные формы с фронтенда.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>
+        /// Статус 201 Created и данные созданного показания счетчиков электроэнергии. 
+        /// В заголовке Location ответа возвращается URL для получения деталей созданного объекта.
+        /// </returns>
         [HttpPost]
-        public async Task<ActionResult<ElectricityReadingCreatedViewModel>> Create([FromBody] CreateElectricityReadingViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<CreateElectricityReadingResponse>> Create(
+            [FromBody] CreateElectricityReadingRequest request,
+            CancellationToken cancellationToken)
         {
-            CreateElectricityReadingDto createDto = _electricityReadingMapper.ToDto(createViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ElectricityReadingCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
-            ElectricityReadingCreatedViewModel resultViewModel = _electricityReadingMapper.ToCreatedViewModel(createdDto);
-
-            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
+            CreateElectricityReadingResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
         /// <summary>
-        /// Отредактировать существующие данные показания счетчика электроэнергии.
+        /// Отредактировать существующие данные показания счетчиков электроэнергии.
         /// </summary>
+        /// <param name="id">Уникальный идентификатор показания счетчиков электроэнергии (передается в URL маршрута).</param>
+        /// <param name="request">Данные формы обновления. Не содержит ID объекта, так как идентификатор извлекается из маршрута.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Данные обновленного показания счетчика электроэнергии со статусом 200 OK.</returns>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<ElectricityReadingUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditElectricityReadingViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<EditElectricityReadingResponse>> Edit(
+            [FromRoute] long id,
+            [FromBody] EditElectricityReadingRequest request,
+            CancellationToken cancellationToken)
         {
-            EditElectricityReadingDto editDto = _electricityReadingMapper.ToDto(editViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ElectricityReadingCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
-            ElectricityReadingUpdatedViewModel resultViewModel = _electricityReadingMapper.ToUpdatedViewModel(updatedDto);
-
-            return Ok(resultViewModel);
+            EditElectricityReadingResponse response = await mediator.Send(request.ToCommand(id), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
-        /// Удалить запись показания счетчика электроэнергии из системы.
+        /// Удалить запись показания счетчиков электроэнергии.
         /// </summary>
+        /// <param name="id">ID показания счетчиков электроэнергии</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Статус 204 No Content в случае успешного удаления (тело ответа отсутствует).</returns>
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            await _commandService.DeleteAsync(id, cancellationToken);
-
+            await mediator.Send(new DeleteElectricityReadingCommand(id), cancellationToken);
             return NoContent();
         }
     }
