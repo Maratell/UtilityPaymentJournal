@@ -6,7 +6,7 @@ using UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings;
 namespace UtilityPaymentJournal.Features.WaterReadings.GetList
 {
     /// <summary>
-    /// Обработчик запроса на получение списка объектов недвижимости.
+    /// Обработчик запроса на получение списка показаний счетчиков воды.
     /// </summary>
     public partial class GetWaterReadingsListHandler(
             ApplicationDbContext context,
