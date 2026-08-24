@@ -1,12 +1,15 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
+using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.Utilities.Delete
 {
     /// <summary>
-    /// Обработчик команды удаления услуги.
-    /// Напрямую удаляет запись из PostgreSQL без предварительной загрузки в память.
+    /// Обработчик команды удаления коммунальной услуги.
+    /// Реализует паттерн "Мягкое удаление" (Soft Delete): вместо физического удаления строки (DELETE) 
+    /// из базы данных PostgreSQL, у записи сбрасывается флаг активности в false. Это позволяет 
+    /// сохранить целостность исторических данных и связанных транзакций.
     /// </summary>
     public partial class DeleteUtilityHandler(
             ApplicationDbContext context,
@@ -16,18 +19,21 @@ namespace UtilityPaymentJournal.Features.Utilities.Delete
         {
             LogUtilityDeletionRequested(logger, command.Id);
 
-            // Высокопроизводительное удаление: EF Core сразу генерирует SQL-запрос DELETE без загрузки сущности в память
-            int deletedRowsCount = await context.Utilities
-                .Where(w => w.Id == command.Id)
-                .ExecuteDeleteAsync(cancellationToken);
+            // Загружаем сущность по уникальному первичному ключу (отслеживание изменений включено)
+            Utility? entity = await context.Utilities
+                .SingleOrDefaultAsync(u => u.Id == command.Id, cancellationToken);
 
-            if (deletedRowsCount == 0)
+            if (entity == null)
             {
                 LogUtilityNotFoundInDb(logger, command.Id);
                 throw new KeyNotFoundException($"Не удалось удалить. Коммунальная услуга с ID {command.Id} не найдена.");
             }
 
-            LogUtilityDeletedFromDb(logger, command.Id);
+            // Переводим в неактивный статус (Мягкое удаление / Soft Delete) и сохраняем изменения
+            entity.IsActive = false;
+            await context.SaveChangesAsync(cancellationToken);
+
+            LogUtilityDeletedFromDb(logger, entity.Id);
         }
     }
 }
