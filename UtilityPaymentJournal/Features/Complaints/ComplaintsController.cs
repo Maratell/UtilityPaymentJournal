@@ -1,35 +1,36 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using UtilityPaymentJournal.Common.Enumerations;
-using UtilityPaymentJournal.Features.Complaints.Models;
-using UtilityPaymentJournal.Features.Complaints.Queries;
+using UtilityPaymentJournal.Features.Complaints.Create;
+using UtilityPaymentJournal.Features.Complaints.GetList;
 
 namespace UtilityPaymentJournal.Features.Complaints
 {
     [Route("complaints")]
-    public class ComplaintsController : Controller
+    public class ComplaintsController(ISender mediator) : Controller
     {
-        private readonly IComplaintQueryService _complaintQueryService;
-
-        public ComplaintsController(IComplaintQueryService complaintQueryService)
-        {
-            _complaintQueryService = complaintQueryService ?? throw new ArgumentNullException(nameof(complaintQueryService));
-        }
-
         [HttpGet]
         public async Task<IActionResult> Index(CancellationToken cancellationToken)
         {
-            // 1. Извлекаем из сервиса чтения жалобы, сгруппированные по статусам внутри словаря
-            Dictionary<ComplaintStatus, List<ComplaintViewModel>> complaintsByStatus 
-                = await _complaintQueryService.GetComplaintsGroupedByStatusAsync(cancellationToken);
+            // Отправляем запрос в MediatR и получаем плоский список
+            GetComplaintsListResponse response = await mediator.Send(new GetComplaintsListQuery(), cancellationToken);
 
-            // 2. Формируем модель представления доски
-            ComplaintBoardViewModel boardViewModel = new ComplaintBoardViewModel
+            // Группируем карточки по статусу
+            Dictionary<ComplaintStatus, List<GetComplaintsListResponse.Item>> complaintsByStatus = Enum.GetValues<ComplaintStatus>()
+                .ToDictionary(
+                    status => status,
+                    status => response.Items.Where(item => item.Status == status).ToList()
+                );
+
+            // Формируем модель представления доски и отпправляем во View
+            return View(new ComplaintsBoardViewModel
             {
                 ComplaintsByStatus = complaintsByStatus,
-                EmptyForm = new CreateComplaintViewModel() // Инициализируем форму для создания карточки
-            };
-
-            return View(boardViewModel);
+                // Инициализируем пустую модель формы. 
+                // Она необходима движку Razor для автоматической генерации HTML-атрибутов 
+                // и правил валидации внутри модального окна добавления новой жалобы.
+                EmptyForm = new CreateComplaintViewModel()
+            });
         }
     }
 }

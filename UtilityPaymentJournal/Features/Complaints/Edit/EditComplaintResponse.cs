@@ -1,0 +1,25 @@
+﻿using UtilityPaymentJournal.Common.Enumerations;
+
+namespace UtilityPaymentJournal.Features.Complaints.Edit
+{
+    /// <summary>
+    /// Ответ API, содержащий отредактированные данные карточки жалобы.
+    /// </summary>
+    /// <param name="Id">Уникальный идентификатор жалобы</param>
+    /// <param name="Title">Заголовок или краткая суть жалобы</param>
+    /// <param name="Description">Подробное описание проблемы</param>
+    /// <param name="UtilityId">Идентификатор связанной коммунальной услуги</param>
+    /// <param name="CreatedAt">Дата и время создания записи в системе</param>
+    /// <param name="SubmissionDate">Дата и время официальной подачи жалобы (опционально)</param>
+    /// <param name="IssueResolutionDate">Дата и время фактического решения проблемы (опционально)</param>
+    /// <param name="Status">Текущий статус рассмотрения жалобы</param>
+    public record EditComplaintResponse(
+        long Id, 
+        string Title,
+        string Description,
+        long UtilityId,
+        DateTime CreatedAt,
+        DateTime? SubmissionDate,
+        DateTime? IssueResolutionDate,
+        ComplaintStatus Status);
+}

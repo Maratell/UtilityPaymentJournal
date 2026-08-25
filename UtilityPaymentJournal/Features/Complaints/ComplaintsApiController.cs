@@ -1,97 +1,108 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.Features.Complaints.Commands;
-using UtilityPaymentJournal.Features.Complaints.Models;
-using UtilityPaymentJournal.Features.Complaints.Queries;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using UtilityPaymentJournal.Features.Complaints.Create;
+using UtilityPaymentJournal.Features.Complaints.Delete;
+using UtilityPaymentJournal.Features.Complaints.Edit;
+using UtilityPaymentJournal.Features.Complaints.GetById;
+using UtilityPaymentJournal.Features.Complaints.GetList;
+using UtilityPaymentJournal.Features.Complaints.ChangeStatus;
 
 namespace UtilityPaymentJournal.Features.Complaints
 {
     /// <summary>
-    /// АПИ-контроллер для управления жалобами.
+    /// Api-контроллер для управления жалобами.
     /// </summary>
     [ApiController]
     [Route("api/complaints")]
-    public class ComplaintsApiController : ControllerBase
+    public class ComplaintsApiController(ISender mediator) : ControllerBase
     {
-        private readonly IComplaintQueryService _queryService;
-        private readonly IComplaintCommandService _commandService;
-        private readonly IComplaintMapper _complaintMapper;
-        public ComplaintsApiController(
-            IComplaintQueryService queryService,
-            IComplaintCommandService commandService,
-            IComplaintMapper complaintMapper)
-        {
-            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            _complaintMapper = complaintMapper ?? throw new ArgumentNullException(nameof(complaintMapper));
-        }
+        /// <summary>
+        /// Получить список карточек жалоб
+        /// </summary>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект-обёртку, содержащий коллекцию карточек жалоб.</returns>
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyCollection<ComplaintDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<GetComplaintsListResponse>> GetAll(CancellationToken cancellationToken)
         {
-            IReadOnlyCollection<ComplaintQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
-            ComplaintDetailsViewModel[] viewModels = dtos
-                .Select(_complaintMapper.ToDetailsViewModel)
-                .ToArray();
-
-            return Ok(viewModels);
+            GetComplaintsListResponse response = await mediator.Send(new GetComplaintsListQuery(), cancellationToken);
+            return Ok(response);
         }
+
         /// <summary>
-        /// Получить развернутые детали жалобы по её уникальному идентификатору.
+        /// Получить развернутые детали карточки с жалобой по его уникальному идентификатору.
         /// </summary>
+        /// <param name="id">ID карточки с жалобой.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект с подробной информацией о карточке с жалобой.</returns>
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<ComplaintDetailsViewModel>> GetById([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetComplaintByIdResponse>> GetById(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ComplaintQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
-            ComplaintDetailsViewModel viewModel = _complaintMapper.ToDetailsViewModel(dto);
-
-            return Ok(viewModel);
+            GetComplaintByIdResponse response = await mediator.Send(new GetComplaintByIdQuery(id), cancellationToken);
+            return Ok(response);
         }
+
         /// <summary>
-        /// Создать новую запись жалобы.
+        /// Создать новую запись карточки с жалобой.
         /// </summary>
+        /// <param name="request">Данные формы с фронтенда.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>
+        /// Статус 201 Created и данные созданного карточки с жалобой. 
+        /// В заголовке Location ответа возвращается URL для получения деталей созданного объекта.
+        /// </returns>
         [HttpPost]
-        public async Task<ActionResult<ComplaintCreatedViewModel>> Create([FromBody] CreateComplaintViewModel createViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<CreateComplaintResponse>> Create(
+            [FromBody] CreateComplaintRequest request,
+            CancellationToken cancellationToken)
         {
-            CreateComplaintDto createDto = _complaintMapper.ToDto(createViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ComplaintCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
-            ComplaintCreatedViewModel resultViewModel = _complaintMapper.ToCreatedViewModel(createdDto);
-
-            return CreatedAtAction(nameof(GetById), new { id = resultViewModel.Id }, resultViewModel);
+            CreateComplaintResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
+
         /// <summary>
-        /// Отредактировать существующие данные жалобы.
+        /// Отредактировать существующие данные карточки с жалобой.
         /// </summary>
+        /// <param name="id">Уникальный идентификатор карточки с жалобой (передается в URL маршрута).</param>
+        /// <param name="request">Данные формы обновления. Не содержит ID объекта, так как идентификатор извлекается из маршрута.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Данные обновленного карточки с жалобой со статусом 200 OK.</returns>
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<ComplaintUpdatedViewModel>> Edit([FromRoute] long id, [FromBody] EditComplaintViewModel editViewModel, CancellationToken cancellationToken)
+        public async Task<ActionResult<EditComplaintResponse>> Edit(
+            [FromRoute] long id,
+            [FromBody] EditComplaintRequest request,
+            CancellationToken cancellationToken)
         {
-            EditComplaintDto editDto = _complaintMapper.ToDto(editViewModel);
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в NotFoundExceptionHandler)
-            ComplaintCommandResultDto updatedDto = await _commandService.EditAsync(id, editDto, cancellationToken);
-            ComplaintUpdatedViewModel resultViewModel = _complaintMapper.ToUpdatedViewModel(updatedDto);
-
-            return Ok(resultViewModel);
+            EditComplaintResponse response = await mediator.Send(request.ToCommand(id), cancellationToken);
+            return Ok(response);
         }
+
         /// <summary>
-        /// Точечно изменить статус существующей жалобы.
+        /// Изменить статус существующей карточки с жалобой.
         /// </summary>
-        [HttpPatch("change-status")]
-        public async Task<ActionResult<ComplaintUpdatedViewModel>> ChangeStatus([FromBody] ChangeComplaintStatusViewModel changeStatusViewModel, CancellationToken cancellationToken)
+        [HttpPatch("{id:long}/change-status")]
+        public async Task<ActionResult<ChangeComplaintStatusResponse>> ChangeStatus(
+            [FromRoute] long id,
+            [FromBody] ChangeComplaintStatusRequest request, 
+            CancellationToken cancellationToken)
         {
-            ChangeComplaintStatusDto changeStatusDto = _complaintMapper.ToDto(changeStatusViewModel);
-            ComplaintCommandResultDto updatedDto = await _commandService.ChangeStatusAsync(changeStatusDto, cancellationToken);
-            ComplaintUpdatedViewModel resultViewModel = _complaintMapper.ToUpdatedViewModel(updatedDto);
-
-            return Ok(resultViewModel);
+            ChangeComplaintStatusResponse response = await mediator.Send(request.ToCommand(id), cancellationToken);
+            return Ok(response);
         }
+
         /// <summary>
-        /// Удалить запись жалобы из системы.
+        /// Удалить запись карточки с жалобой.
         /// </summary>
+        /// <param name="id">ID карточки с жалобой</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Статус 204 No Content в случае успешного удаления (тело ответа отсутствует).</returns>
         [HttpDelete("{id:long}")]
-        public async Task<IActionResult> Delete([FromRoute] long id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(
+            [FromRoute] long id,
+            CancellationToken cancellationToken)
         {
-            await _commandService.DeleteAsync(id, cancellationToken);
-
+            await mediator.Send(new DeleteComplaintCommand(id), cancellationToken);
             return NoContent();
         }
     }
