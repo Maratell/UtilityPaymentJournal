@@ -1,13 +1,13 @@
 ﻿
 @using UtilityPaymentJournal.Common.Enumerations
-@using UtilityPaymentJournal.Features.Complaints.Models
+@using UtilityPaymentJournal.Features.Complaints.GetList
 
 @{
     ViewData["Title"] = "Интерактивный журнал жалоб";
 }
 
 @{
-    Func<ComplaintViewModel, Microsoft.AspNetCore.Html.IHtmlContent> RenderComplaintCard = @<text>
+    Func<GetComplaintsListResponse.Item, Microsoft.AspNetCore.Html.IHtmlContent> RenderComplaintCard = @<text>
     @{
         // В Razor-делегатах текущий элемент всегда называется item
         string iconClass = item.UtilityIcon ?? "bi-tools";
@@ -81,79 +81,6 @@
     </text>;
 }
 
-@* <div class="container-fluid py-4 kanban-board-bg">
-
-    <!-- Генерируем токен защиты для операций POST, PUT, DELETE на доске жалоб -->
-    @Html.AntiForgeryToken()
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="notebook-kanban-title mb-0"></h2>
-        <button class="notebook-kanban-add-btn" data-bs-toggle="modal" data-bs-target="#addModal">
-            <i class="bi bi-plus-lg me-1"></i> Добавить жалобу
-        </button>
-    </div>
-
-    <!-- Сетка колонок интерактивной доски -->
-    <div class="row">
-        <!-- КОЛОНКА: НОВЫЕ -->
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 notebook-column-card">
-                <div class="card-header notebook-column-header header-status-new d-flex justify-content-between align-items-center">
-                    <h5 class="m-0">Новые</h5>
-                    <span class="badge rounded-pill notebook-column-badge">@(Model?.NewComplaints?.Count ?? 0)</span>
-                </div>
-                <div class="card-body notebook-column-body complaint-column" style="min-height: 550px;" data-status="@((int)ComplaintStatus.New)" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    @if (Model?.NewComplaints != null)
-                    {
-                        @foreach (var card in Model.NewComplaints)
-                        {
-                            @RenderComplaintCard(card)
-                        }
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- КОЛОНКА: В РАБОТЕ -->
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 notebook-column-card">
-                <div class="card-header notebook-column-header header-status-progress d-flex justify-content-between align-items-center">
-                    <h5 class="m-0">В работе</h5>
-                    <span class="badge rounded-pill notebook-column-badge">@(Model?.InProgressComplaints?.Count ?? 0)</span>
-                </div>
-                <div class="card-body notebook-column-body complaint-column" style="min-height: 550px;" data-status="@((int)ComplaintStatus.InProgress)" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    @if (Model?.InProgressComplaints != null)
-                    {
-                        @foreach (var card in Model.InProgressComplaints)
-                        {
-                            @RenderComplaintCard(card)
-                        }
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- КОЛОНКА: РЕШЕННЫЕ -->
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 notebook-column-card">
-                <div class="card-header notebook-column-header header-status-resolved d-flex justify-content-between align-items-center">
-                    <h5 class="m-0">Решенные</h5>
-                    <span class="badge rounded-pill notebook-column-badge">@(Model?.ResolvedComplaints?.Count ?? 0)</span>
-                </div>
-                <div class="card-body notebook-column-body complaint-column" style="min-height: 550px;" data-status="@((int)ComplaintStatus.Resolved)" ondragover="allowDrop(event)" ondrop="drop(event)">
-                    @if (Model?.ResolvedComplaints != null)
-                    {
-                        @foreach (var card in Model.ResolvedComplaints)
-                        {
-                            @RenderComplaintCard(card)
-                        }
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-</div> *@
-
 <div class="container-fluid py-4 kanban-board-bg">
     @Html.AntiForgeryToken()
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -199,59 +126,6 @@
     </div>
 </div>
 
-@* <!-- Модальное окно СОЗДАНИЯ записи -->
-<div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content notebook-modal-content">
-            <form id="addComplaintForm">
-                <div class="modal-header notebook-modal-header">
-                    <h5 class="modal-title font-weight-bold">Новая жалоба</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label text-dark small font-weight-bold">Заголовок</label>
-                        <input name="title" class="form-control notebook-form-input" placeholder="Кратко назовите проблему" required />
-                    </div>
-
-                    <!-- Выбор услуги из общего справочника -->
-                    <div class="mb-3">
-                        <label class="form-label text-dark small font-weight-bold">Наименование услуги</label>
-                        <select name="utilityId" class="form-select notebook-form-input" required>
-                            <option value="">-- Выберите услугу --</option>
-                            @foreach (UtilityViewModel utility in Model.AvailableUtilities)
-                            {
-                                <option value="@utility.Id">@utility.Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <!-- Поля выбора дат с защитой от ввода некорректного года -->
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label text-dark small font-weight-bold">Дата подачи</label>
-                            <input type="datetime-local" name="submissionDate" max="2100-12-31T23:59" class="form-control notebook-form-input" />
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label text-dark small font-weight-bold">Дата решения</label>
-                            <input type="datetime-local" name="issueResolutionDate" max="2100-12-31T23:59" class="form-control notebook-form-input" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-dark small font-weight-bold">Описание</label>
-                        <textarea name="description" class="form-control notebook-form-input" rows="4" placeholder="Введите детали..." required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer notebook-modal-footer">
-                    <button type="button" class="notebook-btn-cancel" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" class="notebook-btn-save">Создать</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div> *@
-
 <!-- Модальное окно СОЗДАНИЯ записи -->
 <div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -295,63 +169,6 @@
         </div>
     </div>
 </div>
-
-@* <!-- Модальное окно РЕДАКТИРОВАНИЯ записи -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content notebook-modal-content">
-            <form id="editComplaintForm" autocomplete="off">
-                <div class="modal-header notebook-modal-header">
-                    <h5 class="modal-title font-weight-bold">Редактировать жалобу</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Скрытые поля для идентификатора и текущего статуса жалобы -->
-                    <input type="hidden" id="editComplaintId" name="id" />
-                    <input type="hidden" id="status" name="status" />
-
-                    <div class="mb-3">
-                        <label class="form-label text-dark small font-weight-bold">Заголовок</label>
-                        <input type="text" id="editTitle" name="title" class="form-control notebook-form-input" required />
-                    </div>
-
-                    <!-- Редактирование услуги -->
-                    <div class="mb-3">
-                        <label class="form-label text-dark small font-weight-bold">Наименование услуги</label>
-                        <select id="editUtilityId" name="utilityId" class="form-select notebook-form-input" required>
-                            <option value="">-- Выберите услугу --</option>
-                            @foreach (UtilityViewModel utility in Model.AvailableUtilities)
-                            {
-                                <option value="@utility.Id">@utility.Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <!-- Редактирование дат с защитой от переполнения года -->
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label class="form-label text-dark small font-weight-bold">Дата подачи</label>
-                            <input type="datetime-local" id="editSubmissionDate" name="submissionDate" max="2100-12-31T23:59" class="form-control notebook-form-input" />
-                        </div>
-                        <div class="col-6 mb-3">
-                            <label class="form-label text-dark small font-weight-bold">Дата решения</label>
-                            <input type="datetime-local" id="editIssueResolutionDate" name="issueResolutionDate" max="2100-12-31T23:59" class="form-control notebook-form-input" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label text-dark small font-weight-bold">Описание</label>
-                        <textarea id="editDescription" name="description" class="form-control notebook-form-input" rows="4" required></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer notebook-modal-footer">
-                    <button type="button" class="notebook-btn-cancel" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" id="btnSaveEdit" class="notebook-btn-save">Сохранить</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div> *@
 
 <!-- Модальное окно РЕДАКТИРОВАНИЯ записи -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
@@ -506,45 +323,6 @@
             ev.dataTransfer.setData("text/plain", ev.target.id);
         }
 
-        // function drop(ev) {
-        //     ev.preventDefault();
-        //     const data = ev.dataTransfer.getData("text/plain");
-        //     const card = document.getElementById(data);
-        //     const column = ev.target.closest('.complaint-column');
-        //     if (!column || !card) return;
-        //     const csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
-        //     const complaintId = parseInt($(card).attr('data-id'));
-        //     const newStatus = parseInt($(column).attr('data-status'));
-        //     column.appendChild(card);
-        //     $(card).attr('data-status', newStatus);
-        //     $(card).data('status', newStatus);
-        //     $(card).find('.btn-edit-complaint').attr('data-status', newStatus);
-        //     // Отправляем AJAX-запрос на обновленный PATCH эндпоинт с телом запроса
-        //     $.ajax({
-        //         url: '/api/complaints/change-status',
-        //         type: 'PATCH',
-        //         contentType: 'application/json',
-        //         headers: {
-        //             'RequestVerificationToken': csrfToken
-        //         },
-        //         data: JSON.stringify({
-        //             id: complaintId,
-        //             newStatus: newStatus
-        //         }),
-        //         success: function () {
-        //             // Наш новый метод ChangeStatus возвращает Ok(resultViewModel),
-        //             // поэтому при необходимости здесь можно даже прочитать обновленные даты из ответа бэкенда
-        //             updateCounters();
-        //         },
-        //         error: function (xhr) {
-        //             if (!tryShowServerError(xhr)) {
-        //                 showAlert('Не удалось обновить статус жалобы на сервере.');
-        //             }
-        //             location.reload();
-        //         }
-        //     });
-        // }
-
         function drop(ev) {
             ev.preventDefault();
             const data = ev.dataTransfer.getData("text/plain");
@@ -558,19 +336,20 @@
             $(card).attr('data-status', newStatus);
             $(card).data('status', newStatus);
             $(card).find('.btn-edit-complaint').attr('data-status', newStatus);
+
             // ШАГ 1: Отправляем команду на изменение статуса (Запись)
             $.ajax({
-                url: '/api/complaints/change-status',
+                url: `/api/complaints/${complaintId}/change-status`,
                 type: 'PATCH',
                 contentType: 'application/json',
                 headers: {
                     'RequestVerificationToken': csrfToken
                 },
                 data: JSON.stringify({
-                    id: complaintId,
                     newStatus: newStatus
                 }),
                 success: function () {
+
                     // ШАГ 2: Оркестрация — запрашиваем развернутые данные из сервиса Чтения
                     $.ajax({
                         url: `/api/complaints/${complaintId}`,
@@ -618,62 +397,6 @@
                 }
             });
 
-            // // ОТПРАВКА ФОРМЫ СОЗДАНИЯ (POST)
-            // $('#addComplaintForm').submit(function (e) {
-            //     e.preventDefault();
-            //     const form = this;
-
-            //     // 1. Извлекаем токен безопасности со всей страницы 
-            //     const csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
-
-            //     // 2. Извлекаем данные по новым чистым именам полей (без префиксов EmptyForm.)
-            //     const requestData = {
-            //         title: $(form).find('input[name="title"]').val().trim(),
-            //         utilityId: parseInt($(form).find('select[name="utilityId"]').val()),
-            //         submissionDate: toUtcIsoString($(form).find('input[name="submissionDate"]').val()),
-            //         issueResolutionDate: toUtcIsoString($(form).find('input[name="issueResolutionDate"]').val()),
-            //         description: $(form).find('textarea[name="description"]').val().trim(),
-            //         status: 0 // Передаем стартовый статус (0 = ComplaintStatus.New) для прохождения валидации [Required]
-            //     };
-
-            //     $.ajax({
-            //         url: '/api/complaints',          
-            //         type: 'POST',
-            //         contentType: 'application/json',
-            //         data: JSON.stringify(requestData),
-            //         headers: {
-            //             // Передаем токен безопасности в заголовке запроса
-            //             'RequestVerificationToken': csrfToken
-            //         },
-            //         success: function (createdCard) { 
-            //             // Закрываем модальное окно через Bootstrap API
-            //             $('#addModal').find('[data-bs-dismiss="modal"]').first().click();
-
-            //             // Сбрасываем стандартные поля формы
-            //             form.reset();
-            //             // Принудительно сбрасываем выпадающий список в дефолтное состояние
-            //             $(form).find('select[name="utilityId"]').val('');
-
-            //             // Забираем статус прямо из объекта ответа (учитывая возможный регистр)
-            //             const cardStatus = createdCard.status ?? createdCard.Status;
-
-            //             // Ищем колонку по реальному статусу карточки
-            //             $(`.complaint-column[data-status="${cardStatus}"]`).prepend(buildCardHtml(createdCard));
-
-            //             // Обновляем счетчики на доске
-            //             updateCounters();
-            //         },
-            //         error: function (xhr) {
-            //             // console.error("Ошибка при создании жалобы:", xhr.status);
-            //             // alert("Не удалось создать жалобу. Проверьте правильность заполнения полей.");
-
-            //             // Пытаемся распарсить ошибку бэкенда
-            //             if (!tryShowServerError(xhr)) {
-            //                 showAlert('Не удалось создать жалобу. Проверьте правильность заполнения полей.');
-            //             }
-            //         }
-            //     });
-            // });
 
             // ОТПРАВКА ФОРМЫ СОЗДАНИЯ (POST) 
             $('#addComplaintForm').submit(function (e) {
@@ -780,58 +503,6 @@
                     }
                 });
             });
-
-            // // СОХРАНЕНИЕ ОТРЕДАКТИРОВАННЫХ ДАННЫХ (PUT)
-            // $('#editComplaintForm').submit(function (e) {
-            //     e.preventDefault();
-
-            //     const id = $('#editComplaintId').val();
-
-            //     // Извлекаем токен безопасности ГЛОБАЛЬНО со всей страницы (так как общей формы тут нет)
-            //     const csrfToken = $('input[name="__RequestVerificationToken"]').val() || '';
-
-            //     const requestData = {
-            //         title: $('#editTitle').val().trim(),
-            //         utilityId: parseInt($('#editUtilityId').val()),
-            //         submissionDate: toUtcIsoString($('#editSubmissionDate').val()),
-            //         issueResolutionDate: toUtcIsoString($('#editIssueResolutionDate').val()),
-            //         description: $('#editDescription').val().trim(),
-            //         status: parseInt($('#status').val())
-            //     };
-
-            //     $.ajax({
-            //         url: `/api/complaints/${id}`,   
-            //         type: 'PUT',                      
-            //         contentType: 'application/json',
-            //         data: JSON.stringify(requestData),
-            //         headers: {
-            //             // Передаем токен безопасности в заголовке запроса
-            //             'RequestVerificationToken': csrfToken
-            //         },
-            //         success: function (updatedCard) {
-            //             // Закрываем модальное окно
-            //             $('#editModal').find('[data-bs-dismiss="modal"]').first().click();
-
-            //             // Находим старую карточку в DOM по её ID
-            //             const $card = $('#complaint-' + id);
-            //             if ($card.length === 0) 
-            //             return;
-
-            //             // Генерируем новый HTML карточки с помощью функции buildCardHtml
-            //             // и полностью заменяем старую карточку в DOM на новую!
-            //             $card.replaceWith(buildCardHtml(updatedCard));
-            //         },
-            //         error: function (xhr) {
-            //             // console.error("Ошибка при сохранении изменений жалобы:", xhr.status);
-            //             // alert("Не удалось сохранить изменения. Проверьте корректность данных.");
-
-            //             // Пытаемся распарсить ошибку бэкенда
-            //             if (!tryShowServerError(xhr)) {
-            //                 showAlert('Не удалось сохранить изменения. Проверьте корректность данных.');
-            //             }
-            //         }
-            //     });
-            // });
 
             // СОХРАНЕНИЕ ОТРЕДАКТИРОВАННЫХ ДАННЫХ (PUT)
             $('#editComplaintForm').submit(function (e) {

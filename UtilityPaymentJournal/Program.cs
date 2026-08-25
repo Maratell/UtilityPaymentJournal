@@ -12,9 +12,6 @@ using UtilityPaymentJournal.Common.Constants;
 using UtilityPaymentJournal.Features.Account;
 using UtilityPaymentJournal.Features.Account.Commands;
 using UtilityPaymentJournal.Features.Account.Queries;
-using UtilityPaymentJournal.Features.Complaints;
-using UtilityPaymentJournal.Features.Complaints.Commands;
-using UtilityPaymentJournal.Features.Complaints.Queries;
 using UtilityPaymentJournal.Features.Users;
 using UtilityPaymentJournal.Features.Users.Commands;
 using UtilityPaymentJournal.Features.Users.Queries;
@@ -103,8 +100,8 @@ builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 //builder.Services.AddScoped<IElectricityReadingCommandService, ElectricityReadingCommandService>();
 //builder.Services.AddScoped<IElectricityReadingQueryService, ElectricityReadingQueryService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-builder.Services.AddScoped<IComplaintCommandService, ComplaintCommandService>();
-builder.Services.AddScoped<IComplaintQueryService, ComplaintQueryService>();
+//builder.Services.AddScoped<IComplaintCommandService, ComplaintCommandService>();
+//builder.Services.AddScoped<IComplaintQueryService, ComplaintQueryService>();
 // Регистрация Middleware для добавления ID пользователя в контекст логирования
 builder.Services.AddScoped<UserLoggingMiddleware>();
 
@@ -117,7 +114,7 @@ builder.Services.AddScoped<IUserMapper, UserMapper>();
 //builder.Services.AddSingleton<IUtilityMapper, UtilityMapper>();
 //builder.Services.AddSingleton<IWaterReadingMapper, WaterReadingMapper>();
 //builder.Services.AddSingleton<IElectricityReadingMapper, ElectricityReadingMapper>();
-builder.Services.AddSingleton<IComplaintMapper, ComplaintMapper>();
+//builder.Services.AddSingleton<IComplaintMapper, ComplaintMapper>();
 
 // Позволяет получать HttpContext и Claims пользователя внутри классов данных (по умолчанию Singleton)
 builder.Services.AddHttpContextAccessor();
