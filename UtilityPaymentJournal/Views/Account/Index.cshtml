@@ -1,5 +1,5 @@
-﻿@using UtilityPaymentJournal.Models.Authentication
-@model SignInRequestViewModel
+﻿@using UtilityPaymentJournal.Features.Account.SignIn
+@model SignInRequest
 @{
     ViewData["Title"] = "Account";
 }
@@ -16,14 +16,14 @@
             <!-- Поле ввода Логина -->
             <div class="form-floating mb-3">
                 <input asp-for="UserName" class="form-control rounded-3 border-light-subtle shadow-sm" id="username" placeholder="Логин" />
-                <label asp-for="UserName" class="text-muted"></label>
+                <label asp-for="UserName" class="text-muted">Логин</label>
                 <span asp-validation-for="UserName" class="text-danger small mt-1 d-block"></span>
             </div>
 
             <!-- Поле ввода Пароля -->
             <div class="form-floating mb-4">
                 <input asp-for="Password" type="password" class="form-control rounded-3 border-light-subtle shadow-sm" id="password" placeholder="Пароль" />
-                <label asp-for="Password" class="text-muted"></label>
+                <label asp-for="Password" class="text-muted">Пароль</label>
                 <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
             </div>
 
@@ -70,8 +70,8 @@
                 'RequestVerificationToken': csrfToken
             },
             success: function (data) {
-                // Если сервер вернул 200 OK, проверяем успешность бизнес-логики
-                window.location.href = data.redirectUrl;
+                // Если сервер вернул 200 OK, перенаправляем на главную страницу
+                window.location.href = '@Url.Action("Index", "Home")';
             },
             error: function (xhr) {
 

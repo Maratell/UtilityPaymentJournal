@@ -8,12 +8,10 @@ namespace UtilityPaymentJournal.Infrastructure.Identity
     /// </summary>
     public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
-
         /// <summary>
         /// Уникальный строковый идентификатор (ID) пользователя в системе Identity, зафиксированный в текущей сессии.
         /// Возвращает null, если запрос выполняется анонимным гостем.
         /// </summary>
-        public string? UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
+        public string? UserId => httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
     }
 }
