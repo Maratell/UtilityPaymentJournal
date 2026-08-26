@@ -1,86 +1,78 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using UtilityPaymentJournal.Features.Users.Commands;
-using UtilityPaymentJournal.Features.Users.Models;
-using UtilityPaymentJournal.Features.Users.Queries;
+using UtilityPaymentJournal.Features.Users.Create;
+using UtilityPaymentJournal.Features.Users.Delete;
+using UtilityPaymentJournal.Features.Users.GetById;
+using UtilityPaymentJournal.Features.Users.GetList;
 
 namespace UtilityPaymentJournal.Features.Users
 {
     /// <summary>
-    /// API-контроллер для административного управления пользователями и ролями
+    /// Api-контроллер для административного управления пользователями и ролями
     /// </summary>
     [AllowAnonymous] // Разрешает доступ неавторизованным гостям
     [ApiController]
     [Route("api/admin")]
-    public class AdminApiController : ControllerBase
+    public class AdminApiController(ISender mediator) : ControllerBase
     {
-        private readonly IUserQueryService _queryService;
-        private readonly IUserCommandService _commandService;
-        private readonly IUserMapper _userMapper;
-
-        public AdminApiController(
-            IUserQueryService queryService,
-            IUserCommandService commandService,
-            IUserMapper userMapper)
-        {
-            _queryService = queryService ?? throw new ArgumentNullException(nameof(queryService));
-            _commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
-            _userMapper = userMapper ?? throw new ArgumentNullException(nameof(userMapper));
-        }
-
         /// <summary>
         /// Получение списка всех пользователей системы
         /// </summary>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект-обёртку, содержащий коллекцию пользователей.</returns>
         [HttpGet("users")]
-        public async Task<ActionResult<IReadOnlyCollection<UserDetailsViewModel>>> GetAll(CancellationToken cancellationToken)
+        public async Task<ActionResult<GetUsersListResponse>> GetAll(CancellationToken cancellationToken)
         {
-            IReadOnlyCollection<UserQueryResultDto> dtos = await _queryService.GetAllAsync(cancellationToken);
-
-            UserDetailsViewModel[] viewModels = dtos
-                .Select(u => _userMapper.ToViewModel(u))
-                .ToArray();
-
-            return Ok(viewModels);
+            GetUsersListResponse response = await mediator.Send(new GetUsersListQuery(), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
         /// Получение данных конкретного пользователя по его ID
         /// </summary>
+        /// <param name="id">Строковый идентификатор пользователя в системе.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>Статус 200 OK и объект с подробной информацией о пользователе.</returns>
         [HttpGet("users/{id}")]
-        public async Task<ActionResult<UserDetailsViewModel>> GetById([FromRoute] string id, CancellationToken cancellationToken)
+        public async Task<ActionResult<GetUserByIdResponse>> GetById(
+            [FromRoute] string id, 
+            CancellationToken cancellationToken)
         {
-            // При отсутствии объекта сервис выбросит KeyNotFoundException (обработается в KeyNotFoundExceptionHandler)
-            UserQueryResultDto dto = await _queryService.GetByIdAsync(id, cancellationToken);
-            UserDetailsViewModel viewModel = _userMapper.ToViewModel(dto);
-
-            return Ok(viewModel);
+            GetUserByIdResponse response = await mediator.Send(new GetUserByIdQuery(id), cancellationToken);
+            return Ok(response);
         }
 
         /// <summary>
         /// Создание нового пользователя и автоматическое назначение ему выбранной роли
         /// </summary>
+        /// <param name="request">Данные формы с фронтенда.</param>
+        /// <param name="cancellationToken">Токен отмены операции.</param>
+        /// <returns>
+        /// Статус 201 Created и данные созданного в системе пользователя. 
+        /// В заголовке Location ответа возвращается URL для получения деталей созданного пользователя.
+        /// </returns>
         [HttpPost("users")]
-        public async Task<ActionResult<UserCreatedViewModel>> CreateUserWithRole(
-            [FromBody] CreateUserViewModel createUserVM,
+        public async Task<ActionResult<CreateUserResponse>> CreateUserWithRole(
+            [FromBody] CreateUserRequest request,
             CancellationToken cancellationToken)
         {
-            CreateUserDto createDto = _userMapper.ToDto(createUserVM);
-            // При отсутствии объекта сервис выбросит IdentityValidationException (обработается в IdentityValidationExceptionHandler)
-            UserCommandResultDto createdDto = await _commandService.CreateAsync(createDto, cancellationToken);
-            UserCreatedViewModel resultViewModel = _userMapper.ToCreatedViewModel(createdDto);
-
-            return Ok(resultViewModel);
+            CreateUserResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
         /// <summary>
         /// Удаление пользователя из системы
         /// </summary>
+        /// <param name="id">Строковый идентификатор пользователя в системе.</param>
+        /// <param name="cancellationToken"></param>
+        /// <returns>Статус 204 No Content в случае успешного удаления (тело ответа отсутствует).</returns>
         [HttpDelete("users/{id}")]
-        public async Task<IActionResult> Delete([FromRoute] string id, CancellationToken cancellationToken)
+        public async Task<IActionResult> Delete(
+            [FromRoute] string id, 
+            CancellationToken cancellationToken)
         {
-            // Если пользователя нет — выбросится исключение, которое  внешний ExceptionHandler обработает .
-            await _commandService.DeleteAsync(id, cancellationToken);
-
+            await mediator.Send(new DeleteUserCommand(id), cancellationToken);
             return NoContent();
         }
     }
