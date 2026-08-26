@@ -1,5 +1,5 @@
-﻿@using UtilityPaymentJournal.Features.Users.Models
-@model CreateUserViewModel
+﻿@using UtilityPaymentJournal.Features.Users.Create
+@model CreateUserRequest
 @{
     ViewData["Title"] = "Account";
 }
@@ -14,25 +14,25 @@
 
         <div class="form-floating mb-3">
             <input asp-for="UserName" class="form-control" id="username" placeholder="Логин" />
-            <label asp-for="UserName"></label>
+            <label asp-for="UserName">Логин</label>
             <span asp-validation-for="UserName" class="text-danger"></span>
         </div>
 
         <div class="form-floating mb-3">
             <input asp-for="FirstName" class="form-control" id="firstname" placeholder="Имя" />
-            <label asp-for="FirstName"></label>
+            <label asp-for="FirstName">Имя</label>
             <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
 
         <div class="form-floating mb-3">
             <input asp-for="LastName" class="form-control" id="lastname" placeholder="Фамилия" />
-            <label asp-for="LastName"></label>
+            <label asp-for="LastName">Фамилия</label>
             <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
 
         <div class="form-floating mb-3">
             <input asp-for="Password" type="password" class="form-control" id="password" placeholder="Пароль" />
-            <label asp-for="Password"></label>
+            <label asp-for="Password">Пароль</label>
             <span asp-validation-for="Password" class="text-danger"></span>
         </div>
 

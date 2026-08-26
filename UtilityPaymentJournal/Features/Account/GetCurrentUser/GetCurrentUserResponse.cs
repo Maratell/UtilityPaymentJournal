@@ -10,7 +10,7 @@
     /// <param name="Role">Основная роль пользователя в системе для разграничения прав на клиенте.</param>
     public record GetCurrentUserResponse(
         string Id,
-        string? UserName, // сделал nullable, чтобы не тащить логику в маппер, поскольку в Identity это сво-во nullable
+        string? UserName, // сделал nullable, чтобы не тащить логику в маппер, поскольку в Identity это св-во nullable
         string FirstName,
         string LastName,
         string? Role

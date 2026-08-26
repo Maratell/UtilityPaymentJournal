@@ -9,9 +9,6 @@ using System.Globalization;
 using System.Security.Claims;
 using UtilityPaymentJournal.Common.Behaviours;
 using UtilityPaymentJournal.Common.Constants;
-using UtilityPaymentJournal.Features.Users;
-using UtilityPaymentJournal.Features.Users.Commands;
-using UtilityPaymentJournal.Features.Users.Queries;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
@@ -84,8 +81,8 @@ builder.Services.AddMediatR(cfg =>
 
 //builder.Services.AddScoped<IAuthenticationCommandService, AuthenticationCommandService>();
 //builder.Services.AddScoped<IAuthenticationQueryService, AuthenticationQueryService>();
-builder.Services.AddScoped<IUserCommandService, UserCommandService>();
-builder.Services.AddScoped<IUserQueryService, UserQueryService>();
+//builder.Services.AddScoped<IUserCommandService, UserCommandService>();
+//builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 //builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
 //builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
 //builder.Services.AddScoped<IUtilityProviderCommandService, UtilityProviderCommandService>();
@@ -105,7 +102,7 @@ builder.Services.AddScoped<UserLoggingMiddleware>();
 
 // Регистрируем маппер как Singleton (так как в нем нет состояния)
 //builder.Services.AddScoped<IAccountMapper, AccountMapper>();
-builder.Services.AddScoped<IUserMapper, UserMapper>();
+//builder.Services.AddScoped<IUserMapper, UserMapper>();
 //builder.Services.AddSingleton<IResidenceMapper, ResidenceMapper>();
 //builder.Services.AddSingleton<IUtilityProviderMapper, UtilityProviderMapper>();
 //builder.Services.AddSingleton<IUtilityMapper, UtilityMapper>();
