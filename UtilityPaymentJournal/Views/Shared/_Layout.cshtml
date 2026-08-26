@@ -48,7 +48,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link notebook-tab" asp-area="" asp-controller="Complaints" asp-action="Index">
+                            <a class="nav-link notebook-tab" asp-area="" asp-controller="ComplaintBoard" asp-action="Index">
                                 <i class="bi bi-kanban tab-icon"></i><!-- Иконка жалобная книга -->
                                 <span class="tab-text">Доска жалоб</span>
                             </a>
@@ -193,7 +193,7 @@
                     success: function (data) {
                         // Наш контроллер возвращает URL в свойстве redirectUrl.
                         // Перенаправляем пользователя на страницу входа
-                        window.location.href = data.redirectUrl;
+                        window.location.href = '@Url.Action("Index", "Account")';
                     },
                     error: function (xhr) {
                         // Если у вас есть глобальный хелпер ошибок, пускаем его в ход
