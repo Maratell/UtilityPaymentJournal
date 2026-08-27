@@ -16,9 +16,9 @@ using UtilityPaymentJournal.Tests.Integration.Infrastructure;
 namespace UtilityPaymentJournal.Tests.Integration.Controllers
 {
     [Collection(nameof(IntegrationTestCollection))]
-    public class ComplaintsControllerTests : BaseIntegrationTest
+    public class ComplaintBoardApiControllerTests : BaseIntegrationTest
     {
-        public ComplaintsControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
+        public ComplaintBoardApiControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
         {
         }
 
@@ -84,7 +84,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
 
             // Отправляем запрос на создание. Метод расширения сам сериализует DTO в JSON.
-            HttpResponseMessage response = await Client.PostAsJsonAsync("api/complaints", request);
+            HttpResponseMessage response = await Client.PostAsJsonAsync("api/complaint-board", request);
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -147,7 +147,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
 
             // 3.1. Гарантируем наличие услуги (Utility) в базе, так как UtilityId обязателен!
             // Пытаемся взять любую существующую или создаем новую, если база пуста
-            Utility utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
+            Utility? utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
             if (utility == null)
             {
                 utility = new Utility
@@ -185,7 +185,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
 
             // Отправляем GET-запрос по сгенерированному базой ID
-            HttpResponseMessage response = await Client.GetAsync($"api/complaints/{complaint.Id}");
+            HttpResponseMessage response = await Client.GetAsync($"api/complaint-board/{complaint.Id}");
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -226,7 +226,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
 
             // Пытаемся получить несуществующий объект через HttpClient
-            HttpResponseMessage response = await Client.GetAsync($"api/complaints/{nonExistentComplaintId}");
+            HttpResponseMessage response = await Client.GetAsync($"api/complaint-board/{nonExistentComplaintId}");
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -261,7 +261,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             await DbContext.SaveChangesAsync();
 
             // Гарантируем наличие коммунальной услуги (Utility) в базе, так как UtilityId обязателен!
-            Utility utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
+            Utility? utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
             if (utility == null)
             {
                 utility = new Utility { Name = "Тестовая коммунальная услуга" };
@@ -299,7 +299,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.GetAsync("api/complaints");
+            HttpResponseMessage response = await Client.GetAsync("api/complaint-board");
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -335,7 +335,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             }
 
             // Гарантируем наличие коммунальной услуги (Utility) в базе, так как UtilityId обязателен!
-            Utility utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
+            Utility? utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
             if (utility == null)
             {
                 utility = new Utility { Name = "Тестовая коммунальная услуга" };
@@ -376,7 +376,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.PutAsJsonAsync($"api/complaints/{complaint.Id}", request);
+            HttpResponseMessage response = await Client.PutAsJsonAsync($"api/complaint-board/{complaint.Id}", request);
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -447,7 +447,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.DeleteAsync($"api/complaints/{complaint.Id}");
+            HttpResponseMessage response = await Client.DeleteAsync($"api/complaint-board/{complaint.Id}");
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -482,7 +482,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             }
 
             // Гарантируем наличие коммунальной услуги (Utility) в базе, так как UtilityId обязателен!
-            Utility utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
+            Utility? utility = await DbContext.Utilities.IgnoreQueryFilters().FirstOrDefaultAsync();
             if (utility == null)
             {
                 utility = new Utility { Name = "Тестовая коммунальная услуга" };
@@ -512,7 +512,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.PatchAsJsonAsync($"api/complaints/{complaint.Id}/change-status", request);
+            HttpResponseMessage response = await Client.PatchAsJsonAsync($"api/complaint-board/{complaint.Id}/change-status", request);
 
             // ==========================================
             // ASSERT (Проверка результатов)
@@ -558,7 +558,7 @@ namespace UtilityPaymentJournal.Tests.Integration.Controllers
             // ==========================================
             // ACT (Выполнение запроса)
             // ==========================================
-            HttpResponseMessage response = await Client.PatchAsJsonAsync($"api/complaints/{nonExistentComplaintId}/change-status", request);
+            HttpResponseMessage response = await Client.PatchAsJsonAsync($"api/complaint-board/{nonExistentComplaintId}/change-status", request);
 
             // ==========================================
             // ASSERT (Проверка результатов)
