@@ -16,9 +16,9 @@ using UtilityPaymentJournal.Tests.Integration.Infrastructure;
 namespace UtilityPaymentJournal.Tests.Integration.Controllers
 {
     [Collection(nameof(IntegrationTestCollection))]
-    public class WaterReadingsControllerTests : BaseIntegrationTest
+    public class WaterReadingsApiControllerTests : BaseIntegrationTest
     {
-        public WaterReadingsControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
+        public WaterReadingsApiControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
         {
         }
 

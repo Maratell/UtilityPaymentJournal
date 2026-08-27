@@ -15,9 +15,9 @@ using UtilityPaymentJournal.Tests.Integration.Infrastructure;
 namespace UtilityPaymentJournal.Tests.Integration.Controllers
 {
     [Collection(nameof(IntegrationTestCollection))]
-    public class ElectricityReadingsControllerTests : BaseIntegrationTest
+    public class ElectricityReadingsApiControllerTests : BaseIntegrationTest
     {
-        public ElectricityReadingsControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
+        public ElectricityReadingsApiControllerTests(IntegrationTestWebAppFactory factory) : base(factory)
         {
         }
 

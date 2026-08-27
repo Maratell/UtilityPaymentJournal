@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
@@ -135,9 +137,11 @@ namespace UtilityPaymentJournal.Tests.Integration.Infrastructure
                 {
                     options.DefaultAuthenticateScheme = AuthenticationScheme;
                     options.DefaultChallengeScheme = AuthenticationScheme;
-                    options.DefaultScheme = AuthenticationScheme;
-                    options.DefaultSignInScheme = AuthenticationScheme;
-                    options.DefaultSignOutScheme = AuthenticationScheme;
+
+                    // Эти подмены избыточны, закомментировал
+                    //options.DefaultScheme = AuthenticationScheme;
+                    //options.DefaultSignInScheme = AuthenticationScheme;
+                    //options.DefaultSignOutScheme = AuthenticationScheme;
                 })
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(AuthenticationScheme, options => { });
 
@@ -147,18 +151,68 @@ namespace UtilityPaymentJournal.Tests.Integration.Infrastructure
                     options.FallbackPolicy = null; // Отключаем редиректы Identity на страницу /Account/Login
                 });
 
+                services.PostConfigure<Microsoft.AspNetCore.Identity.IdentityOptions>(options =>
+                {
+                    #region НАСТРОЙКА ПРАВИЛ IDENTITY ДЛЯ ТЕСТОВ
+
+                    // ИНЖЕНЕРНЫЙ ХАК ДЛЯ СТАТУСА NotAllowed (result.IsNotAllowed):
+                    // В Microsoft Identity статус IsNotAllowed триггерится только если включено требование подтверждения аккаунта/почты.
+                    // Даже если проект не использует Email (вход идет по UserName), мы ПРИНУДИТЕЛЬНО включаем флаг RequireConfirmedEmail.
+                    // Это позволяет нам в тестах имитировать запрет на вход (бизнес-статус NotAllowed), просто сбрасывая 
+                    // булевое поле `EmailConfirmed = false` напрямую в базе данных для нужного пользователя.
+                    options.SignIn.RequireConfirmedEmail = true;
+
+                    // СИНХРОНИЗАЦИЯ ПАРАМЕТРОВ БЛОКИРОВКИ (result.IsLockedOut):
+                    // По умолчанию Identity не активирует правила блокировки для свежесозданных пользователей.
+                    // Мы принудительно включаем AllowedForNewUsers, чтобы SignInManager при каждом входе проверял поле `LockoutEnd` в БД.
+                    // Это позволяет честно тестировать сценарии временного бана (бизнес-статус LockedOut), переводя часы `LockoutEnd` в будущее.
+                    options.Lockout.AllowedForNewUsers = true;
+                    options.Lockout.DefaultLockoutTimeSpan = System.TimeSpan.FromMinutes(15);
+
+                    #endregion
+                });
+
+
                 services.PostConfigure<Microsoft.AspNetCore.Mvc.MvcOptions>(options =>
                 {
-                    // Находим и удаляем фильтр автоматической валидации антиподделочных токенов (CSRF/XSRF),
-                    // чтобы POST/PUT/DELETE запросы в тестах не падали с ошибкой 400 Bad Request
-                    var csrfFilter = options.Filters.FirstOrDefault(f =>
+                    #region ГЛОБАЛЬНОЕ ОТКЛЮЧЕНИЕ ANTIFORGERY
+
+                    // Удаляем автоматическую валидацию CSRF из глобальных фильтров MVC
+                    // Этот код находит и удаляет AutoValidateAntiforgeryTokenAttribute, который обычно вешается на всё 
+                    // приложение сразу в Program.cs. Это защищает стандартные POST/PUT/DELETE запросы в тестах.
+                    //
+                    // ВНИМАНИЕ: Данный шаг НЕ удаляет точечные, жестко прописанные атрибуты [ValidateAntiForgeryToken] 
+                    // непосредственно на методах контроллеров (например, в AccountApiController.SignIn). 
+                    // Для их нейтрализации ниже в контейнер DI регистрируется заглушка NullAntiforgery.
+                    Microsoft.AspNetCore.Mvc.Filters.IFilterMetadata? csrfFilter = options.Filters.FirstOrDefault(f =>
                         f is Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute);
 
                     if (csrfFilter != null)
                     {
                         options.Filters.Remove(csrfFilter);
                     }
+
+                    #endregion
                 });
+
+                #region ПОДМЕНА СЛУЖБЫ CSRF (ANTIFORGERY)
+
+                // Отключаем валидацию точечных атрибутов [ValidateAntiForgeryToken].
+                // Ищем оригинальный дескриптор службы IAntiforgery, зарегистрированный в основном приложении
+                var antiforgeryDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IAntiforgery));
+
+                if (antiforgeryDescriptor != null)
+                {
+                    // Удаляем настоящую конфигурацию защиты из контейнера зависимостей (DI), чтобы она не перехватывала запросы
+                    services.Remove(antiforgeryDescriptor);
+                }
+
+                // Регистрируем нашу тестовую заглушку StubAntiforgery в формате Singleton.
+                // Теперь при обработке атрибутов [ValidateAntiForgeryToken] движок MVC будет вызывать методы нашей пустышки,
+                // которая автоматически пропустит любые POST/PUT/DELETE запросы от тестового HttpClient без проверки кук.
+                services.AddSingleton<IAntiforgery, StubAntiforgery>();
+
+                #endregion
             });
         }
 
@@ -190,5 +244,4 @@ namespace UtilityPaymentJournal.Tests.Integration.Infrastructure
             await base.DisposeAsync();
         }
     }
-
 }

@@ -26,10 +26,10 @@ namespace UtilityPaymentJournal.Tests.Integration.Infrastructure
             // Вы можете добавлять сюда любые данные, которые ваш контроллер ожидает увидеть у пользователя.
             var claims = new[]
             {
-            new Claim(ClaimTypes.Name, "TestAdmin"),
-            new Claim(ClaimTypes.NameIdentifier, "test-admin-id-123"), // Понадобится, если контроллер берет ID текущего юзера
-            new Claim(ClaimTypes.Role, "Admin")                        // Позволяет проходить через фильтры [Authorize(Roles = "Admin")]
-        };
+                new Claim(ClaimTypes.Name, "TestAdmin"),
+                new Claim(ClaimTypes.NameIdentifier, "test-admin-id-123"), // Понадобится, если контроллер берет ID текущего юзера
+                new Claim(ClaimTypes.Role, "Admin")                        // Позволяет проходить через фильтры [Authorize(Roles = "Admin")]
+            };
 
             // 2. Создаем личность пользователя (Identity) и привязываем её к нашей константе схемы тестов.
             // Использование константы гарантирует, что система авторизации ASP.NET Core правильно сопоставит этот Handler.
