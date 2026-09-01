@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 
 namespace UtilityPaymentJournal.Features.Residences.Delete
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.Residences.Delete
     /// Напрямую удаляет запись из PostgreSQL без предварительной загрузки в память.
     /// </summary>
     public partial class DeleteResidenceHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<DeleteResidenceHandler> logger) : IRequestHandler<DeleteResidenceCommand>
     {
         public async Task Handle(DeleteResidenceCommand command, CancellationToken cancellationToken)

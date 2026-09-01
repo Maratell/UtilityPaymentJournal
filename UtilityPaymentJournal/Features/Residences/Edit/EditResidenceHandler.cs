@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
 
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.Residences.Edit
     /// Обработчик команды редактирования объекта недвижимости.
     /// </summary>
     public partial class EditResidenceHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<EditResidenceHandler> logger) : IRequestHandler<EditResidenceCommand, EditResidenceResponse>
     {
         public async Task<EditResidenceResponse> Handle(EditResidenceCommand command, CancellationToken cancellationToken)

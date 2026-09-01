@@ -9,6 +9,8 @@ using System.Globalization;
 using System.Security.Claims;
 using UtilityPaymentJournal.Common.Behaviours;
 using UtilityPaymentJournal.Common.Constants;
+using UtilityPaymentJournal.Common.Interfaces;
+using UtilityPaymentJournal.Features.Users.GetList;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
@@ -79,6 +81,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
 });
 
+
 //builder.Services.AddScoped<IAuthenticationCommandService, AuthenticationCommandService>();
 //builder.Services.AddScoped<IAuthenticationQueryService, AuthenticationQueryService>();
 //builder.Services.AddScoped<IUserCommandService, UserCommandService>();
@@ -93,6 +96,7 @@ builder.Services.AddMediatR(cfg =>
 //builder.Services.AddScoped<IWaterReadingQueryService, WaterReadingQueryService>();
 //builder.Services.AddScoped<IElectricityReadingCommandService, ElectricityReadingCommandService>();
 //builder.Services.AddScoped<IElectricityReadingQueryService, ElectricityReadingQueryService>();
+builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 //builder.Services.AddScoped<IComplaintCommandService, ComplaintCommandService>();
 //builder.Services.AddScoped<IComplaintQueryService, ComplaintQueryService>();
@@ -135,6 +139,8 @@ builder.Services.AddHttpContextAccessor();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
 // внедряем в проект систему ASP.NET Core Identity для управления пользователями, ролями и безопасностью
 builder.Services.AddIdentity<User, Role>(options =>

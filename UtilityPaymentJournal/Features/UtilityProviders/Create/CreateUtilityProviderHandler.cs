@@ -1,11 +1,12 @@
 ﻿using MediatR;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.UtilityProviders.Create
 {
     public partial class CreateUtilityProviderHandler(
-        ApplicationDbContext context,
+        IApplicationDbContext context,
         ILogger<CreateUtilityProviderHandler> logger) : IRequestHandler<CreateUtilityProviderCommand, CreateUtilityProviderResponse>
     {
         public async Task<CreateUtilityProviderResponse> Handle(CreateUtilityProviderCommand command, CancellationToken cancellationToken)

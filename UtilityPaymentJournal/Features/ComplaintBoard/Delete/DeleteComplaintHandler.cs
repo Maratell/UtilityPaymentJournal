@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 
 namespace UtilityPaymentJournal.Features.ComplaintBoard.Delete
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.ComplaintBoard.Delete
     /// Напрямую удаляет запись из PostgreSQL без предварительной загрузки в память.
     /// </summary>
     public partial class DeleteComplaintHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<DeleteComplaintHandler> logger) : IRequestHandler<DeleteComplaintCommand>
     {
         public async Task Handle(DeleteComplaintCommand command, CancellationToken cancellationToken)

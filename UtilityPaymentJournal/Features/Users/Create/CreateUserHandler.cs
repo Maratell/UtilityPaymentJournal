@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Storage;
 using UtilityPaymentJournal.Common.Exceptions;
 using UtilityPaymentJournal.Common.Extensions;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 
 namespace UtilityPaymentJournal.Features.Users.Create
 {
     public partial class CreateUserHandler(
-        ApplicationDbContext context,
+        IApplicationDbContext context,
         UserManager<User> userManager,
         RoleManager<Role> roleManager,
         ILogger<CreateUserHandler> logger) : IRequestHandler<CreateUserCommand, CreateUserResponse>

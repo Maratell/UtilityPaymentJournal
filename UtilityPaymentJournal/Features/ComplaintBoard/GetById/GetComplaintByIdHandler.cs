@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
 
@@ -10,7 +11,7 @@ namespace UtilityPaymentJournal.Features.ComplaintBoard.GetById
     /// Инкапсулирует логику эффективного чтения из PostgreSQL.
     /// </summary>
     public partial class GetComplaintByIdHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetComplaintByIdHandler> logger) : IRequestHandler<GetComplaintByIdQuery, GetComplaintByIdResponse>
     {
         public async Task<GetComplaintByIdResponse> Handle(GetComplaintByIdQuery query, CancellationToken cancellationToken)

@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ElectricityReadings;
 
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings.Edit
     /// Обработчик команды редактирования показания счетчика электроэнергии.
     /// </summary>
     public partial class EditElectricityReadingHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<EditElectricityReadingHandler> logger) : IRequestHandler<EditElectricityReadingCommand, EditElectricityReadingResponse>
     {
         public async Task<EditElectricityReadingResponse> Handle(EditElectricityReadingCommand command, CancellationToken cancellationToken)

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.Common.Extensions;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Common.Specifications;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
@@ -8,7 +9,7 @@ using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 namespace UtilityPaymentJournal.Features.Utilities.GetList
 {
     public partial class GetUtilitiesListHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetUtilitiesListHandler> logger) : IRequestHandler<GetUtilitiesListQuery, GetUtilitiesListResponse>
     {
         public async Task<GetUtilitiesListResponse> Handle(GetUtilitiesListQuery query, CancellationToken cancellationToken)

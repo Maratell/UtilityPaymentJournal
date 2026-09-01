@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Features.ComplaintBoard.Edit
 {
     public partial class EditComplaintHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<EditComplaintHandler> logger) : IRequestHandler<EditComplaintCommand, EditComplaintResponse>
     {
         public async Task<EditComplaintResponse> Handle(EditComplaintCommand command, CancellationToken cancellationToken)

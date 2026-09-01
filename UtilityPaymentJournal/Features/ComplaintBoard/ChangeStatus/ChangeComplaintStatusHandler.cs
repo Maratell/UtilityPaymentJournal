@@ -1,13 +1,14 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.Common.Enumerations;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Features.ComplaintBoard.ChangeStatus
 {
     public partial class ChangeComplaintStatusHandler(
-        ApplicationDbContext context,
+        IApplicationDbContext context,
         ILogger<ChangeComplaintStatusHandler> logger) : IRequestHandler<ChangeComplaintStatusCommand, ChangeComplaintStatusResponse>
     {
         public async Task<ChangeComplaintStatusResponse> Handle(ChangeComplaintStatusCommand command, CancellationToken cancellationToken)

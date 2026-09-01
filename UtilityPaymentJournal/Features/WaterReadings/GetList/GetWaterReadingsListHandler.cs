@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings;
 
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.WaterReadings.GetList
     /// Обработчик запроса на получение списка показаний счетчиков воды.
     /// </summary>
     public partial class GetWaterReadingsListHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetWaterReadingsListHandler> logger) : IRequestHandler<GetWaterReadingsListQuery, GetWaterReadingsListResponse>
     {
         public async Task<GetWaterReadingsListResponse> Handle(GetWaterReadingsListQuery query, CancellationToken cancellationToken)

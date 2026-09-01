@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
@@ -12,7 +13,7 @@ namespace UtilityPaymentJournal.Features.Utilities.Delete
     /// сохранить целостность исторических данных и связанных транзакций.
     /// </summary>
     public partial class DeleteUtilityHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<DeleteUtilityHandler> logger) : IRequestHandler<DeleteUtilityCommand>
     {
         public async Task Handle(DeleteUtilityCommand command, CancellationToken cancellationToken)

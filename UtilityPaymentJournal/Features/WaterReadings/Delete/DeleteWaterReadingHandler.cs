@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 
 namespace UtilityPaymentJournal.Features.WaterReadings.Delete
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.WaterReadings.Delete
     /// Напрямую удаляет запись из PostgreSQL без предварительной загрузки в память.
     /// </summary>
     public partial class DeleteWaterReadingHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<DeleteWaterReadingHandler> logger) : IRequestHandler<DeleteWaterReadingCommand>
     {
         public async Task Handle(DeleteWaterReadingCommand command, CancellationToken cancellationToken)
