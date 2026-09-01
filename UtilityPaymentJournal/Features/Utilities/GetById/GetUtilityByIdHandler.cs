@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
@@ -10,7 +11,7 @@ namespace UtilityPaymentJournal.Features.Utilities.GetById
     /// Инкапсулирует логику эффективного чтения из PostgreSQL.
     /// </summary>
     public partial class GetUtilityByIdHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetUtilityByIdHandler> logger) : IRequestHandler<GetUtilityByIdQuery, GetUtilityByIdResponse>
     {
         public async Task<GetUtilityByIdResponse> Handle(GetUtilityByIdQuery query, CancellationToken cancellationToken)

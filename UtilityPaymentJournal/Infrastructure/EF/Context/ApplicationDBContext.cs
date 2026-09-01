@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using UtilityPaymentJournal.Common.Extensions;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ElectricityReadings;
@@ -11,7 +12,7 @@ using UtilityPaymentJournal.Infrastructure.Identity;
 
 namespace UtilityPaymentJournal.Infrastructure.EF.Context
 {
-    public class ApplicationDbContext : IdentityDbContext<User, Role, string>
+    public class ApplicationDbContext : IdentityDbContext<User, Role, string>, IApplicationDbContext
     {
         private readonly ICurrentUserService _currentUserService;
 

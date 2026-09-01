@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings;
 
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.WaterReadings.Edit
     /// Обработчик команды редактирования показания счетчика воды.
     /// </summary>
     public partial class EditWaterReadingHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<EditWaterReadingHandler> logger) : IRequestHandler<EditWaterReadingCommand, EditWaterReadingResponse>
     {
         public async Task<EditWaterReadingResponse> Handle(EditWaterReadingCommand command, CancellationToken cancellationToken)

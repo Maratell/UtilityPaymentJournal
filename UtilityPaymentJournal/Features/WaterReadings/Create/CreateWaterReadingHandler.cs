@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings;
 
@@ -11,7 +12,7 @@ namespace UtilityPaymentJournal.Features.WaterReadings.Create
     /// Инкапсулирует в себе всю бизнес-логику и запись в базу данных PostgreSQL для этой фичи.
     /// </summary>
     public partial class CreateWaterReadingHandler(
-        ApplicationDbContext context,
+        IApplicationDbContext context,
         ILogger<CreateWaterReadingHandler> logger) : IRequestHandler<CreateWaterReadingCommand, CreateWaterReadingResponse>
     {
         public async Task<CreateWaterReadingResponse> Handle(CreateWaterReadingCommand command, CancellationToken cancellationToken)

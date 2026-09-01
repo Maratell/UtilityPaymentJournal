@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
 
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.Residences.Create
     /// Инкапсулирует в себе всю бизнес-логику и запись в базу данных PostgreSQL для этой фичи.
     /// </summary>
     public partial class CreateResidenceHandler(
-        ApplicationDbContext context,
+        IApplicationDbContext context,
         ILogger<CreateResidenceHandler> logger) : IRequestHandler<CreateResidenceCommand, CreateResidenceResponse>
     {
         public async Task<CreateResidenceResponse> Handle(CreateResidenceCommand command, CancellationToken cancellationToken)

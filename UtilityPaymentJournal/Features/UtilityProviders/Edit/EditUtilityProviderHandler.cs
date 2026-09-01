@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.UtilityProviders.Edit
 {
     public partial class EditUtilityProviderHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<EditUtilityProviderHandler> logger) : IRequestHandler<EditUtilityProviderCommand, EditUtilityProviderResponse>
     {
         public async Task<EditUtilityProviderResponse> Handle(EditUtilityProviderCommand command, CancellationToken cancellationToken)

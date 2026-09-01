@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ElectricityReadings;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
@@ -11,7 +12,7 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings.GetById
     /// Инкапсулирует логику эффективного чтения из PostgreSQL.
     /// </summary>
     public partial class GetElectricityReadingByIdHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetElectricityReadingByIdHandler> logger) : IRequestHandler<GetElectricityReadingByIdQuery, GetElectricityReadingByIdResponse>
     {
         public async Task<GetElectricityReadingByIdResponse> Handle(GetElectricityReadingByIdQuery query, CancellationToken cancellationToken)

@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Utilities;
 
 namespace UtilityPaymentJournal.Features.UtilityProviders.GetList
 {
     public partial class GetUtilityProvidersListHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetUtilityProvidersListHandler> logger) : IRequestHandler<GetUtilityProvidersListQuery, GetUtilityProvidersListResponse>
     {
         public async Task<GetUtilityProvidersListResponse> Handle(GetUtilityProvidersListQuery query, CancellationToken cancellationToken)

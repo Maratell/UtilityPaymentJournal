@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.Design;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 
 namespace UtilityPaymentJournal.Features.ElectricityReadings.Delete
@@ -10,7 +11,7 @@ namespace UtilityPaymentJournal.Features.ElectricityReadings.Delete
     /// Напрямую удаляет запись из PostgreSQL без предварительной загрузки в память.
     /// </summary>
     public partial class DeleteElectricityReadingHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<DeleteElectricityReadingHandler> logger) : IRequestHandler<DeleteElectricityReadingCommand>
     {
         public async Task Handle(DeleteElectricityReadingCommand command, CancellationToken cancellationToken)

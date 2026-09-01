@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.WaterReadings;
 
@@ -10,7 +11,7 @@ namespace UtilityPaymentJournal.Features.WaterReadings.GetById
     /// Инкапсулирует логику эффективного чтения из PostgreSQL.
     /// </summary>
     public partial class GetWaterReadingByIdHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetWaterReadingByIdHandler> logger) : IRequestHandler<GetWaterReadingByIdQuery, GetWaterReadingByIdResponse>
     {
         public async Task<GetWaterReadingByIdResponse> Handle(GetWaterReadingByIdQuery query, CancellationToken cancellationToken)

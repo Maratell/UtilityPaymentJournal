@@ -1,12 +1,13 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.ComplaintBoard;
 
 namespace UtilityPaymentJournal.Features.ComplaintBoard.GetList
 {
     public partial class GetComplaintsListHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetComplaintsListHandler> logger) : IRequestHandler<GetComplaintsListQuery, GetComplaintsListResponse>
     {
         public async Task<GetComplaintsListResponse> Handle(GetComplaintsListQuery query, CancellationToken cancellationToken)

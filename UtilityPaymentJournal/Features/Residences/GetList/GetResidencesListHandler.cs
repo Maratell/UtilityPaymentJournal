@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
+using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Residences;
 
@@ -9,7 +10,7 @@ namespace UtilityPaymentJournal.Features.Residences.GetList
     /// Обработчик запроса на получение списка объектов недвижимости.
     /// </summary>
     public partial class GetResidencesListHandler(
-            ApplicationDbContext context,
+            IApplicationDbContext context,
             ILogger<GetResidencesListHandler> logger) : IRequestHandler<GetResidencesListQuery, GetResidencesListResponse>
     {
         public async Task<GetResidencesListResponse> Handle(GetResidencesListQuery query, CancellationToken cancellationToken)
