@@ -9,7 +9,7 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{754FC069-D67B-A9D7-50A1-8D1CA196D8F1}"
 	ProjectSection(SolutionItems) = preProject
-		.env = .env
+		.env.example = .env.example
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityPaymentJournal.Tests.Integration", "UtilityPaymentJournal.Tests.Integration\UtilityPaymentJournal.Tests.Integration.csproj", "{CB4C762C-28BC-908E-FCFA-F1F65E10A8EC}"
