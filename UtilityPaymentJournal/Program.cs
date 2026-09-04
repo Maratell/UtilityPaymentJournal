@@ -184,6 +184,14 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new NullableUtcDateTimeJsonConverter());
     });
 
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddAntiforgery(options =>
+{
+    // Сервер строго завязан на развернутую константу безопасности
+    options.HeaderName = AntiforgerySecurityConstants.AntiforgeryHeaderName;
+});
+
 // Настройка параметров куки для Identity (вместо AddCookie)
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -238,7 +246,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Добавление AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
-
 
 // Регистрируем Swagger
 builder.Services.AddSwaggerGen(options =>
@@ -325,6 +332,14 @@ if (app.Environment.IsDevelopment())
     {
         context.Response.Redirect("/swagger/index.html");
     }).AllowAnonymous();
+
+    app.MapGet("/api/xsrf-token", (HttpContext context, Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery) =>
+    {
+        var tokens = antiforgery.GetAndStoreTokens(context);
+        return Results.Ok(new { token = tokens.RequestToken });
+    })
+    .WithName("GetXsrfToken")
+    .AllowAnonymous();
 }
 
 app.UseRequestLocalization();

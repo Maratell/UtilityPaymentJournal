@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using UtilityPaymentJournal.Common.Constants;
 
 namespace UtilityPaymentJournal.Infrastructure.Filters
 {
     /// <summary>
     /// Фильтр для Swagger, который автоматически находит эндпоинты, защищенные от CSRF-атак,
-    /// и добавляет для них обязательное поле ввода заголовка "X-XSRF-TOKEN" в интерфейсе Swagger UI.
+    /// и динамически добавляет для них поле ввода заголовка, имя которого задано в константе AntiforgerySecurityConstants.AntiforgeryHeaderName.
     /// </summary>
     public class SwaggerAntiforgeryFilter : IOperationFilter
     {
@@ -50,12 +51,12 @@ namespace UtilityPaymentJournal.Infrastructure.Filters
                 }
 
                 // Проверяем, чтобы случайно не добавить заголовок X-XSRF-TOKEN дважды
-                if (!operation.Parameters.Any(p => p.Name == "X-XSRF-TOKEN"))
+                if (!operation.Parameters.Any(p => p.Name == AntiforgerySecurityConstants.AntiforgeryHeaderName))
                 {
                     // Добавляем новое поле ввода в интерфейс Swagger для этого метода
                     operation.Parameters.Add(new OpenApiParameter
                     {
-                        Name = "X-XSRF-TOKEN", // Имя заголовка, которое ожидает ASP.NET Core Antiforgery
+                        Name = AntiforgerySecurityConstants.AntiforgeryHeaderName, // Имя заголовка, которое ожидает ASP.NET Core Antiforgery
                         In = ParameterLocation.Header, // Указываем Swagger, что этот параметр передается в Заголовках (Header)
                         Required = false, // Делаем поле необязательным для заполнения (чтобы не блокировать UI, если токен не нужен)
                         Description = "Токен защиты от CSRF (ValidateAntiForgeryToken / AutoValidate)", // Подсказка для разработчика
