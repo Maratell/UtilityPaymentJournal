@@ -3,6 +3,7 @@
 
 namespace UtilityPaymentJournal.Features.UtilityProviders
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("utility-providers")]
     public class UtilityProvidersController : Controller
     {

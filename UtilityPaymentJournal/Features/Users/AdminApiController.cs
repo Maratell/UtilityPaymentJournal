@@ -34,7 +34,7 @@ namespace UtilityPaymentJournal.Features.Users
         /// <param name="id">Строковый идентификатор пользователя в системе.</param>
         /// <param name="cancellationToken">Токен отмены операции.</param>
         /// <returns>Статус 200 OK и объект с подробной информацией о пользователе.</returns>
-        [HttpGet("users/{id}")]
+        [HttpGet("users/{id}", Name = "GetAdminUserById")]
         public async Task<ActionResult<GetUserByIdResponse>> GetById(
             [FromRoute] string id, 
             CancellationToken cancellationToken)
@@ -58,7 +58,7 @@ namespace UtilityPaymentJournal.Features.Users
             CancellationToken cancellationToken)
         {
             CreateUserResponse response = await mediator.Send(request.ToCommand(), cancellationToken);
-            return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
+            return CreatedAtRoute("GetAdminUserById", new { id = response.Id }, response);
         }
 
         /// <summary>

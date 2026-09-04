@@ -2,6 +2,7 @@
 
 namespace UtilityPaymentJournal.Features.ElectricityReadings
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("electricity-readings")]
     public class ElectricityReadingsController : Controller
     {

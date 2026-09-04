@@ -2,6 +2,7 @@
 
 namespace UtilityPaymentJournal.Features.Utilities
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("utilities")]
     public class UtilitiesController : Controller
     {

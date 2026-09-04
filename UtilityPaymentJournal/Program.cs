@@ -4,8 +4,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi;
 using Serilog;
 using System.Globalization;
+using System.Net;
 using System.Security.Claims;
 using UtilityPaymentJournal.Common.Behaviours;
 using UtilityPaymentJournal.Common.Constants;
@@ -14,6 +16,7 @@ using UtilityPaymentJournal.Features.Users.GetList;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
+using UtilityPaymentJournal.Infrastructure.Filters;
 using UtilityPaymentJournal.Infrastructure.Identity;
 using UtilityPaymentJournal.Infrastructure.JsonConverters;
 using UtilityPaymentJournal.Infrastructure.Middlewares;
@@ -196,11 +199,75 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
     // Автоматически продлевает время жизни куки еще на 60 минут при каждом действии пользователя
     options.SlidingExpiration = true;
+
+    // Перехватываем событие редиректа на страницу входа
+    options.Events.OnRedirectToLogin = context =>
+    {
+        // Проверяем: если запрос идет на API или Swagger-спецификацию
+        if (context.Request.Path.StartsWithSegments("/api") ||
+            context.Request.Path.StartsWithSegments("/swagger") ||
+            context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+        {
+            // Вместо редиректа 302 возвращаем честный JSON-статус 401 Unauthorized
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+        }
+        else
+        {
+            // Для обычных пользователей в браузере оставляем стандартный редирект
+            context.Response.Redirect(context.RedirectUri);
+        }
+        return Task.CompletedTask;
+    };
+
+    // Аналогично для ошибки 403 Forbidden (когда залогинен, но нет прав/роли)
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api") ||
+            context.Request.Path.StartsWithSegments("/swagger"))
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden; // 403
+        }
+        else
+        {
+            context.Response.Redirect(context.RedirectUri);
+        }
+        return Task.CompletedTask;
+    };
 });
 
 // Добавление AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));
 //builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+
+// Регистрируем Swagger
+builder.Services.AddSwaggerGen(options =>
+{
+    // Подключаем ваш фильтр антифорджери
+    options.OperationFilter<SwaggerAntiforgeryFilter>();
+
+    // Решает конфликт одинаковых имен вложенных классов (например, Item)
+    options.CustomSchemaIds(type => type.FullName?.Replace("+", "_"));
+
+    // Говорим Swagger игнорировать системный тип CancellationToken
+    options.MapType<CancellationToken>(() => new OpenApiSchema
+    {
+        Type = JsonSchemaType.Object
+    });
+
+    // Явно указываем Swagger, как отображать DateTime и DateTime?
+    options.MapType<DateTime>(() => new OpenApiSchema
+    {
+        Type = JsonSchemaType.String,
+        Format = "date-time"
+    });
+
+    options.MapType<DateTime?>(() => new OpenApiSchema
+    {
+        Type = JsonSchemaType.String,
+        Format = "date-time",
+    });
+});
 
 //Подключаем Serilog и заставляем его читать appsettings.json
 builder.Host.UseSerilog((context, configuration) =>
@@ -234,12 +301,30 @@ app.UseSerilogRequestLogging(options =>
 // возвращая клиенту стандартизированный ответ ProblemDetails вместо аварийного падения.
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
+// Настройки для Production (сервера)
 if (!app.Environment.IsDevelopment())
 {
     //app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+}
+
+// Настройки для Development (локальной разработки)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.EnablePersistAuthorization(); // Наш метод для сохранения куки
+    });
+
+    // Разрешаем анонимный доступ конкретно к роуту /swagger UI, 
+    // чтобы FallbackPolicy его не перехватывал
+    app.MapGet("/swagger", (HttpContext context) =>
+    {
+        context.Response.Redirect("/swagger/index.html");
+    }).AllowAnonymous();
 }
 
 app.UseRequestLocalization();
@@ -250,6 +335,9 @@ app.UseRouting();
 // Сперва подключаем аутентификацию (кем является пользвователь?) и авторизацию (какие у него права)
 app.UseAuthentication();
 app.UseAuthorization();
+// Разрешаем анонимный доступ к JSON-спецификации Swagger
+//app.MapSwagger().AllowAnonymous();
+app.MapSwagger("/swagger/{documentName}/swagger.json").AllowAnonymous();
 
 // Затем обогащаем логи данными пользователя (он уже распознан системой Identity)
 app.UseMiddleware<UserLoggingMiddleware>();

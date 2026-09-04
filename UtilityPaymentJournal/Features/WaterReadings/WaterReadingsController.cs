@@ -2,6 +2,7 @@
 
 namespace UtilityPaymentJournal.Features.WaterReadings
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("water-readings")]
     public class WaterReadingsController : Controller
     {

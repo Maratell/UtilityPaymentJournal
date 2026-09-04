@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace UtilityPaymentJournal.Features.Users
 {
     [AllowAnonymous] // Разрешает доступ неавторизованным гостям
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("admin")]
     public class AdminController : Controller
     {

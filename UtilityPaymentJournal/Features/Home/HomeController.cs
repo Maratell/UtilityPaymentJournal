@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace UtilityPaymentJournal.Features.Home
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class HomeController : Controller
     {
         public IActionResult Index()

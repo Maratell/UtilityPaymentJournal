@@ -5,6 +5,7 @@ using UtilityPaymentJournal.Features.ComplaintBoard.GetList;
 
 namespace UtilityPaymentJournal.Features.ComplaintBoard
 {
+    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("complaint-board")]
     public class ComplaintBoardController(ISender mediator) : Controller
     {
