@@ -22,16 +22,22 @@ using UtilityPaymentJournal.Infrastructure.JsonConverters;
 using UtilityPaymentJournal.Infrastructure.Middlewares;
 
 
-var builder = WebApplication.CreateBuilder(args);
+// Инициализируем базовый сборщик (Builder) веб-приложения.
+// Он отвечает за загрузку файлов конфигурации (appsettings.json), настройку логирования,
+// параметров веб-сервера Kestrel и регистрацию всех зависимостей (Dependency Injection).
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Настрйока культуры (для корректной работы значений с плавающей точкой)
+#region НАСТРОЙКА ЛОКАЛИЗАЦИИ (Культура и форматы данных)
+// Настройка локализации приложения (для корректной работы чисел с плавающей точкой)
+// Мы принудительно заставляем сервер использовать точку '.' вместо запятой ',' как разделитель в дробных числах.
+// Это критически важно для работы API, чтобы JSON-запросы с децимал/флоат значениями (например, 10.5) не падали с ошибками парсинга.
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    var supportedCultures = new[] { new CultureInfo("ru-RU") };
+    CultureInfo[] supportedCultures = new[] { new CultureInfo("ru-RU") };
 
     // Говорим серверу: форматы дат и строк оставляем русскими, 
     // но парсинг чисел (NumberFormat) делаем инвариантным (всегда с точкой '.')
-    foreach (var culture in supportedCultures)
+    foreach (CultureInfo culture in supportedCultures)
     {
         culture.NumberFormat.NumberDecimalSeparator = ".";
         culture.NumberFormat.CurrencyDecimalSeparator = ".";
@@ -41,141 +47,132 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedCultures = supportedCultures;
     options.SupportedUICultures = supportedCultures;
 });
+#endregion
 
+#region РЕГИСТРАЦИЯ ОБРАБОТКИ ОШИБОК (Exception Handling)
 
-// регистрация глобальной обработки ошибок
 builder.Services.AddProblemDetails();
 
-// Порядок регистрации критически важен! Общий обработчик ВСЕГДА идет самым последним.
-builder.Services.AddExceptionHandler<IdentityValidationExceptionHandler>();
-builder.Services.AddExceptionHandler<NotFoundExceptionHandler>();
-builder.Services.AddExceptionHandler<DatabaseExceptionHandler>();
-builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-// -------------------------------------------------
+// РЕГИСТРАЦИЯ ОБРАБОТЧИКОВ ИСКЛЮЧЕНИЙ (IExceptionHandler)
+// Порядок регистрации критически важен! Конвейер перехвата ошибок работает по принципу цепочки:
+// запрос идет сверху вниз. Как только один из хендлеров вернет true, обработка завершается.
+// Поэтому специфичные (узкие) ошибки ловим первыми, а универсальный GlobalExceptionHandler ВСЕГДА идет самым последним.
+builder.Services.AddExceptionHandler<IdentityValidationExceptionHandler>();  // Ошибки валидации ASP.NET Core Identity
+builder.Services.AddExceptionHandler<NotFoundExceptionHandler>(); // Ошибки отсутствия ресурсов (404)
+builder.Services.AddExceptionHandler<DatabaseExceptionHandler>(); // Сбои и исключения при работе с базой данных
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>(); // Общие ошибки валидации моделей (FluentValidation и т.д.)
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>(); // Корневой «улавливатель» для всех непредвиденных системных сбоев (500)
 
-//builder.Services.AddControllersWithViews();
+#endregion
 
-// Регистрируем контроллеры с поддержкой представлений (Razor-страниц) и настраиваем фильтры
+#region РЕГИСТРАЦИЯ АРХИТЕКТУРНЫХ КОМПОНЕНТОВ (MVC, FluentValidation, MediatR)
+
+// Подключаем поддержку контроллеров и Razor-страниц (Views) с глобальной конфигурацией фильтров
 builder.Services.AddControllersWithViews(options =>
 {
-    // Фильтр автоматической проверки входящих CSRF / Antiforgery токенов.
-    // Защищает абсолютно все методы POST, PUT, DELETE в проекте, избавляя от рутины.
+    // Глобальный фильтр автоматической проверки CSRF / Antiforgery токенов.
+    // Он автоматически защищает все изменяющие методы (POST, PUT, PATCH, DELETE) во всем проекте,
+    // избавляя от необходимости вручную расставлять [ValidateAntiForgeryToken] над каждым эндпоинтом.
     options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
 });
 
-//Add services to the container.
-//builder.Services.AddControllersWithViews(options =>
-//{
-//    // Фильтр работает для всех контроллеров приложения
-//    options.Filters.Add<ValidateModelAttribute>();
-//});
-
-// Автоматически находим и регистрируем ВСЕ валидаторы (AbstractValidator) во всей сборке
+// FluentValidation: Автоматически сканируем текущую сборку (Assembly) 
+// и регистрируем все созданные нами классы валидаторов (наследников AbstractValidator<T>) в DI-контейнере.
 builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
+// НАСТРОЙКА МЕДИАТОРА (Паттерн CQRS / Mediator)
 builder.Services.AddMediatR(cfg =>
 {
-    // Говорим MediatR отсканировать сборку (assembly), в которой находится класс Program.
-    // Он автоматически найдет ВСЕ хэндлеры в любых подпапках!
+    // Сканируем текущую сборку для автоматического поиска и регистрации всех Request/Response хэндлеров
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
 
-    // Подключаем валидацию в пайплайн MediatR (выполнится до хэндлера)
+    // Встраиваем валидацию в сквозной пайплайн MediatR (Мiddleware-поведение).
+    // Этот код гарантирует, что валидация бизнес-правил выполнится ДО того, как запрос попадет в основной хэндлер.
     cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
 });
 
+#endregion
 
-//builder.Services.AddScoped<IAuthenticationCommandService, AuthenticationCommandService>();
-//builder.Services.AddScoped<IAuthenticationQueryService, AuthenticationQueryService>();
-//builder.Services.AddScoped<IUserCommandService, UserCommandService>();
-//builder.Services.AddScoped<IUserQueryService, UserQueryService>();
-//builder.Services.AddScoped<IResidenceCommandService, ResidenceCommandService>();
-//builder.Services.AddScoped<IResidenceQueryService, ResidenceQueryService>();
-//builder.Services.AddScoped<IUtilityProviderCommandService, UtilityProviderCommandService>();
-//builder.Services.AddScoped<IUtilityProviderQueryService, UtilityProviderQueryService>();
-//builder.Services.AddScoped<IUtilityCommandService, UtilityCommandService>();
-//builder.Services.AddScoped<IUtilityQueryService, UtilityQueryService>();
-//builder.Services.AddScoped<IWaterReadingCommandService, WaterReadingCommandService>();
-//builder.Services.AddScoped<IWaterReadingQueryService, WaterReadingQueryService>();
-//builder.Services.AddScoped<IElectricityReadingCommandService, ElectricityReadingCommandService>();
-//builder.Services.AddScoped<IElectricityReadingQueryService, ElectricityReadingQueryService>();
+#region РЕГИСТРАЦИЯ СЕРВИСОВ ПРИЛОЖЕНИЯ И КОНТЕКСТА ПОЛЬЗОВАТЕЛЯ (Application Services & Context)
+
+// Сервис для выполнения безопасных (Read-Only) запросов к данным пользователей
 builder.Services.AddScoped<IUserQueryService, UserQueryService>();
+
+// Сервис для получения данных о текущем залогиненном пользователе (ID, Имя, Роли) в любом слое приложения
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-//builder.Services.AddScoped<IComplaintCommandService, ComplaintCommandService>();
-//builder.Services.AddScoped<IComplaintQueryService, ComplaintQueryService>();
-// Регистрация Middleware для добавления ID пользователя в контекст логирования
+
+// Регистрация кастомного Middleware, которое внедряет ID текущего пользователя в контекст логирования (Serilog + Seq).
+// Зарегистрировано как Scoped, так как оно зависит от HttpContext конкретного входящего запроса.
 builder.Services.AddScoped<UserLoggingMiddleware>();
 
-
-// Регистрируем маппер как Singleton (так как в нем нет состояния)
-//builder.Services.AddScoped<IAccountMapper, AccountMapper>();
-//builder.Services.AddScoped<IUserMapper, UserMapper>();
-//builder.Services.AddSingleton<IResidenceMapper, ResidenceMapper>();
-//builder.Services.AddSingleton<IUtilityProviderMapper, UtilityProviderMapper>();
-//builder.Services.AddSingleton<IUtilityMapper, UtilityMapper>();
-//builder.Services.AddSingleton<IWaterReadingMapper, WaterReadingMapper>();
-//builder.Services.AddSingleton<IElectricityReadingMapper, ElectricityReadingMapper>();
-//builder.Services.AddSingleton<IComplaintMapper, ComplaintMapper>();
-
-// Позволяет получать HttpContext и Claims пользователя внутри классов данных (по умолчанию Singleton)
+// Системный сервис ASP.NET Core, позволяющий получать доступ к HttpContext (и Claims пользователя) 
+// внутри обычных классов, сервисов или слоев данных, где HttpContext недоступен напрямую.
+// Метод расширения автоматически регистрирует данный компонент как Singleton в DI-контейнере.
 builder.Services.AddHttpContextAccessor();
 
+#endregion
 
-//builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-//    .AddCookie(options =>
-//    {
-//        options.LoginPath = "/Account/Login"; // Страница входа
-//        options.Cookie.HttpOnly = true;
+#region КОНФИГУРАЦИЯ БАЗЫ ДАННЫХ (PostgreSQL & EF Core)
 
-//        // ВАЖНО ДЛЯ РАЗРАБОТКИ: 
-//        // SameSiteMode.Lax разрешает передачу куки при переходе по ссылке
-//        options.Cookie.SameSite = SameSiteMode.Lax;
+// Извлекаем строку подключения из файла конфигурации (appsettings.json)
+string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-//        // Предотвращает блокировку куки, если вы тестируете через http://
-//        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-//    });
-
-//// ??
-//builder.Services.AddControllersWithViews();
-
-// Регистрируем контекст (по умолчанию Scoped) с провайдером PostgreSQL
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Регистрируем контекст базы данных Entity Framework Core в DI-контейнере.
+// По умолчанию AddDbContext регистрирует контекст как Scoped (один экземпляр на один HTTP-запрос).
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+// Связываем интерфейс IApplicationDbContext с реальной реализацией ApplicationDbContext.
+// Используем фабричный метод фабрики, чтобы возвращать ТОТ ЖЕ самый экземпляр контекста (Scoped), 
+// который уже был создан выше (через AddDbContext), предотвращая создание дублирующих подключений в рамках одного запроса.
 builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
-// внедряем в проект систему ASP.NET Core Identity для управления пользователями, ролями и безопасностью
+#endregion
+
+#region КОНФИГУРАЦИЯ БЕЗОПАСНОСТИ (ASP.NET Core Identity & Глобальная Авторизация)
+
+// Внедряем систему ASP.NET Core Identity для управления пользователями, ролями и сессиями
 builder.Services.AddIdentity<User, Role>(options =>
 {
-    // Настройки сложности пароля
-    options.Password.RequiredLength = 4;        // Минимальная длина (например, 4 символа)
-    options.Password.RequireDigit = false;       // Отключить обязательные цифры
-    options.Password.RequireLowercase = false;   // Отключить обязательные строчные буквы
-    options.Password.RequireUppercase = false;   // Отключить обязательные заглавные буквы
-    options.Password.RequireNonAlphanumeric = false; // Отключить спецсимволы
-    options.Password.RequiredUniqueChars = 1;    // Количество уникальных символов
+    // НАСТРОЙКИ СЛОЖНОСТИ ПАРОЛЯ (Password Requirements)
+    // Облегченные настройки для удобства локальной разработки и тестирования
+    options.Password.RequiredLength = 4;             // Минимальная длина пароля — 4 символа
+    options.Password.RequireDigit = false;           // Отключаем обязательные цифры
+    options.Password.RequireLowercase = false;       // Отключаем обязательные строчные буквы
+    options.Password.RequireUppercase = false;       // Отключаем обязательные заглавные буквы
+    options.Password.RequireNonAlphanumeric = false; // Отключаем спецсимволы
+    options.Password.RequiredUniqueChars = 1;        // Минимальное количество уникальных символов в пароле
 
-    // Настройки блокировки аккаунта (Lockout)
-    options.Lockout.AllowedForNewUsers = true;      // Включить блокировку для новых пользователей
-    options.Lockout.MaxFailedAccessAttempts = 5;    // Блокировать после 5 неудачных попыток ввода
+    // НАСТРОЙКИ БЛОКИРОВКИ АККАУНТА (User Lockout)
+    // Защита от перебора паролей (Brute-Force атак)
+    options.Lockout.AllowedForNewUsers = true;      // Включать блокировку для всех новых аккаунтов
+    options.Lockout.MaxFailedAccessAttempts = 5;    // Блокировать учетную запись после 5 неудачных попыток входа
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15); // Время блокировки — 15 минут
 })
+    // Указываем Identity использовать наш Entity Framework контекст для хранения таблиц пользователей и ролей
     .AddEntityFrameworkStores<ApplicationDbContext>()
+    // Подключаем стандартные провайдеры токенов (нужны для генерации кодов сброса пароля, подтверждения Email и т.д.)
     .AddDefaultTokenProviders()
-    // Подключаем кастомную фабрику клеймов
+    // Подключаем кастомную фабрику утверждений (Claims). Она обогащает объект пользователя (ClaimsPrincipal) 
+    // дополнительными данными при авторизации, которые затем доступны во всем приложении через HttpContext.
     .AddClaimsPrincipalFactory<UserProfileClaimsPrincipalFactory>();
 
-// Включаем глобальную блокировку: по умолчанию неавторизованные пользователи не могут
-// отправлять запросы
+// НАСТРОЙКА ПОЛИТИК АВТОРИЗАЦИИ (Authorization Policies)
 builder.Services.AddAuthorization(options =>
 {
+    // Включаем строгую глобальную политику защиты (Secure by Default).
+    // Если над контроллером или эндпоинтом НЕ стоит атрибут [AllowAnonymous], 
+    // система автоматически потребует от пользователя быть авторизованным для любого действия.
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
 });
 
-// Регистрируем контроллеры API
+#endregion
+
+#region СЕРВИСЫ: Контроллеры API и Настройка Сериализации JSON
+
+// Регистрируем контроллеры API с кастомной настройкой сериализации JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -184,56 +181,68 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new NullableUtcDateTimeJsonConverter());
     });
 
+// Подключаем исследователь эндпоинтов (необходим для корректного обнаружения Minimal API эндпоинтов в Swagger)
 builder.Services.AddEndpointsApiExplorer();
 
+#endregion
+
+#region СЕРВИСЫ: Конфигурация Защиты от CSRF (Antiforgery)
+
+// Настраиваем глобальный механизм защиты от межсайтовой подделки запросов (CSRF)
 builder.Services.AddAntiforgery(options =>
 {
-    // Сервер строго завязан на развернутую константу безопасности
+    // Сервер строго завязан на развернутую константу безопасности.
+    // Имя заголовка (AntiforgerySecurityConstants.AntiforgeryHeaderName)
+    // полностью синхронизировано со Swagger-фильтром и фронтендом.
     options.HeaderName = AntiforgerySecurityConstants.AntiforgeryHeaderName;
 });
 
-// Настройка параметров куки для Identity (вместо AddCookie)
+#endregion
+
+#region СЕРВИСЫ: Глубокая Настройка Авторизационных Кук (Identity Application Cookie)
+
+// Настройка параметров Cookie-сессии, создаваемой системой Identity
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // Адрес перенаправления, если неавторизованный пользователь пытается открыть защищенную страницу
-    options.LoginPath = "/account";
-    // Запрещает доступ к куке из JavaScript - защита от кражи сессии через XSS-атаки (Cross-Site Scripting)
-    options.Cookie.HttpOnly = true;
-    // Защищает от CSRF-атак (Cross-Site Request Forgery), запрещая отправку куки при скрытых запросах со сторонних сайтов
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    // Подстраивает режим передачи куки под текущий запрос: если сайт открыт по http — кука идет без шифрования, если по https — с шифрованием
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    // Срок действия сессии пользователя при его полной неактивности на сайте
-    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
-    // Автоматически продлевает время жизни куки еще на 60 минут при каждом действии пользователя
-    options.SlidingExpiration = true;
+    // НАСТРОЙКИ СВОЙСТВ COOKIE (Cookie Policies & Security)
+    options.LoginPath = "/account"; // Адрес перенаправления, если неавторизованный пользователь пытается открыть защищенную страницу
+    options.Cookie.HttpOnly = true; // Флаг защиты от XSS-атак (Cross-Site Scripting): запрещает чтение куки через JavaScript скрипты
+    options.Cookie.SameSite = SameSiteMode.Lax; // Защита от CSRF (Cross-Site Request Forgery): запрещает отправку куки при скрытых запросах со сторонних сайтов
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;// Подстраивает режим передачи куки под текущий запрос: если сайт открыт по http — кука идет без шифрования, если по https — с шифрованием
 
-    // Перехватываем событие редиректа на страницу входа
+    // НАСТРОЙКИ ВРЕМЕНИ ЖИЗНИ СЕССИИ (Session Lifetime)
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Срок действия сессии пользователя при его полной неактивности
+    options.SlidingExpiration = true; // Автоматически продлевает сессию еще на 60 минут при каждом новом действии пользователя
+
+    // ПЕРЕХВАТ СОБЫТИЙ КОНВЕЙЕРА БЕЗОПАСНОСТИ (Security Events & API Handlers)
+    // Изменение поведения при ошибке 401 Unauthorized (Пользователь не залогинен)
     options.Events.OnRedirectToLogin = context =>
     {
-        // Проверяем: если запрос идет на API или Swagger-спецификацию
+        // Разделяем поведение для классического фронтенда и API/Swagger.
+        // Если запрос идет на REST API или документацию, редирект не имеет смысла.
         if (context.Request.Path.StartsWithSegments("/api") ||
             context.Request.Path.StartsWithSegments("/swagger") ||
             context.Request.Headers["X-Requested-With"] == "XMLHttpRequest")
         {
-            // Вместо редиректа 302 возвращаем честный JSON-статус 401 Unauthorized
+            // Возвращаем честный HTTP-статус 401 Unauthorized, понятный для Swagger UI и AJAX-запросов
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
         }
         else
         {
-            // Для обычных пользователей в браузере оставляем стандартный редирект
+            // Для обычных пользователей, переходящих по ссылкам в браузере, оставляем стандартный редирект на форму входа
             context.Response.Redirect(context.RedirectUri);
         }
         return Task.CompletedTask;
     };
 
-    // Аналогично для ошибки 403 Forbidden (когда залогинен, но нет прав/роли)
+    // Изменение поведения при ошибке 403 Forbidden (Пользователь залогинен, но у него нет нужной роли/прав)
     options.Events.OnRedirectToAccessDenied = context =>
     {
         if (context.Request.Path.StartsWithSegments("/api") ||
             context.Request.Path.StartsWithSegments("/swagger"))
         {
-            context.Response.StatusCode = (int)HttpStatusCode.Forbidden; // 403
+            // Вместо редиректа возвращаем честный REST-статус 403 Forbidden
+            context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
         }
         else
         {
@@ -243,32 +252,41 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-// Добавление AutoMapper
-builder.Services.AddAutoMapper(typeof(Program));
-//builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+#endregion
 
-// Регистрируем Swagger
+// Закомментировал AutoMapper
+//builder.Services.AddAutoMapper(typeof(Program));
+
+
+#region СЕРВИСЫ: Генерация Документации API (Swagger UI)
+
+// Конфигурация генератора документации Swagger
 builder.Services.AddSwaggerGen(options =>
 {
-    // Подключаем ваш фильтр антифорджери
+    // Подключаем кастомный фильтр операций. 
+    // Он автоматически добавит поле ввода CSRF-токена (AntiforgerySecurityConstants.AntiforgeryHeaderName) для всех защищенных методов.
     options.OperationFilter<SwaggerAntiforgeryFilter>();
 
-    // Решает конфликт одинаковых имен вложенных классов (например, Item)
+    // Решает конфликт одинаковых имен классов из разных пространств имен (например, вложенных классов Item).
+    // По умолчанию Swagger использует только имя класса, из-за чего одинаковые имена вызывают ошибку компиляции спецификации.
+    // Данная лямбда заменяет имена на полные (FullName), превращая системный разделитель вложенности "+" в читаемый символ "_".
     options.CustomSchemaIds(type => type.FullName?.Replace("+", "_"));
 
-    // Говорим Swagger игнорировать системный тип CancellationToken
+    // Говорим Swagger корректно отображать системный тип CancellationToken как пустой объект,
+    // чтобы он не засорял интерфейс Swagger UI внутренними свойствами токена отмены в каждом запросе.
     options.MapType<CancellationToken>(() => new OpenApiSchema
     {
         Type = JsonSchemaType.Object
     });
 
-    // Явно указываем Swagger, как отображать DateTime и DateTime?
+    // Явно указываем спецификации Swagger, как отображать DateTime в формате ISO (строка с date-time)
     options.MapType<DateTime>(() => new OpenApiSchema
     {
         Type = JsonSchemaType.String,
         Format = "date-time"
     });
 
+    // Аналогично настраиваем отображение для Nullable-типа DateTime?
     options.MapType<DateTime?>(() => new OpenApiSchema
     {
         Type = JsonSchemaType.String,
@@ -276,137 +294,217 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-//Подключаем Serilog и заставляем его читать appsettings.json
+#endregion
+
+#region СЕРВИСЫ: Системное Логирование (Serilog)
+
+// Подключаем Serilog в качестве основного провайдера логирования приложения.
+// Метод ReadFrom.Configuration заставляет логер автоматически считывать уровни логирования,
+// пути к файлам и настройки вывода (Sinks) напрямую из файла конфигурации appsettings.json.
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
 
+#endregion
+
+#region СИСТЕМНЫЕ НАСТРОЙКИ: Инициализация Окружения Среды (.NET / Npgsql)
+
 // Глобальная настройка для драйвера базы данных PostgreSQL (Npgsql).
-// Принудительно заставляет .NET помечать все даты, выгружаемые из колонок 'timestamptz', 
-// как DateTimeKind.Utc, исключая появление типа 'Unspecified'.
+// Отключаем старое (Legacy) поведение работы с датами. Это принудительно заставляет .NET помечать все даты, 
+// выгружаемые из колонок типа 'timestamp with time zone' (timestamptz), как DateTimeKind.Utc.
+// Исключает появление опасного типа 'DateTimeKind.Unspecified', который часто приводит к сдвигу времени на продакшене.
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", false);
 
-var app = builder.Build();
+#endregion
 
-// Собирает данные о HTTP-запросе в один структурированный JSON-объект для Seq
-// (сохраняет метод, URL, статус-код и скорость ответа как отдельные поля для поиска)
+WebApplication app = builder.Build();
+
+#region КОНВЕЙЕР (MIDDLEWARE): Сквозное структурированное Логирование (Serilog)
+
+// Перехватывает каждый входящий запрос и собирает все данные о нем в один структурированный JSON-объект.
+// Автоматически фиксирует HTTP-метод, URL, статус-код ответа и точную скорость его выполнения в миллисекундах.
 app.UseSerilogRequestLogging(options =>
 {
-    // Обогащает финальный лог ответа (например: "HTTP GET /residences responded 200") данными (ID) пользователя.
-    // Это необходимо, так как подобный системный лог записывается вне зоны видимости кастомного UserLoggingMiddleware.
+    // Обогащает системный лог завершения запроса данными пользователя - UserId.
+    // Это критически важно, так как стандартные логи Kestrel записываются на самом выходе из конвейера, 
+    // где наше кастомное Scoped-middleware (UserLoggingMiddleware) уже уничтожено.
     options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
     {
+        // Ищем уникальный идентификатор пользователя (ID) в его Claims (утверждениях)
         string? userId = httpContext.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!string.IsNullOrEmpty(userId))
         {
+            // Добавляем ID пользователя как отдельное индексируемое поле для удобного поиска в Seq
             diagnosticContext.Set(LogPropertyConstants.UserId, userId);
         }
     };
+
+    
 });
 
-// Активирует централизованную обработку ошибок. Все исключения из контроллеров и сервисов 
-// будут поочередно проходить через кастомные обработчики (NotFound, Database, Global), 
-// возвращая клиенту стандартизированный ответ ProblemDetails вместо аварийного падения.
+#endregion
+
+#region КОНВЕЙЕР (MIDDLEWARE): Глобальный Перехват и Обработка Ошибок
+// Активирует встроенный централизованный конвейер обработки исключений. 
+// Все непредвиденные ошибки из контроллеров и хэндлеров MediatR будут автоматически перехватываться
+// и передаваться по цепочке в наши кастомные хэндлеры (NotFoundExceptionHandler, DatabaseExceptionHandler и т.д.),
+// возвращая клиенту стандартизированный JSON-ответ в формате RFC 7807 Problem Details вместо аварийного падения приложения.
+
 app.UseExceptionHandler();
 
-// Настройки для Production (сервера)
+#endregion
+
+#region КОНВЕЙЕР (MIDDLEWARE): Специфичные Настройки для Production Среды
+
+// Данный блок настроек безопасности активируется только при работе приложения на реальном сервере (Production)
 if (!app.Environment.IsDevelopment())
 {
-    //app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // Активирует протокол безопасности HTTP Strict Transport Security (HSTS).
+    // Принудительно заставляет браузеры клиентов взаимодействовать с нашим сайтом исключительно по защищенному протоколу HTTPS,
+    // защищая от атак типа Man-in-the-Middle (MITM) и перехвата незашифрованного трафика.
     app.UseHsts();
 }
 
-// Настройки для Development (локальной разработки)
+#endregion
+
+#region КОНВЕЙЕР (MIDDLEWARE): Специфичные Настройки для Локальной Разработки (Development)
+
+// Данный блок кода выполняется исключительно в режиме отладки и разработки. Полностью вырезается на Production.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    // Включаем генерацию JSON-документации API
+    app.UseSwagger(); 
+
+    // Настраиваем графический интерактивный интерфейс Swagger UI
     app.UseSwaggerUI(options =>
     {
+        // Указываем путь к сгенерированному файлу спецификации OpenAPI
         options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
-        options.EnablePersistAuthorization(); // Наш метод для сохранения куки
+
+        // Для удобства разработки: Swagger сохраняет введенные токены авторизации и куки при обновлении страницы (F5)
+        options.EnablePersistAuthorization(); 
     });
 
-    // Разрешаем анонимный доступ конкретно к роуту /swagger UI, 
-    // чтобы FallbackPolicy его не перехватывал
+    // Вспомогательный Minimal API эндпоинт для автоматического редиректа: 
+    // при вводе в адресную строку просто "/swagger", приложение мгновенно перенаправляет 
+    // разработчика на полноценную страницу графического интерфейса "/swagger/index.html".
+    // Разрешаем анонимный доступ (.AllowAnonymous), чтобы глобальная FallbackPolicy безопасности не блокировала UI.
     app.MapGet("/swagger", (HttpContext context) =>
     {
         context.Response.Redirect("/swagger/index.html");
     }).AllowAnonymous();
 
+    // Специальный вспомогательный Minimal API эндпоинт для генерации и получения CSRF-токена безопасности.
+    // Из него мы копируем текстовое значение токена и вставляем его в поле RequestVerificationToken в Swagger UI,
+    // чтобы успешно тестировать изменяющие данные методы (POST, PUT, DELETE), защищенные фильтром AutoValidate.
+    // Доступен анонимно, так как без этого токена невозможно выполнить даже метод входа в систему (SignIn).
     app.MapGet("/api/xsrf-token", (HttpContext context, Microsoft.AspNetCore.Antiforgery.IAntiforgery antiforgery) =>
     {
-        var tokens = antiforgery.GetAndStoreTokens(context);
+        Microsoft.AspNetCore.Antiforgery.AntiforgeryTokenSet tokens = antiforgery.GetAndStoreTokens(context);
         return Results.Ok(new { token = tokens.RequestToken });
     })
     .WithName("GetXsrfToken")
     .AllowAnonymous();
 }
 
+#endregion
+
+#region КОНВЕЙЕР (MIDDLEWARE): Маршрутизация, Локализация и Безопасность Запросов
+
+// Применяем настройки локализации (наша инвариантная точка '.' в числах будет работать для всех входящих запросов)
 app.UseRequestLocalization();
+
+// Автоматически перенаправляет все незащищенные HTTP-запросы на безопасный протокол HTTPS
 app.UseHttpsRedirection();
+
+// Разрешаем раздачу статических файлов (CSS, JS, картинки) из папки wwwroot для Razor-страниц
 app.UseStaticFiles();
+
+// Включаем сопоставление маршрутов (Routing) — соотносит URL запроса с конкретным эндпоинтом приложения
 app.UseRouting();
 
-// Сперва подключаем аутентификацию (кем является пользвователь?) и авторизацию (какие у него права)
-app.UseAuthentication();
-app.UseAuthorization();
-// Разрешаем анонимный доступ к JSON-спецификации Swagger
-//app.MapSwagger().AllowAnonymous();
+// СИСТЕМА БЕЗОПАСНОСТИ (Identity Pipeline)
+// Важно: Порядок вызовов строго зафиксирован!
+app.UseAuthentication(); // 1. Аутентификация: Проверяем куки/токены и определяем, КЕМ является пользователь
+app.UseAuthorization();  // 2. Авторизация: Проверяем, КАКИЕ права и роли есть у этого распознанного пользователя
+
+// Создаем эндпоинт, по которому Swagger UI скачивает файл разметки (swagger.json).
+// Метод .AllowAnonymous() строго необходим, чтобы этот файл открывался без ввода логина и пароля.
+// Если его не написать, наша глобальная защита заблокирует этот JSON, и сам интерфейс Swagger просто не загрузится.
 app.MapSwagger("/swagger/{documentName}/swagger.json").AllowAnonymous();
 
-// Затем обогащаем логи данными пользователя (он уже распознан системой Identity)
+// МОНИТОРИНГ И ЛОГИРОВАНИЕ
+// Подключаем наше кастомное Middleware для обогащения логов.
+// Оно стоит ПОСЛЕ авторизации, поэтому система Identity уже расшифровала куку и мы можем достать ID пользователя.
 app.UseMiddleware<UserLoggingMiddleware>();
 
-app.MapControllers(); // Позволит атрибутам [Route(...)] работать на 100% правильно
+#endregion
+
+#region КОНВЕЙЕР (MIDDLEWARE): Регистрация Маршрутов Контроллеров (Endpoints)
+
+// Маппим API-контроллеры: это позволяет атрибутам [Route(...)] и [HttpPost]/[HttpGet] на эндпоинтах работать на 100% правильно
+app.MapControllers();
+
+// Настраиваем классический шаблон маршрутизации по умолчанию для Razor-страниц (MVC UI).
+// Если пользователь откроет корень сайта, его автоматически направит на AccountController и эндпоинт Index.
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Index}/{id?}");
 
-// Автоматическое применение миграций при старте контейнера
-//using (var scope = app.Services.CreateScope())
-//{
-//    try
-//    {
-//        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//        db.Database.Migrate();
-//    }
-//    catch (Exception ex)
-//    {
-//        // Здесь можно логировать ошибку, если база данных еще не успела подняться
-//        Console.WriteLine($"Ошибка при применении миграций: {ex.Message}");
-//    }
-//}
+#endregion
 
-// Проверяем: если приложение запущено НЕ внутри интеграционных тестов
+#region ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ: Автоматические Миграции БД на старте (Только вне тестов)
+
+// Защита конвейера тестирования: если приложение запущено внутри интеграционных тестов, 
+// автоматические миграции не запускаются (тесты используют свою изолированную или in-memory базу данных)
 if (app.Environment.EnvironmentName != "IntegrationTesting")
 {
+    // Запускаем миграции в фоновой задаче (Task), чтобы не блокировать последовательную 
+    // инициализацию конвейера и запуск самого веб-сервера Kestrel (app.Run()).
+    // Это гарантирует, что сервер мгновенно откроет порты на старте, а миграции накатятся параллельно.
     _ = Task.Run(async () =>
     {
-        // Небольшая пауза, чтобы Kestrel и Seq успели занять порты на старте
+        // Небольшая пауза (2 секунды). Это критически важно при запуске в Docker Compose, 
+        // чтобы Kestrel и сборщик логов успели занять порты, а СУБД PostgreSQL успела полностью инициализироваться.
         await Task.Delay(TimeSpan.FromSeconds(2));
 
-        using var scope = app.Services.CreateScope();
+        // Создаем изолированную область видимости (Scope) для безопасного извлечения Scoped-сервисов на старте приложения
+        using IServiceScope scope = app.Services.CreateScope();
         try
         {
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            // Автоматически применяем все недостающие миграции к базе данных PostgreSQL
             await db.Database.MigrateAsync();
-            Console.WriteLine("=== База данных успешно проверена, миграции применены ===");
+
+            // Текст написал по-английски для корректного отображения в powershell
+            Console.WriteLine("=== Database successfully verified, migrations applied ===");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"=== КРИТИЧЕСКАЯ ОШИБКА МИГРАЦИИ БД: {ex.Message} ===");
+            Console.WriteLine($"=== CRITICAL DATABASE MIGRATION ERROR: {ex.Message} ===");
         }
     });
 }
 
+// Главный терминальный компонент приложения. Запускает веб-сервер Kestrel, 
+// открывает сетевые порты и переводит приложение в режим бесконечного ожидания 
+// и обработки входящих HTTP-запросов. Полностью блокирует дальнейший поток выполнения.
 app.Run();
 
-// Эта строчка делает автоматически сгенерированный класс public, 
-// позволяя тестовому проекту увидеть его.
+#endregion
+
+#region ТЕСТИРОВАНИЕ: Доступ к сборке для интеграционных тестов
+
 namespace UtilityPaymentJournal
 {
+    // По умолчанию компилятор делает класс Program внутренним (internal).
+    // Данный partial-класс принудительно делает его публичным (public).
+    // Это строго необходимо, чтобы тестовый проект (xUnit/NUnit) мог увидеть сборку приложения 
+    // через WebApplicationFactory<Program> и запускать полноценные интеграционные тесты.
     public partial class Program { }
 }
+
+#endregion
 
 
 
