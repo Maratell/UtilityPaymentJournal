@@ -17,8 +17,8 @@
 * **Интеграционное тестирование (100% покрытие ключевых сценариев):** xUnit, Microsoft.AspNetCore.Mvc.Testing (WebApplicationFactory), Testcontainers.PostgreSql, Respawn (Respawner), FluentAssertions
 * **Избирательное Unit-тестирование:** xUnit, NSubstitute, FluentAssertions
 * **Безопасность:** ASP.NET Core Identity (Аутентификация на основе cookie-файлов), Строгая CSRF/Antiforgery защита
-* **Фронтенд-оркестрация:** JavaScript (jQuery AJAX), Bootstrap 5, DataTables.net
-* **Окружение и Контейнеризация:** Docker, Docker Compose, Конфигурация через `.env`
+ **Фронтенд-оркестрация:** JavaScript (Нативный HTML5 Drag and Drop API), jQuery (Двухшаговые AJAX-запросы), Bootstrap 5 (Модальные окна, компоненты & Icons), Автоматический перевод UTC-дат в местное время пользователя
+* **Окружение и Контейнеризация:** Docker, Docker Compose, Конфигурация через шаблон переменных окружения `.env.example` (настроен для запуска «из коробки»)
 
 ---
 
