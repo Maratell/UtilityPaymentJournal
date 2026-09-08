@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 using UtilityPaymentJournal.Common.Extensions;
 using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
@@ -49,6 +50,8 @@ namespace UtilityPaymentJournal.Infrastructure.EF.Context
 
             // Переводим элементы базыы данных в нижний регистр (для упрощения запросов к Postgre SQL)
             builder.UseLowerCaseNamingConvention();
+
+            builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         }
 
         /// <summary>

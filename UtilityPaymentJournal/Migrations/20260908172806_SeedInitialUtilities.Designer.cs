@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
@@ -11,9 +12,11 @@ using UtilityPaymentJournal.Infrastructure.EF.Context;
 namespace UtilityPaymentJournal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260908172806_SeedInitialUtilities")]
+    partial class SeedInitialUtilities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -408,7 +411,7 @@ namespace UtilityPaymentJournal.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedAt = new DateTime(2026, 9, 8, 18, 33, 48, 560, DateTimeKind.Utc).AddTicks(2513),
+                            CreatedAt = new DateTime(2026, 9, 8, 17, 28, 5, 674, DateTimeKind.Utc).AddTicks(1186),
                             IconClass = "bi bi-droplet-fill text-primary",
                             IsActive = true,
                             Name = "Водоснабжение"
@@ -416,18 +419,10 @@ namespace UtilityPaymentJournal.Migrations
                         new
                         {
                             Id = 2L,
-                            CreatedAt = new DateTime(2026, 9, 8, 18, 33, 48, 560, DateTimeKind.Utc).AddTicks(2515),
+                            CreatedAt = new DateTime(2026, 9, 8, 17, 28, 5, 674, DateTimeKind.Utc).AddTicks(1188),
                             IconClass = "bi bi-lightning-charge-fill text-warning",
                             IsActive = true,
                             Name = "Электроэнергия"
-                        },
-                        new
-                        {
-                            Id = 3L,
-                            CreatedAt = new DateTime(2026, 9, 8, 18, 33, 48, 560, DateTimeKind.Utc).AddTicks(2516),
-                            IconClass = "bi bi-sun-fill text-danger",
-                            IsActive = true,
-                            Name = "Отопление"
                         });
                 });
 

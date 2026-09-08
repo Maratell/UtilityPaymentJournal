@@ -15,6 +15,7 @@ using UtilityPaymentJournal.Common.Interfaces;
 using UtilityPaymentJournal.Features.Users.GetList;
 using UtilityPaymentJournal.Infrastructure.EF.Context;
 using UtilityPaymentJournal.Infrastructure.EF.Entity.Authentication;
+using UtilityPaymentJournal.Infrastructure.EF.Extensions;
 using UtilityPaymentJournal.Infrastructure.ExceptionHandling;
 using UtilityPaymentJournal.Infrastructure.Filters;
 using UtilityPaymentJournal.Infrastructure.Identity;
@@ -454,42 +455,41 @@ app.MapControllerRoute(
 
 #region ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ: Автоматические Миграции БД на старте (Только вне тестов)
 
-// Защита конвейера тестирования: если приложение запущено внутри интеграционных тестов, 
-// автоматические миграции не запускаются (тесты используют свою изолированную или in-memory базу данных)
-if (app.Environment.EnvironmentName != "IntegrationTesting")
-{
-    // Запускаем миграции в фоновой задаче (Task), чтобы не блокировать последовательную 
-    // инициализацию конвейера и запуск самого веб-сервера Kestrel (app.Run()).
-    // Это гарантирует, что сервер мгновенно откроет порты на старте, а миграции накатятся параллельно.
-    _ = Task.Run(async () =>
-    {
-        // Небольшая пауза (2 секунды). Это критически важно при запуске в Docker Compose, 
-        // чтобы Kestrel и сборщик логов успели занять порты, а СУБД PostgreSQL успела полностью инициализироваться.
-        await Task.Delay(TimeSpan.FromSeconds(2));
+await app.ApplyMigrationsAndSeedAsync();
 
-        // Создаем изолированную область видимости (Scope) для безопасного извлечения Scoped-сервисов на старте приложения
-        using IServiceScope scope = app.Services.CreateScope();
-        try
-        {
-            ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+//// Запускаем миграции в фоновой задаче (Task), чтобы не блокировать последовательную 
+//// инициализацию конвейера и запуск самого веб-сервера Kestrel (app.Run()).
+//// Это гарантирует, что сервер мгновенно откроет порты на старте, а миграции накатятся параллельно.
+//_ = Task.Run(async () =>
+//{
+//    // Небольшая пауза (2 секунды). Это критически важно при запуске в Docker Compose, 
+//    // чтобы Kestrel и сборщик логов успели занять порты, а СУБД PostgreSQL успела полностью инициализироваться.
+//    await Task.Delay(TimeSpan.FromSeconds(2));
 
-            // Автоматически применяем все недостающие миграции к базе данных PostgreSQL
-            await db.Database.MigrateAsync();
+//    // Создаем изолированную область видимости (Scope) для безопасного извлечения Scoped-сервисов на старте приложения
+//    using IServiceScope scope = app.Services.CreateScope();
+//    try
+//    {
+//        ApplicationDbContext db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            // Текст написал по-английски для корректного отображения в powershell
-            Console.WriteLine("=== Database successfully verified, migrations applied ===");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"=== CRITICAL DATABASE MIGRATION ERROR: {ex.Message} ===");
-        }
-    });
-}
+//        // Автоматически применяем все недостающие миграции к базе данных PostgreSQL
+//        await db.Database.MigrateAsync();
+
+//        // Текст написал по-английски для корректного отображения в powershell
+//        Console.WriteLine("=== Database successfully verified, migrations applied ===");
+//    }
+//    catch (Exception ex)
+//    {
+//        Console.WriteLine($"=== CRITICAL DATABASE MIGRATION ERROR: {ex.Message} ===");
+//    }
+//});
+
 
 // Главный терминальный компонент приложения. Запускает веб-сервер Kestrel, 
 // открывает сетевые порты и переводит приложение в режим бесконечного ожидания 
-// и обработки входящих HTTP-запросов. Полностью блокирует дальнейший поток выполнения.
-app.Run();
+// и обработки входящих HTTP-запросов только после успешного наката миграций.
+// Полностью блокирует дальнейший поток выполнения.
+await app.RunAsync();
 
 #endregion
 
